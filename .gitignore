@@ -1,3 +1,4 @@
 /resources/DeepMatcherDatasets/
+/resources/*
 /venv/*
 *.pth
