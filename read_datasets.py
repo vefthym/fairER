@@ -1,4 +1,4 @@
-import py_entitymatching as em
+#import py_entitymatching as em
 import sys
 import os
 import deepmatcher as dm

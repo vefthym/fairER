@@ -6,15 +6,15 @@ import pandas as pd
 # also update deepmatcher/data/field.py, and two more files in the same folder to "from torchtext.legacy import data"
 
 
-def train_or_load_pretrained_model(model, data_path, train_file, valid_file, test_file, epochs=3):
-    train, validation, test = dm.data.process(path=data_path, train=train_file, validation=valid_file, test=test_file)
+def train_or_load_pretrained_model(model, data_path, train_file, valid_file, test_file, model_name='best_model.pth' , epochs=3,left_prefix = None, right_prefix= None):
+    train, validation, test = dm.data.process(path=data_path, train=train_file, validation=valid_file, test=test_file,left_prefix=left_prefix, right_prefix=right_prefix)
     try:
-        model.load_state(os.path.join(data_path, 'best_model.pth'))
-        print('Using the pre-trained model best_model.pth. Delete it or rename it to re-train the model.')
+        model.load_state(os.path.join(data_path, model_name))
+        print('Using the pre-trained model '+model_name+'. Delete it or rename it to re-train the model.')
     except:
         print('No pre-trained model found stored as best_model.pth in the current path.')
-        print('Starting training and storing model at current path as best_model.pth ...')
-        model.run_train(train, validation, best_save_path=os.path.join(data_path, 'best_model.pth'), epochs=epochs)
+        print('Starting training and storing model at current path as '+model_name+ ' ...')
+        model.run_train(train, validation, best_save_path=os.path.join(data_path, model_name), epochs=epochs)
         print('Starting evaluation...')
         model.run_eval(test)
     return model
@@ -30,9 +30,9 @@ def get_predictions_from_unlabeled_data(model, unlabeled_file):
     return predictions
 
 
-def get_predictions_from_labeled_data(model, path, file):
+def get_predictions_from_labeled_data(model, path, file, left_prefix = None, right_prefix= None):
     print('Starting predictions on labeled data stored in ' + file)
-    processed = dm.data.process(path=path, train=file)
+    processed = dm.data.process(path=path, train=file, left_prefix = left_prefix, right_prefix=right_prefix)
     predictions = pd.DataFrame(model.run_prediction(processed, output_attributes=True))
 
     return predictions

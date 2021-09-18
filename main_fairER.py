@@ -1,4 +1,5 @@
 from matching import run_deepmatcher as dm
+from matching import run_deepmatcher_w_explainer as dme
 import sys
 import pandas as pd
 import os
@@ -26,6 +27,7 @@ def run(data, data_path, train_file, valid_file, test_file, k_results):
     preds = preds.sort_values(by='match_score', ascending=False)
     #print("Initial Ranking:\n", preds[:k_results].to_string(index=False))
 
+    dme.run(data_path, train_file, valid_file, test_file)
     #################################
     # Fair Unique Mapping Clustering
     #################################
