@@ -1,3 +1,5 @@
 /venv/*
 *.pth
 *.csv
+resources/datasets
+__pycache__/
