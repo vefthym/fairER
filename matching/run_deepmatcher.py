@@ -12,7 +12,7 @@ def train_or_load_pretrained_model(model, data_path, train_file, valid_file, tes
         model.load_state(os.path.join(data_path, model_name))
         print('Using the pre-trained model '+model_name+'. Delete it or rename it to re-train the model.')
     except:
-        print('No pre-trained model found stored as best_model.pth in the current path.')
+        print('No pre-trained model found stored as ' + model_name +' in the current path.')
         print('Starting training and storing model at current path as '+model_name+ ' ...')
         model.run_train(train, validation, best_save_path=os.path.join(data_path, model_name), epochs=epochs)
         print('Starting evaluation...')

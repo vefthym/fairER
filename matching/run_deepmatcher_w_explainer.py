@@ -67,8 +67,8 @@ def run(data_path, train_file, valid_file, test_file, unlabeled_file=None, epoch
                         tn_group,
                         num_features = 15,
                         num_perturbation = 100)
-    chart(tp_result, (1, 1, 1), (-1, 1), title = "chart_tp")
-    chart(tn_result, (1, 1, 1), (-1, 1), title = "chart_tn")
+    chart(tp_result, (1, 1, 1), (-0.6, 0.4), title = "chart_tp")
+    chart(tn_result, (1, 1, 1), (-0.6, 0.4), title = "chart_tn")
     return preds
 
 def wrap_dm(model, ignore_columns = ['label', 'id']):
