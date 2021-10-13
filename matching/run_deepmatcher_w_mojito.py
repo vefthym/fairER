@@ -7,7 +7,6 @@ import string
 import random
 import warnings
 import contextlib
-import torch
 
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
@@ -18,7 +17,6 @@ parentdir = os.path.dirname(currentdir)
 sys.path.insert(0, parentdir)
 
 from mojito import Mojito, chart
-import read_datasets as rd
 from matching import run_deepmatcher as rdm
 
 
@@ -39,10 +37,10 @@ def run(data_path, train_file, valid_file, test_file, unlabeled_file=None, epoch
 
     model = rdm.train_or_load_pretrained_model(dm.MatchingModel(), data_path, train_file, valid_file, test_file, 'best_model_w_explainer.pth',epochs,left_prefix= 'ltable_',right_prefix= 'rtable_')   
     
-    #if unlabeled_file:
-    #    preds = get_predictions_from_unlabeled_data(model, unlabeled_file)
-    #else:
-    preds = rdm.get_predictions_from_labeled_data(model, data_path, test_file, left_prefix= 'ltable_',right_prefix= 'rtable_')
+    if unlabeled_file:
+        preds = get_predictions_from_unlabeled_data(model, unlabeled_file)
+    else:
+        preds = rdm.get_predictions_from_labeled_data(model, data_path, test_file, left_prefix= 'ltable_',right_prefix= 'rtable_')
 
     
     data = pd.read_csv(data_path+test_file, dtype = str)

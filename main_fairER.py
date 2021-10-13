@@ -19,6 +19,7 @@ def run(data, data_path, train_file, valid_file, test_file, k_results):
     if os.path.exists(data_path + '/dm_results.csv'):
         preds = pd.read_csv(data_path + '/dm_results.csv')
     else:
+        #preds = dme.run(data_path, train_file, valid_file, test_file)
         preds = dm.run(data_path, train_file, valid_file, test_file)  # , unlabeled_file)
         preds.to_csv(data_path + '/dm_results.csv')
         # print(preds)
@@ -27,7 +28,6 @@ def run(data, data_path, train_file, valid_file, test_file, k_results):
     preds = preds.sort_values(by='match_score', ascending=False)
     #print("Initial Ranking:\n", preds[:k_results].to_string(index=False))
 
-    dme.run(data_path, train_file, valid_file, test_file)
     #################################
     # Fair Unique Mapping Clustering
     #################################
@@ -53,10 +53,10 @@ if __name__ == '__main__':
     for data in datasets:
         print('\n', data, '\n')
 
-        data_path = sys.argv[1] if args else datasets_path + data  # the folder containing train,valid,test data
-        train_file = sys.argv[2] if args else 'joined_train.csv'
-        valid_file = sys.argv[3] if args else 'joined_valid.csv'
-        test_file = sys.argv[4] if args else 'joined_test.csv'
+        data_path = sys.argv[1] if args else datasets_path + data +'/' # the folder containing train,valid,test data
+        train_file = sys.argv[2] if args else 'merged_train.csv'
+        valid_file = sys.argv[3] if args else 'merged_valid.csv'
+        test_file = sys.argv[4] if args else 'merged_test.csv'
         # unlabeled_file = sys.argv[5] if args else data+path+'test_unlabeled.csv'  # unlabeled data for predictions
 
         av_time = 0
