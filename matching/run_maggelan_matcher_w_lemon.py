@@ -1,14 +1,14 @@
+#To install Lemon and it's requirments use: !pip install lemon-explain[all]
 import lemon
 import os
-import inspect
 
 #load dataset
 import inspect
-
 currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 parentdir = os.path.dirname(currentdir)
 
-dataset = lemon.utils.datasets.deepmatcher.structured_amazon_google(root= parentdir+"/resources/DeepMatcherDatasets/")
+dataset = lemon.utils.datasets.deepmatcher.structured_amazon_google(root=parentdir+"/resources/",
+                                                                    download=False)
 
 #train
 matcher = lemon.utils.matchers.MagellanMatcher()
