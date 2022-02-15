@@ -6,7 +6,7 @@ import pandas as pd
 # also update deepmatcher/data/field.py, and two more files in the same folder to "from torchtext.legacy import data"
 
 
-def train_or_load_pretrained_model(model, data_path, train_file, valid_file, test_file, model_name='best_model.pth' , epochs=3,left_prefix = None, right_prefix= None):
+def train_or_load_pretrained_model(model, data_path, train_file, valid_file, test_file, model_name='best_model.pth' , epochs=3,left_prefix ='left_', right_prefix='right_'):
     train, validation, test = dm.data.process(path=data_path, train=train_file, validation=valid_file, test=test_file,left_prefix=left_prefix, right_prefix=right_prefix)
     try:
         model.load_state(os.path.join(data_path, model_name))
@@ -30,7 +30,7 @@ def get_predictions_from_unlabeled_data(model, unlabeled_file):
     return predictions
 
 
-def get_predictions_from_labeled_data(model, path, file, left_prefix = None, right_prefix= None):
+def get_predictions_from_labeled_data(model, path, file, left_prefix = 'left_', right_prefix= 'right_'):
     print('Starting predictions on labeled data stored in ' + file)
     processed = dm.data.process(path=path, train=file, left_prefix = left_prefix, right_prefix=right_prefix)
     predictions = pd.DataFrame(model.run_prediction(processed, output_attributes=True))
@@ -41,7 +41,7 @@ def get_predictions_from_labeled_data(model, path, file, left_prefix = None, rig
 def run(data_path, train_file, valid_file, test_file, unlabeled_file=None, epochs=2): #TODO: more epochs for testing
     print('Running DeepMatcher with data from folder: ' + str(data_path))
 
-    model = train_or_load_pretrained_model(dm.MatchingModel(), data_path, train_file, valid_file, test_file, epochs)
+    model = train_or_load_pretrained_model(dm.MatchingModel(), data_path, train_file, valid_file, test_file, epochs=epochs)
     if unlabeled_file:
         return get_predictions_from_unlabeled_data(model, unlabeled_file)
     else:
