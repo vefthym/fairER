@@ -49,17 +49,17 @@ if __name__ == '__main__':
     k = 20
     args = True if len(sys.argv[1:]) > 4 else False  # checks if user provided runtime arguments or not
 
-    datasets_path = 'resources/deepmatcher/Structured/'
+    datasets_path = 'resources/DeepMatcherDatasets/'
     datasets = ['Beer', 'iTunes-Amazon', 'Fodors-Zagats', 'DBLP-ACM', 'DBLP-GoogleScholar',
                 'Amazon-Google', 'Walmart-Amazon']
-    # datasets = [datasets[3]]  # test only a single dataset from the list
+    datasets = [datasets[0]]  # test only a single dataset from the list
     for data in datasets:
         print('\n', data, '\n')
 
         data_path = sys.argv[1] if args else datasets_path + data + '/'   # the folder containing train,valid,test data
-        train_file = sys.argv[2] if args else 'merged_train.csv'
-        valid_file = sys.argv[3] if args else 'merged_valid.csv'
-        test_file = sys.argv[4] if args else 'merged_test.csv'
+        train_file = sys.argv[2] if args else 'joined_train.csv'
+        valid_file = sys.argv[3] if args else 'joined_valid.csv'
+        test_file = sys.argv[4] if args else 'joined_test.csv'
         # unlabeled_file = sys.argv[5] if args else data+path+'test_unlabeled.csv'  # unlabeled data for predictions
         explanation = sys.argv[5] if args else False  # 1 or 0 (mojito only)
 

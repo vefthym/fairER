@@ -3,21 +3,23 @@
 This file contains techical information on how to setup and run FairER on Linux OS using Python (3.9).
 
 Before running the code: 
-* First please install the DeepMatcher package using the command: `pip install deepmatcher`,
-* then install all the packages that Mojito requires to run, using the command: `pip install -r fairER/mojito/requirements.txt`
-* and lastly, please download the [Datasets from DeepMatcher](https://github.com/anhaidgroup/deepmatcher/blob/master/Datasets.md).
+* install the DeepMatcher package using the command: `pip install deepmatcher`,
+* install all the packages that Mojito requires to run, using the command: `pip install -r fairER/mojito/requirements.txt`
+* download the [Datasets from DeepMatcher](https://github.com/anhaidgroup/deepmatcher/blob/master/Datasets.md).
+* process the downloaded datasets by running the `read_datasets.py` file and changing the dataset name to the one you wish to process.
+* to use our pre-defined settings, you may also need to install the gender-guesser library using `pip install gender-guesser`
 
 The main file of FairER is main_fairER.py. The FA*IR and traditional ER baselines are in the files main_fair.py and main_unfair.py, respectively.
 
 To run FairER you need to specify certaing arguments while calling main_fairER.py:
 1. the first argument specifies the path containing the labeled data (e.g.: resources/deepmatcher/Structured/),
-2. the second argument specifies how the training file is named (e.g.: merged_train.csv),
-3. the third argument specifies how the validation file is named (e.g.: merged_valid.csv),
-4. the fourth argument specifies how the testing file is named (e.g.: merged_test.csv),
+2. the second argument specifies how the training file is named (e.g.: joined_train.csv),
+3. the third argument specifies how the validation file is named (e.g.: joined_valid.csv),
+4. the fourth argument specifies how the testing file is named (e.g.: joined_test.csv),
 5. the fifth argument specifies if we need explanation for our model (1: for True, 0: for False).
 
 What an example of calling main_fairER.py looks like:
-`python main_fairER.py resources/deepmatcher/Structured/ merged_train.csv merged_valid.csv merged_test.csv 1`
+`python main_fairER.py resources/deepmatcher/Structured/ joined_train.csv joined_valid.csv joined_test.csv 1`
 (This currently runs on all the default settings and hyperparameters)
 
 If you want to change any hyperparameters before training the DeepMatcher's model, locate to `matching/run_deepmatcher.py` and edit the `train_or_load_pretrained_moded` function to your desires.

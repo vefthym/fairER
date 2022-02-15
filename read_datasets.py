@@ -40,7 +40,7 @@ def prepare_deepmatcher_dataset(dataset_path, left='tableA.csv', right='tableB.c
 if __name__ == '__main__':
     deepmatcher_datasets = os.path.join('.', 'resources', 'DeepMatcherDatasets')
 
-    dataset = os.path.join(deepmatcher_datasets, 'Walmart-Amazon')
+    dataset = os.path.join(deepmatcher_datasets, 'Beer')
     prepare_deepmatcher_dataset(dataset)
 
     # preds = match.run(amazon_google, 'joined_train.csv', 'joined_valid.csv', 'joined_test.csv', epochs=2)
