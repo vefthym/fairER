@@ -1,9 +1,9 @@
-#FairER
+## FairER
 
 This file contains techical information on how to setup and run FairER on Linux OS using Python (3.9).
 
 Before running the code: 
-* install the DeepMatcher package using the command: `pip install deepmatcher`,
+* install the DeepMatcher package using the command: `pip install deepmatcher` (see note for Windows 10/11 users at the end), 
 * install all the packages that Mojito requires to run, using the command: `pip install -r fairER/mojito/requirements.txt`
 * download the [Datasets from DeepMatcher](https://github.com/anhaidgroup/deepmatcher/blob/master/Datasets.md).
 * process the downloaded datasets by running the `read_datasets.py` file and changing the dataset name to the one you wish to process.
@@ -32,5 +32,10 @@ chart(tp_result, (1, 1, 1), (-0.6, 0.4), title = "chart_tp")
 chart(tn_result, (1, 1, 1), (-0.6, 0.4), title = "chart_tn")
 ```
 instead of (-0.6, 0.4), to what you want the minimum and maximum attributes' scores to be.
+
+**Running DeepMatcher on Windows 10/11**: To install deepmatcher on Windows 10/11: run `pip install git+https://github.com/anhaidgroup/deepmatcher#egg=deepmatcher`. <br/>
+Also update deepmatcher/data/field.py, and two more files in the same folder to "from torchtext.legacy import data"
+
+
 
 In case of problems or questions, please report an issue, or contact Vasilis Efthymiou (vefthym AT ics DOT forth DOT gr).
