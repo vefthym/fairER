@@ -34,7 +34,7 @@ chart(tn_result, (1, 1, 1), (-0.6, 0.4), title = "chart_tn")
 instead of (-0.6, 0.4), to what you want the minimum and maximum attributes' scores to be.
 
 **Running DeepMatcher on Windows 10/11**: To install deepmatcher on Windows 10/11: run `pip install git+https://github.com/anhaidgroup/deepmatcher#egg=deepmatcher`. <br/>
-Also update deepmatcher/data/field.py, and two more files in the same folder to "from torchtext.legacy import data"
+Also update deepmatcher/data/field.py, and two more files in the same folder to "from torchtext.legacy import data". In case you encounter problems installing fastText on Windows, this post might be useful: https://stackoverflow.com/questions/51683015/unable-to-install-fasttext-for-python-on-windows .
 
 
 
