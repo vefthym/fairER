@@ -16,13 +16,11 @@ def run(data, data_path, train_file, valid_file, test_file, k_results):
     # Matching
     ###########
 
-    # comment out after the first run (it writes output to file, which does not need to be re-written in every run)
-    if os.path.exists(data_path + '/dm_results.csv'):
-        preds = pd.read_csv(data_path + '/dm_results.csv')
-    else:
+    if not os.path.exists(data_path + '/dm_results.csv'):
         preds = dm.run(data_path, train_file, valid_file, test_file)  # , unlabeled_file)
         preds.to_csv(data_path + '/dm_results.csv')
-        # print(preds)
+
+    preds = pd.read_csv(data_path + '/dm_results.csv')
 
     # Ranking of matching results in desc. match score
     preds = preds.sort_values(by='match_score', ascending=False)
