@@ -14,7 +14,7 @@ def tuple_is_protected(tuple, dataset='datasets/Test'):
         # main_author_fname_l = str(tuple.left_authors).split(" ")[0].replace('.','')
         # main_author_fname_r = str(tuple.right_authors).split(" ")[0].replace('.', '')
         last_author_fname_l = str(tuple.left_authors).split(",")[-1].strip().split(" ")[0].replace('.','')
-        last_author_fname_r = str(tuple.left_authors).split(",")[-1].strip().split(" ")[0].replace('.', '')
+        last_author_fname_r = str(tuple.right_authors).split(",")[-1].strip().split(" ")[0].replace('.', '')
         last_author_is_female = ('female' in d.get_gender(last_author_fname_l)) or \
                                 ('female' in d.get_gender(last_author_fname_r))
 
