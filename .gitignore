@@ -1,5 +1,7 @@
 /venv/*
 *.pth
 *.csv
-resources/datasets
+*.png
+*.json
+*.pkl
 __pycache__/

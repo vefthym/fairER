@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Services - ResponsibleER</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+        crossorigin="anonymous"></script>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"
+        integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+
+    <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/viewerjs/1.10.5/viewer.js"
+        integrity="sha512-lgj1oT2/0EWpv2oHNeqzWmINqNEfHR4kjvl5DXc6o8IPxoRLgMxhW6c/mZ/fnSFN+6ByTSabiq//GGbYMo/4Lw=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/viewerjs/1.10.5/viewer.css"
+        integrity="sha512-c7kgo7PyRiLnl7mPdTDaH0dUhJMpij4aXRMOHmXaFCu96jInpKc8sZ2U6lby3+mOpLSSlAndRtH6dIonO9qVEQ=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <link href="https://unpkg.com/tabulator-tables@5.2.4/dist/css/tabulator.min.css" rel="stylesheet">
+    <script src="https://unpkg.com/tabulator-tables@5.2.4/dist/js/tabulator.min.js"></script>
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/tabulator/5.2.4/css/tabulator_bootstrap5.min.css"
+        integrity="sha512-IdsXMTvZYT+5cARgJynSLu/iDLFfFc1u1W8+nM7lg5J45oJh85zjagUcj4SSM2pNa1o+N4tzvABNG8C0myWuEg=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/tabulator/5.2.4/css/tabulator_materialize.min.css"
+        integrity="sha512-Gfw6hrFBipNsIsYjC5Tla6Lh8ZArF221Ekpf0XRkyp5CHNt4Eq41sri9vt/jqQU1/rNQQWs9MgDMwMcsvfY3kA=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js" defer></script>
+
+
+    <link href="{{ url_for('static', filename='stylesheets/styles.css') }}" rel="stylesheet">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='img/favicon.ico') }}">
+</head>
+
+<body>
+    <div class="sidenav">
+        <a class="navbar-brand">ResponsibleER</a>
+        <hr><br>
+        <a class="active" href="/">Services</a>
+        <a href="/services-manual">Services Manual</a>
+        <a href="https://isl.ics.forth.gr/ResponsibleER/#contact">Contact <i class="fa fa-external-link"
+                aria-hidden="true"></i>
+        </a>
+    </div>
+    <div class="requests-main-container container">
+        <label for="dataset-val" id="select-dataset-label"><b>Select a Dataset:</b></label>
+        <div class="container-fluid" id="datasets-container">
+
+            <select class="form-select" id="dataset-val">
+
+            </select>
+            
+        </div>
+        <div id="datasets-info-container">
+            
+        </div>
+        <ul class="nav nav-tabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="FairER-tab" data-bs-toggle="tab" data-bs-target="#FairER"
+                    type="button" role="tab" aria-selected="true">FairER</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="Unfair-tab" data-bs-toggle="tab" data-bs-target="#Unfair" type="button"
+                    role="tab" aria-selected="false">Unfair</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="protected-tuples-tab" data-bs-toggle="tab"
+                    data-bs-target="#protected-tuples" type="button" role="tab" aria-selected="false">Protected
+                    Tuples</button>
+            </li>
+        </ul>
+        <div class="tab-content">
+            <div class="tab-pane fade show active" id="FairER" role="tabpanel" aria-labelledby="FairER-tab">
+                <div class="container fairER-container">
+                    <div class="btn-group container" role="group">
+                        <button type="button" class="btn btn-secondary"
+                            onclick="get_evaluation('fairER', 'fairer-container')">
+                            Evaluation Results
+                        </button>
+                        <button type="button" class="btn btn-secondary"
+                            onclick="get_clusters('fairER', 'fairer-container')">Get
+                            Clusters</button>
+                        <button type="button" class="btn btn-secondary"
+                            onclick="get_predictions('fairER', 'fairer-container')">Get
+                            Predictions</button>
+                        <button type="button" class="btn btn-secondary" onclick="get_explanation()">Get
+                            Explanation</button>
+                    </div>
+                    <div id="fairer-container">
+
+                    </div>
+                </div>
+            </div>
+            <div class="tab-pane fade" id="Unfair" role="tabpanel" aria-labelledby="Unfair-tab">
+                <div class="container btn-group" role="group">
+                    <button type="button" class="btn btn-secondary"
+                            onclick="get_evaluation('unfair', 'unfair-container')">
+                            Evaluation Results
+                        </button>
+                    <button type="button" class="btn btn-secondary"
+                        onclick="get_clusters('unfair', 'unfair-container')">Get
+                        Clusters</button>
+                    <button type="button" class="btn btn-secondary"
+                        onclick="get_predictions('unfair', 'unfair-container')">Get
+                        Predictions</button>
+                </div>
+                <div id="unfair-container">
+
+                </div>
+            </div>
+            <div class="tab-pane fade" id="protected-tuples" role="tabpanel" aria-labelledby="protected-tuples-tab">
+                <div class="btn-group container" role="group">
+                    <button type="button" class="btn btn-secondary" onclick="get_condition('protected-container')">Get
+                        Condition</button>
+                    <button type="button" class="btn btn-secondary" onclick="edit_condition()">Edit Condition</button>
+                    <button type="button" class="btn btn-secondary" onclick="get_table_options()">Tuple is
+                        Protected</button>
+                    <button type="button" class="btn btn-secondary" onclick="get_pair_fields()">Pair is Protected</button>
+                </div>
+                <div id="protected-container">
+
+                </div>
+                <div id="general-container">
+
+                </div>
+            </div>
+            <div class="tab-pane fade" id="dataset-statistics" role="tabpanel" aria-labelledby="dataset-statistics-tab">
+                <div class="btn-group container" role="group">
+                    <button type="button" class="btn btn-secondary" onclick="get_statistics()">Get Statistics</button>
+                </div>
+                <div id="statistics-container">
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+        crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"
+        integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+    <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/lib.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/requests.js') }}"></script>
+</body>
+
+</html>

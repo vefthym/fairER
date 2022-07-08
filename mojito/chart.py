@@ -1,5 +1,8 @@
 import numpy as np
-from matplotlib import pyplot as plt
+import os
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
 
 
 def average_weight_for_attribute(dataframe, attrname, tuple=None):
@@ -23,14 +26,14 @@ def count_explanation(dataframe):
     return len(dataframe['exp'].unique())
 
 
-def chart(data, subplot, ylim, title="", w=True):
+def chart(data, subplot, ylim, title="", w=True, dataset_path=os.path.join('resources','Datasets')):
+
     bars = []
 
     spacing = 2
 
     N = np.ones((1,))
     ticks = []
-
     plt.subplot(*subplot)
     plt.grid(True)
     plt.ylim(ylim)
@@ -58,6 +61,12 @@ def chart(data, subplot, ylim, title="", w=True):
                 align='center')
 
     plt.title(title)
+
+    
+    file_name = 'Figure_1.png' if (title == 'chart_tp') else 'Figure_2.png'
+    plt.savefig(os.path.join(dataset_path, 'figures', file_name))
+    
+    
     plt.ylabel("Score")
     plt.xticks(ticks, attr_sorted, rotation=90)
-    plt.show()
+    #plt.show()

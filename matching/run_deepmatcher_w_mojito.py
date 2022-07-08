@@ -43,7 +43,7 @@ def run(data_path, train_file, valid_file, test_file, unlabeled_file=None, epoch
         preds = rdm.get_predictions_from_labeled_data(model, data_path, test_file, left_prefix= 'ltable_',right_prefix= 'rtable_')
 
     
-    data = pd.read_csv(data_path+test_file, dtype = str)
+    data = pd.read_csv(os.path.join(data_path,test_file), dtype = str)
     proba = wrap_dm(model)(data)
     tp_group = data[(proba[:, 1] >= 0.5) & (data['label'] == '1')]
     tn_group = data[(proba[:, 0] >= 0.5) & (data['label'] == '0')]
@@ -65,9 +65,9 @@ def run(data_path, train_file, valid_file, test_file, unlabeled_file=None, epoch
                         tn_group,
                         num_features = 15,
                         num_perturbation = 100)
-    chart(tp_result, (1, 1, 1), (-0.6, 0.4), title = "chart_tp")
-    chart(tn_result, (1, 1, 1), (-0.6, 0.4), title = "chart_tn")
-    return preds
+    chart(tp_result, (1, 1, 1), (-0.6, 0.4), title = "chart_tp", dataset_path = data_path)
+    chart(tn_result, (1, 1, 1), (-0.6, 0.4), title = "chart_tn", dataset_path = data_path)
+    return preds 
 
 def wrap_dm(model, ignore_columns = ['label', 'id']):
 
@@ -157,5 +157,5 @@ if __name__ == '__main__':
     #unlabeled_file = sys.argv[5] if args else '../resources/datasets/test/test_unlabeled.csv'  # unlabeled data for predictions
 
     preds = run(data_path, train_file, valid_file, test_file)
-    print(preds)
+    #print(preds)
 

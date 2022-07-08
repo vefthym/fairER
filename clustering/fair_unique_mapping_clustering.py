@@ -21,11 +21,11 @@ def run(candidates, results_limit):
     nextProtected = True
     while (protected_candidates or nonprotected_candidates) and (len(matches) < results_limit):
         cand = protected_candidates.pop(0) if nextProtected else nonprotected_candidates.pop(0)
-        print(cand)
+        #print(cand)
 
         # unique mapping constraint check
         if cand[0] in matched_ids_left or cand[1] in matched_ids_right:
-            print('Skipping candidate: ', cand, 'for violating unique mapping constraint')
+            #print('Skipping candidate: ', cand, 'for violating unique mapping constraint')
             continue
 
         # add pair to matches
@@ -35,7 +35,7 @@ def run(candidates, results_limit):
 
         if (nextProtected and nonprotected_candidates) or (not nextProtected and protected_candidates):
             nextProtected = not nextProtected  # swap queues
-            print('swapping to ', 'protected' if nextProtected else 'nonprotected', 'queue')
+            #print('swapping to ', 'protected' if nextProtected else 'nonprotected', 'queue')
 
     return matches
 
@@ -43,4 +43,4 @@ def run(candidates, results_limit):
 if __name__ == '__main__':
     cand_list = [[-1,1,0.5,False],[-1,3,0.3,False],[-2,3,0.2,True],[-3,3,0.1,False],[-4,4,0.0,True]]
     clusters = run(cand_list)
-    print(clusters)
+    #print(clusters)
