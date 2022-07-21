@@ -1,0 +1,6 @@
+torchtext==0.11.2
+torch==1.10.2
+deepmatcher==0.1.2.post2
+gender-guesser==0.4.0
+Flask==2.1.2
+lime==0.2.0.1

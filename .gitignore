@@ -1,5 +1,6 @@
 /venv/*
 *.pth
+/.idea/
 *.csv
 *.png
 *.json

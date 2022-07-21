@@ -1,42 +1,28 @@
-## FairER
+The source code for the paper: 
 
-This file contains techical information on how to setup and run FairER on Linux OS using Python (3.9).
+Vasilis Efthymiou, Kostas Stefanidis, Evaggelia Pitoura, Vassilis Christophides. FairER: Entity Resolution with Fairness Constraints. CIKM 2021 (short) [[pdf]](https://github.com/vefthym/fairER/blob/main/CIKM2021short_fairER_CR.pdf) [[slides]](https://github.com/vefthym/fairER/blob/main/FairER-slides.pdf) [[poster]](https://github.com/vefthym/fairER/blob/main/FairER_poster.pdf)
 
-Before running the code: 
-* install the DeepMatcher package using the command: `pip install deepmatcher` (see note for Windows 10/11 users at the end), 
-* install all the packages that Mojito requires to run, using the command: `pip install -r fairER/mojito/requirements.txt`
-* download the [Datasets from DeepMatcher](https://github.com/anhaidgroup/deepmatcher/blob/master/Datasets.md).
-* process the downloaded datasets by running the `read_datasets.py` file and changing the dataset name to the one you wish to process.
-* to use our pre-defined settings, you may also need to install the gender-guesser library using `pip install gender-guesser`
-
-The main file of FairER is main_fairER.py. The FA*IR and traditional ER baselines are in the files main_fair.py and main_unfair.py, respectively.
-
-To run FairER you need to specify certaing arguments while calling main_fairER.py:
-1. the first argument specifies the path containing the labeled data (e.g.: resources/deepmatcher/Structured/),
-2. the second argument specifies how the training file is named (e.g.: joined_train.csv),
-3. the third argument specifies how the validation file is named (e.g.: joined_valid.csv),
-4. the fourth argument specifies how the testing file is named (e.g.: joined_test.csv),
-5. the fifth argument specifies if we need explanation for our model (1: for True, 0: for False).
-
-What an example of calling main_fairER.py looks like:
-`python main_fairER.py resources/deepmatcher/Structured/ joined_train.csv joined_valid.csv joined_test.csv 1`
-(This currently runs on all the default settings and hyperparameters)
-
-If you want to change any hyperparameters before training the DeepMatcher's model, locate to `matching/run_deepmatcher.py` and edit the `train_or_load_pretrained_moded` function to your desires.
-For example, if you want to change the number of epochs, at the line `model.run_train(train, validation, best_save_path=os.path.join(data_path, model_name), epochs=epochs)`, change epochs to desired number and the same goes for model_name(changes the model's save name).
-**Before training a new model, remember to move or delete any old model from the data directory or it will be loaded as pre-trained, instead of training a new one.**
-
-If you want to change the score margins on the explanation charts, locate to `matching/run_deepmatcher_w_explainer.py`. Under the `run` funtion, modify the lines 
-```Python
-chart(tp_result, (1, 1, 1), (-0.6, 0.4), title = "chart_tp")
-chart(tn_result, (1, 1, 1), (-0.6, 0.4), title = "chart_tn")
-```
-instead of (-0.6, 0.4), to what you want the minimum and maximum attributes' scores to be.
-
-**Running DeepMatcher on Windows 10/11**: To install deepmatcher on Windows 10/11: run `pip install git+https://github.com/anhaidgroup/deepmatcher#egg=deepmatcher`. <br/>
-<!-- Also update deepmatcher/data/field.py, and two more files in the same folder to "from torchtext.legacy import data".  -->
-In case you encounter problems installing fastText on Windows, please follow the instructions in this post: https://stackoverflow.com/questions/51683015/unable-to-install-fasttext-for-python-on-windows .
+which is part of the project <a href="https://isl.ics.forth.gr/ResponsibleER/">ResponsibleER: Responsible by Design Entity Resolution</a>, 
+funded by the <a href="https://www.elidek.gr/en/homepage/">Hellenic Foundation for Research and Innovation</a>.
 
 
+Instructions:
+First of all, make sure that you have installed on your computer:
+-Python (3.9 – recommended)
+-Microsoft Visual C++ (for Windows OS only)
 
-In case of problems or questions, please report an issue, or contact Vasilis Efthymiou (vefthym AT ics DOT forth DOT gr).
+Then you have to install all the required packages, using the command:
+pip install -r requirements.txt
+
+This allows a user to avoid the hassle of individually installing each required library, as well as resolving potential compatibility issues (since the library versions in the requirements file have been tested and found to be fully functional). 
+
+Now you can run local version using the command:
+python web/run.py
+
+To open the app on your default browser, open the URL http://127.0.0.1:5000 (you can use Ctrl+Click to open it from the terminal).
+
+During the first run, the datasets are not present in the system, so you have to click the Download button from the Web UI,  in order to download the datasets from DeepMatcher. This is a more convenient way than the alternative option of downloading each dataset individually, which is still applicable (if disk space is an issue). 
+
+Finally, it is also recommended to use a system with more than 12GB of RAM, otherwise the system may be unstable.
+
+In case of problems or questions, please report an issue, or contact Vasilis Efthymiou (vefthym _AT_ ics _DOT_ forth _DOT_ gr).
