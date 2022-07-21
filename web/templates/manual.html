@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Services - Manual</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+        crossorigin="anonymous"></script>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+    <link href="{{ url_for('static', filename='stylesheets/styles.css') }}" rel="stylesheet">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='img/favicon.ico') }}">
+</head>
+
+<body>
+    <div class="sidenav">
+        <a class="navbar-brand">ResponsibleER</a>
+        <hr><br>
+        <a href="/">Services</a>
+        <a class="active" href="/services-manual">Services Manual</a>
+        <a href="https://isl.ics.forth.gr/ResponsibleER/#contact">Contact <i class="fa fa-external-link"
+                aria-hidden="true"></i>
+        </a>
+    </div>
+
+    <div class="api-info-container">
+        <h1>Services - Manual</h1>
+
+        <main id="main-doc">
+
+            <section class="main-section">
+                <header>Get Statistics <span class="method-type">GET</span></header>
+                <div class="service-container">
+                    <div>
+                        <p>Given a dataset as a parameter, this service returns some useful information about this
+                            dataset.
+                        </p>
+                        <ul>
+                            <li>The number of protected matches (belonging to the protected group).</li>
+                            <li>The number of nonprotected matches (belonging to the nonprotected group).</li>
+                            <li>The average matching score of protected pairs.</li>
+                            <li>The average matching score of nonprotected pairs.</li>
+                            <li>The average matching score of protected matches (as defined in the ground truth).</li>
+                            <li>The average matching score of nonprotected matches (as defined in the ground truth).
+                            </li>
+                        </ul>
+                        <p>The matching score is the score returned by DeepMatcher <a href="#references" style="text-decoration: none;">[1]</a>, assigning a matching likelihood
+                            to
+                            each
+                            pair of records.
+                        </p>
+                    </div>
+                    <div class="response">
+                        <div class="response-header">
+                            <span class="example-keyword">Example</span>
+                        </div>
+                        <p>/requests/getStatistics?dataset=<span class="request-param">Beer</span></p>
+                        <div>
+                            <p>Response</p><span class="type-icon">JSON</span>
+                        </div>
+                        <pre>
+                            {
+                                "Number of Protected Matches": "5", 
+                                "Number of non-Protected Matches": "9", 
+                                "Avg Score Protected": "0.09855581252057044", 
+                                "Agv Score non-Protected": "0.37686637056370575", 
+                                "Avg Score Protected Matches": "0.4835389912128448", 
+                                "Avg Score non-Protected Matches": "0.7464810742272271"
+                            }
+                        </pre>
+                    </div>
+                </div>
+            </section>
+
+
+
+            <section class="main-section">
+                <header>Get Protected Condition <span class="method-type">GET</span></header>
+                <div class="service-container">
+                    <div>
+                        <p>The service takes a dataset as a parameter and returns the condition that the system uses to
+                            consider if a tuple is protected or not.<br>
+                            The conditions for Deepmatcher datasets are initially defined in the program code.
+                            There is also a file, which is empty on the first run. This file contains conditions for the
+                            Deepmatcher datasets and the uploaded datasets, of which the condition has been changed by
+                            the user.<br>
+                            The conditions that are located in this file have higher priority than the default
+                            conditions that are defined in the code.
+
+                        </p>
+                    </div>
+                    <div class="response">
+                        <div class="response-header">
+                            <span class="example-keyword">Example</span>
+                        </div>
+                        <p>/requests/getProtectedCondition?dataset=<span class="request-param">Amazon-Google</span></p>
+                        <div>
+                            <p>Response</p><span class="type-icon">JSON</span>
+                        </div>
+                        <pre>
+                            {
+                                "condition": "('microsoft' in str(tuple.left_manufacturer)) or 
+                                                ('microsoft' in str(tuple.right_manufacturer))"
+                            }
+                        </pre>
+                    </div>
+                </div>
+            </section>
+
+
+            <section class="main-section">
+                <header>Get Table Attributes <span class="method-type">GET</span></header>
+                <div class="service-container">
+                    <div>
+                        <p>Given a dataset as a parameter and an argument which can have two values, “left” or “right”,
+                            this service returns the attributes of the header of the corresponding table of the specific
+                            dataset.
+                        </p>
+                    </div>
+                    <div class="response">
+                        <div class="response-header">
+                            <span class="example-keyword">Example</span>
+                        </div>
+                        <p>/requests/getTableAttributes?dataset=<span
+                                class="request-param">Amazon-Google</span>&table=<span class="request-param">left</span>
+                        </p>
+                        <div>
+                            <p>Response</p><span class="type-icon">Array</span>
+                        </div>
+                        <pre>
+                            [ "title", "manufacturer", "price" ]
+                        </pre>
+                    </div>
+                </div>
+            </section>
+
+
+            <section class="main-section">
+                <header>Get Accuracy <span class="method-type">GET</span></header>
+                <div class="service-container">
+                    <div>
+                        <p>Given a dataset as a parameter, this service returns the accuracy for this specific
+                            dataset.<br><br>
+                            <b>Accuracy</b>@𝑘: out of 𝑘 returned matches, how many are correct (i.e., in the ground
+                            truth of
+                            known matches)? Bias@𝑘: following the fairness constraint 𝐹 defined earlier as | (|𝑅𝑝
+                            |/𝑘) − (|𝑅𝑛 |/𝑘) | = 𝜖∗, we report the values of (|𝑅𝑝|/𝑘) − (|𝑅𝑛 |/𝑘), with
+                            negative values denoting favoring the non-protected group, zero implying no bias, and
+                            positive values favoring the protected group.
+
+                        </p>
+                    </div>
+                    <div class="response">
+                        <div class="response-header">
+                            <span class="example-keyword">Example</span>
+                        </div>
+                        <p>/requests/getAccuracy?dataset=<span class="request-param">Amazon-Google</span>&alg=<span
+                                class="request-param">fairER</span>
+                        </p>
+                        <div>
+                            <p>Response</p><span class="type-icon">JSON</span>
+                        </div>
+                        <pre>
+                            {
+                                "Algorithm": "fairER", 
+                                "Dataset": "Amazon-Google", 
+                                "Accuracy": "0.6"
+                            }
+                        </pre>
+                    </div>
+                </div>
+            </section>
+
+
+            <section class="main-section">
+                <header>Get SPD <span class="method-type">GET</span></header>
+                <div class="service-container">
+                    <div>
+                        <p>Given a dataset as a parameter, this service returns the SPD (statistical parity difference)
+                            for this specific dataset.<br><br>
+                            The statistical parity difference is a measure of bias, with SPD
+                            = 0 indicating no bias (i.e., fair results), while |SPD| = 1 indicates a completely biased
+                            algorithm in favor of (SPD = 1), or against (SPD = -1) the protected group. In more detail,
+                            SPD is defined as follows:<br>
+                            SPD = Pr(y'=1|p=1)-Pr(y'=1|p=0),
+                            where y'=1 indicates that the algorithm suggests a record pair to be matching and p=1 (resp.
+                            p=0) indicates that this pair is protected (resp. nonprotected).
+                        </p>
+                    </div>
+                    <div class="response">
+                        <div class="response-header">
+                            <span class="example-keyword">Example</span>
+                        </div>
+                        <p>/requests/getSPD?dataset=<span class="request-param">Amazon-Google</span>&alg=<span
+                                class="request-param">fairER</span>
+                        </p>
+                        <div>
+                            <p>Response</p><span class="type-icon">JSON</span>
+                        </div>
+                        <pre>
+                            {
+                                "Algorithm": "fairER", 
+                                "Dataset": "Amazon-Google", 
+                                "SPD": "0.0"
+                            }
+                        </pre>
+                    </div>
+                </div>
+            </section>
+
+
+
+            <section class="main-section">
+                <header>Get EOD <span class="method-type">GET</span></header>
+                <div class="service-container">
+                    <div>
+                        <p>Given a dataset as a parameter, this service returns the EOD (equality of opportunity
+                            difference) for this specific dataset. <br><br>
+                            The equality of opportunity difference is another
+                            measure of bias, with EOD = 0, again, indicating no bias (i.e., fair results), and |EOD = 1|
+                            indicating a completely biased algorithm. In more detail, EOD is defined as follows:<br>
+                            EOD = Pr(y'=1|y=1,p=1)-Pr(y'=1|y=1,p=0),
+                            where y'=1 indicates that the algorithm suggests a record pair to be matching, y=1 indicates
+                            that the pair is known to be matching (from the ground truth), and p=1 (resp. p=0) indicates
+                            that this pair is protected (resp. nonprotected).
+                        </p>
+                    </div>
+                    <div class="response">
+                        <div class="response-header">
+                            <span class="example-keyword">Example</span>
+                        </div>
+                        <p>/requests/getEOD?dataset=<span class="request-param">Amazon-Google</span>&alg=<span
+                                class="request-param">fairER</span>
+                        </p>
+                        <div>
+                            <p>Response</p><span class="type-icon">JSON</span>
+                        </div>
+                        <pre>
+                            {
+                                "Algorithm": "fairER", 
+                                "Dataset": "Amazon-Google", 
+                                "EOD": "0.16666666666666657"
+                            }
+                        </pre>
+                    </div>
+                </div>
+            </section>
+
+
+            <section class="main-section">
+                <header>Get Evaluation Results <span class="method-type">GET</span></header>
+                <div class="service-container">
+                    <div>
+                        <p>Given a dataset as a parameter, this service returns the evaluation results for this specific
+                            dataset.<br><br>
+                            The evaluation results contain the accuracy, SPD and EOD, as defined above.
+
+                        </p>
+                    </div>
+                    <div class="response">
+                        <div class="response-header">
+                            <span class="example-keyword">Example</span>
+                                Test</a>
+                        </div>
+                        <p>/requests/getEvaluationResults?dataset=<span class="request-param">Beer</span>&alg=<span
+                                class="request-param">fairER</span>
+                        </p>
+                        <div>
+                            <p>Response</p><span class="type-icon">JSON</span>
+                        </div>
+                        <pre>
+                            {
+                                "Algorithm": "fairER", 
+                                "Dataset": "Beer", 
+                                "Accuracy": "0.6", 
+                                "SPD": "0.0", 
+                                "EOD": "0.16666666666666657"
+                            }
+                        </pre>
+                    </div>
+                </div>
+            </section>
+
+
+
+            <section class="main-section">
+                <header>Get Predictions <span class="method-type">GET</span></header>
+                <div class="service-container">
+                    <div>
+                        <p>Given a dataset as a parameter, this service returns the predictions for this specific
+                            dataset.<br><br>
+                            These predictions include information such as the ids of the pair consisting of two tuples,
+                            as well as the values of each attribute of these two tuples.
+                        </p>
+                    </div>
+                    <div class="response">
+                        <div class="response-header">
+                            <span class="example-keyword">Example</span>
+                                Test</a>
+                        </div>
+                        <p>/requests/getPreds?dataset=<span class="request-param">Beer</span>&alg=<span
+                                class="request-param">fairER</span>
+                        </p>
+                        <div>
+                            <p>Response</p><span class="type-icon">JSON</span>
+                        </div>
+                        <pre>
+                            {
+                                "preds":    [ 
+                                                {
+                                                    'id': '1219_2470', 
+                                                    'match_score': '0.05297598987817764', 
+                                                    'label': '0', 
+                                                    'ltable_ABV': '8.70 %', 
+                                                    'ltable_Beer_Name': "Bulleit Bourbon Barrel",
+                                                    'ltable_Brew_Factory_Name': 'Oskar Blues', 
+                                                    'ltable_Style': 'American Amber / Red Ale', 
+                                                    'rtable_ABV': '-', 
+                                                    'rtable_Beer_Name': 'Figure Eight Bourbon', 
+                                                    'rtable_Brew_Factory_Name': 'Figure Eight Brewing', 
+                                                    'rtable_Style': 'Barley Wine'
+                                                }, 
+                                                {
+                                                    'id': '492_1635',
+                                                            ...
+                                                }
+                                            ]
+                            }
+                        </pre>
+                    </div>
+                </div>
+            </section>
+
+
+
+
+            <section class="main-section">
+                <header>Get Clusters <span class="method-type">GET</span></header>
+                <div class="service-container">
+                    <div>
+                        <p>Given a dataset as a parameter, this service returns the clusters for this specific
+                            dataset.<br><br>
+                            Since FairER deals with clean-cleanER, the resulting clusters of matching entities are
+                            clusters of at most size 2 (i.e., each cluster may contain a single record, for which no
+                            match has been found, or two records that match).<br>
+                            In other words, each cluster contains all the records that describe the same real-world
+                            entity.
+                        </p>
+                    </div>
+                    <div class="response">
+                        <div class="response-header">
+                            <span class="example-keyword">Example</span>
+                                Test</a>
+                        </div>
+                        <p>/requests/getClusters?dataset=<span class="request-param">Beer</span>&alg=<span
+                                class="request-param">fairER</span>
+                        </p>
+                        <div>
+                            <p>Response</p><span class="type-icon">JSON</span>
+                        </div>
+                        <pre>
+                            {
+                                "clusters": "   [
+                                                    {
+                                                        "Table A":"2242" , 
+                                                        "Table B":"1048"
+                                                    },
+                                                    {
+                                                        "Table A":"2558" , 
+                                                        "Table B":"1284"
+                                                    },
+                                                    {
+                                                        "Table A":"2007" ,
+                                                        "Table B":"203"
+                                                    },
+                                                            ... 
+                                                ]"
+                            }
+                        </pre>
+                    </div>
+                </div>
+            </section>
+
+
+
+            <section class="main-section">
+                <header>Get Datasets Names <span class="method-type">GET</span></header>
+                <div class="service-container">
+                    <div>
+                        <p>This service is called automatically on every page reload, in order to get the available
+                            datasets. Specifically, the code scans the folder that contains the datasets and returns a
+                            list with all folder's names.
+                        </p>
+                    </div>
+                    <div class="response">
+                        <div class="response-header">
+                            <span class="example-keyword">Example</span>
+                                Test</a>
+                        </div>
+                        <p>/requests/getDatasetsNames</p>
+                        <div>
+                            <p>Response</p><span class="type-icon">JSON</span>
+                        </div>
+                        <pre>
+                            {
+                                "datasets_list":    [
+                                                        "Amazon-Google", 
+                                                        "Beer", 
+                                                        "DBLP-ACM", 
+                                                        "DBLP-GoogleScholar", 
+                                                        "Walmart-Amazon", 
+                                                        "iTunes-Amazon"
+                                                    ]
+                            }
+                        </pre>
+                    </div>
+                </div>
+            </section>
+
+
+
+            <section class="main-section">
+                <header>Get Explanation
+                    <span class="method-type">GET</span>
+                </header>
+                <div class="service-container">
+                    <div>
+                        <p>Given a dataset as a parameter, this service returns the explanation for this specific
+                            dataset.<br><br>
+                            The explanation consists of two figures which are returned in base64 format. The
+                            explanations have been generated by MOJITO <a href="#references" style="text-decoration: none;">[2]</a>, and they were incorporated into FairER by
+                            the undergraduate thesis of Neofytos Dionysiou, a contributor of FairER.
+                        </p>
+                    </div>
+                    <div class="response">
+                        <div class="response-header">
+                            <span class="example-keyword">Example</span>
+                                Test</a>
+                        </div>
+                        <p>/requests/getExplanation?dataset=<span class="request-param">Beer</span>&alg=<span
+                                class="request-param">fairER</span>
+                        </p>
+                        <div>
+                            <p>Response</p><span class="type-icon">JSON</span>
+                        </div>
+                        <pre>
+                            {
+                                "base64_1": "iVBORw0KGgoAAAANSUhEUgAAAoAAAAHgCAYAAAA(...)",
+                                "base64_2": "iVBORw0KGgoAAAANSUsdfJHKLlKHlKLJkljklLL(...)"
+                            }
+                        </pre>
+                    </div>
+                </div>
+            </section>
+
+
+
+            <section class="main-section" id="tuple-is-protected">
+                <header>Tuple is Protected
+                    <span class="method-type post-span">POST</span>
+                </header>
+                <div class="service-container">
+                    <div>
+                        <p>This service has three parameters.<br> A dataset, a table (“right” or “left”) and the values
+                            for
+                            every attribute of that table.<br> Then, the service will check if this tuple is protected
+                            or
+                            not and will return the corresponding answer to the user.
+                        </p>
+                    </div>
+                    <div class="response">
+                        <span class="example-keyword">Example</span>
+                        <p>/requests/tupleIsProtected</p>
+                        <div>
+                            <p>Parameters</p><span class="type-icon">JSON</span>
+                        </div>
+                        <span class="request-param">
+                            <pre>
+                            {
+                                "dataset":"Amazon-Google",
+                                "table":"left", 
+                                "json": "{ 
+                                            "attributes" : [
+                                                                { 
+                                                                    "title": "adobe" 
+                                                                },
+                                                                { 
+                                                                    "manufacturer": "microsoft" 
+                                                                },
+                                                                { 
+                                                                    "price": "-" 
+                                                                } 
+                                                            ]
+                                        }"
+                            }
+                            </pre>
+                        </span>
+                        <div>
+                            <p>Response</p><span class="type-icon">JSON</span>
+                        </div>
+                        <pre>
+                            {
+                                "is_protected": "True"
+                            }
+                        </pre>
+                    </div>
+                </div>
+            </section>
+
+
+
+            <section class="main-section" id="pair-is-protected">
+                <header>Pair is Protected
+                    <span class="method-type post-span">POST</span>
+                </header>
+                <div class="service-container">
+                    <div>
+                        <p>This service has three parameters. <br>A dataset and the values for every attribute of the
+                            right
+                            and left table. <br>Then, the service will check if this pair is protected or not and will
+                            return the corresponding answer to the user.
+                        </p>
+                    </div>
+                    <div class="response">
+                        <span class="example-keyword">Example</span>
+                        <p>/requests/pairIsProtected</p>
+                        <div>
+                            <p>Parameters</p><span class="type-icon">JSON</span>
+                        </div>
+                        <span class="request-param">
+                            <pre>
+                            {
+                                "dataset":"Amazon-Google",
+                                "json1": " { 
+                                                "right_table" :   [
+                                                                        { 
+                                                                            "title": "yy"
+                                                                        },
+                                                                        { 
+                                                                            "manufacturer": "yy" 
+                                                                        },
+                                                                        { 
+                                                                            "price": "yy" 
+                                                                        } 
+                                                                    ]
+                                            }",
+                                "json2": " { 
+                                                "left_table" :    [
+                                                                        { 
+                                                                            "title": "yy" 
+                                                                        },
+                                                                        { 
+                                                                            "manufacturer": "yy" 
+                                                                        },
+                                                                        { 
+                                                                            "price": "yy" 
+                                                                        } 
+                                                                    ]
+                                            }"
+                            }
+                            </pre>
+                        </span>
+                        <div>
+                            <p>Response</p><span class="type-icon">JSON</span>
+                        </div>
+                        <pre>
+                            {
+                                "is_protected": "True"
+                            }
+                        </pre>
+                    </div>
+                </div>
+            </section>
+
+
+            <section class="main-section">
+                <header>Tuple is Protected JSON
+                    <span class="method-type post-span">POST</span>
+                </header>
+                <div class="service-container">
+                    <div>
+                        <p>This service works in the same way as “Tuple is Protected” service, but the third parameter
+                            here is a JSON file that the user uploaded.<br> This JSON file contains all the values for
+                            every
+                            attribute of that table.<br>
+                            Finally, it returns “True” if the given tuple is protected, otherwise it returns “False”.
+                        </p>
+                    </div>
+                    <div class="response">
+                        <span class="example-keyword">Example</span>
+                        <p>/requests/tupleIsProtectedJSON</p>
+                        <div>
+                            <p>Parameters</p><span class="type-icon">File</span>
+                        </div>
+                        <span class="request-param">
+                            <pre>
+                                (Uploaded File. The file's structure is the same as 
+                                the parameter of '<a href="#tuple-is-protected">Tuple is Protected</a>' Service)
+                            </pre>
+                        </span>
+                        <div>
+                            <p>Response</p><span class="type-icon">JSON</span>
+                        </div>
+                        <pre>
+                            {
+                                "is_protected": "True"
+                            }
+                        </pre>
+                    </div>
+                </div>
+            </section>
+
+
+            <section class="main-section">
+                <header>Pair is Protected JSON
+                    <span class="method-type post-span">POST</span>
+                </header>
+                <div class="service-container">
+                    <div>
+                        <p>This service works in the same way as “Pair is Protected” service, but the second and third
+                            parameters here are two JSON files that the user uploaded.<br> These JSON files contain all
+                            the
+                            values for every attribute of the right and left tables.<br> Finally, it returns “True” if
+                            the
+                            given pair is protected, otherwise it returns “False”.
+                        </p>
+                    </div>
+                    <div class="response">
+                        <span class="example-keyword">Example</span>
+                        <p>/requests/pairIsProtectedJSON</p>
+                        <div>
+                            <p>Parameters</p><span class="type-icon">File</span>
+                        </div>
+                        <span class="request-param">
+                            <pre>
+                                (Uploaded File. The file's structure is the same as 
+                                the parameter of '<a href="#pair-is-protected">Pair is Protected</a>' Service)
+                            </pre>
+                        </span>
+                        <div>
+                            <p>Response</p><span class="type-icon">JSON</span>
+                        </div>
+                        <pre>
+                            {
+                                "is_protected": "True"
+                            }
+                        </pre>
+                    </div>
+                </div>
+            </section>
+
+
+
+        </main>
+
+        <div id="references">
+            <hr>
+            <h2>References</h2>
+            <p>[1] Sidharth Mudgal, Han Li, Theodoros Rekatsinas, AnHai Doan, Youngchoon Park, Ganesh Krishnan, Rohit
+                Deep, Esteban Arcaute, and Vijay Raghavendra. Deep learning for entity matching: A design space
+                exploration. In SIGMOD, pages 19-34, 2018.
+            </p>
+            <p>[2]Vincenzo Di Cicco, Donatella Firmani, Nick Koudas, Paolo Merialdo, Divesh Srivastava. Interpreting
+                deep learning models for entity resolution: an experience report using LIME. aiDM@SIGMOD 2019: 8:1-8:4
+            </p>
+        </div>
+    </div>
+</body>
+
+</html>

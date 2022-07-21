@@ -1,5 +1,6 @@
+from crypt import methods
 from matching import run_deepmatcher as dm
-import sys
+import sys, json
 import pandas as pd
 import os
 from fairsearchcore.models import FairScoreDoc
@@ -9,6 +10,7 @@ import evaluation.accuracy as eval
 import evaluation.fairness as f_eval
 import util
 import time
+import web.library.methods
 
 
 def run(data, data_path, train_file, valid_file, test_file, k_results):
@@ -17,13 +19,12 @@ def run(data, data_path, train_file, valid_file, test_file, k_results):
     ###########
 
     # comment out after the first run (it writes output to file, which does not need to be re-written in every run)
-    if os.path.exists(data_path + '/dm_results.csv'):
-        preds = pd.read_csv(data_path + '/dm_results.csv')
-    else:
+    if not os.path.exists(data_path + '/dm_results.csv'):
         preds = dm.run(data_path, train_file, valid_file, test_file)  # , unlabeled_file)
         preds.to_csv(data_path + '/dm_results.csv')
-        # print(preds)
 
+
+    preds = pd.read_csv(data_path + '/dm_results.csv')
     # Ranking of matching results in desc. match score
     preds = preds.sort_values(by='match_score', ascending=False)
     #print("Initial Ranking (top-20):\n", preds[:20].to_string())
@@ -73,6 +74,22 @@ def run(data, data_path, train_file, valid_file, test_file, k_results):
 
     clusters = umc.run(re_ranked_pairs[:k_results])
     #print("\nclustering results:\n", clusters)
+
+
+    ####################################################
+    # Write clusters to json file
+    ####################################################
+    data = {'clusters': clusters}
+    json_string = json.dumps(data)
+    with open('web/data/json_data/clusters_data.json', 'w+') as outfile:
+        outfile.write(json_string)
+
+    ###########################
+    # Write preds to json file
+    ###########################
+    web.library.methods.csv_to_json(data_path + '/dm_results.csv',
+                      'web/data/json_data/preds_data.json')
+
 
     return clusters, preds
 

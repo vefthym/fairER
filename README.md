@@ -1,4 +1,5 @@
-The source code for the paper: 
+The source code for the paper:
+
 
 Vasilis Efthymiou, Kostas Stefanidis, Evaggelia Pitoura, Vassilis Christophides. FairER: Entity Resolution with Fairness Constraints. CIKM 2021 (short) [[pdf]](https://github.com/vefthym/fairER/blob/main/CIKM2021short_fairER_CR.pdf) [[slides]](https://github.com/vefthym/fairER/blob/main/FairER-slides.pdf) [[poster]](https://github.com/vefthym/fairER/blob/main/FairER_poster.pdf)
 
@@ -7,6 +8,7 @@ funded by the <a href="https://www.elidek.gr/en/homepage/">Hellenic Foundation f
 
 
 Instructions:
+
 First of all, make sure that you have installed on your computer:
 -Python (3.9 – recommended)
 -Microsoft Visual C++ (for Windows OS only)
@@ -25,4 +27,5 @@ During the first run, the datasets are not present in the system, so you have to
 
 Finally, it is also recommended to use a system with more than 12GB of RAM, otherwise the system may be unstable.
 
-In case of problems or questions, please report an issue, or contact Vasilis Efthymiou (vefthym _AT_ ics _DOT_ forth _DOT_ gr).
+
+In case of problems or questions, please report an issue, or contact Vasilis Efthymiou (vefthym AT ics DOT forth DOT gr).

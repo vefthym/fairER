@@ -10,7 +10,7 @@ def get_spd(clusters, preds, data):
         left_id = cluster[0]
         right_id = cluster[1]
         #label = preds['label'][preds['id'] == str(left_id)+'_'+str(right_id)]
-        is_protected = util.tuple_is_protected(preds[preds['id'] == str(left_id)+'_'+str(right_id)].iloc[0], data)
+        is_protected = util.pair_is_protected(preds[preds['id'] == str(left_id)+'_'+str(right_id)].iloc[0], data)
         #print(left_id, right_id, label.all())
         if is_protected:
             num_protected += 1
@@ -33,7 +33,7 @@ def get_eod(clusters, preds, data):
         left_id = cluster[0]
         right_id = cluster[1]
         label = preds['label'][preds['id'] == str(left_id)+'_'+str(right_id)]
-        is_protected = util.tuple_is_protected(preds[preds['id'] == str(left_id)+'_'+str(right_id)].iloc[0], data)
+        is_protected = util.pair_is_protected(preds[preds['id'] == str(left_id)+'_'+str(right_id)].iloc[0], data)
         if label.all() == 1:
             correct_results += 1
             if is_protected:

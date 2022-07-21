@@ -1,4 +1,4 @@
-import py_entitymatching as em
+#import py_entitymatching as em
 import sys
 import os
 import deepmatcher as dm
@@ -37,10 +37,19 @@ def prepare_deepmatcher_dataset(dataset_path, left='tableA.csv', right='tableB.c
     merge_data(test_path, a_path, b_path, joined_test_path)
 
 
-if __name__ == '__main__':
-    deepmatcher_datasets = os.path.join('.', 'resources', 'DeepMatcherDatasets')
 
-    dataset = os.path.join(deepmatcher_datasets, 'Walmart-Amazon')
+def run(dataset):
+
+    deepmatcher_datasets = os.path.join('..', 'resources', 'Datasets')
+    dataset = os.path.join(deepmatcher_datasets, dataset)
+    prepare_deepmatcher_dataset(dataset)
+
+
+
+if __name__ == '__main__':
+    deepmatcher_datasets = os.path.join('..', 'resources', 'Datasets')
+
+    dataset = os.path.join(deepmatcher_datasets, 'Beer')
     prepare_deepmatcher_dataset(dataset)
 
     # preds = match.run(amazon_google, 'joined_train.csv', 'joined_valid.csv', 'joined_test.csv', epochs=2)
