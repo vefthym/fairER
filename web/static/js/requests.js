@@ -695,6 +695,24 @@ function upload_dataset() {
                         $("#dataset-val").select2({
                             data: data
                         })
+
+                        $('#method-val').select2({
+                            data:  [{
+                                id: '',
+                                text: 'Tabular',
+                                children: [
+                                    { id: 'deepmatcher', text: 'Deepmatcher' },
+                                ]
+                            },{
+                                id: '',
+                                text: 'Graph',
+                                children: [
+                                    { id: 'rrea', text: 'RREA' },
+                                    { id: 'rdgcn', text: 'RDGCN' },
+                                ]
+                            }]
+                        })
+                        
                         has_cached_data();
                     }
                 }
