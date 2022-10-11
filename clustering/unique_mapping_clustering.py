@@ -20,9 +20,6 @@ def run(candidates):
         matched_ids_right.add(cand[1])
     return matches
 
-def run_for_graph():
-    pass
-
 if __name__ == '__main__':
     cand_list = [[-1,1,0.5],[-1,3,0.3],[-2,3,0.2],[-3,3,0.1],[-4,4,0.0]]
     clusters = run(cand_list)
