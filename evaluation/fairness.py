@@ -24,6 +24,33 @@ def get_spd(clusters, preds, data):
     return spd
 
 
+"""
+    Version for KGs
+"""
+# returns the statistical parity difference (ideal: 0, worst: 1)
+def get_spd_KG(clusters, preds, g):
+    num_protected = 0
+    num_results = len(clusters) * 1.0
+
+    for cluster in clusters:
+        left_id = cluster[0]
+        right_id = cluster[1]
+
+        is_protected = g.pair_is_protected(cluster, 0)
+        if is_protected:
+            num_protected += 1
+            
+    predict_protected_prob = num_protected / num_results
+    predict_nonprotected_prob = 1 - predict_protected_prob
+
+    spd = predict_nonprotected_prob - predict_protected_prob
+    # print('predict_protected_prob:', predict_protected_prob)
+    # print('predict_nonprotected_prob:', predict_nonprotected_prob)
+
+    return spd
+
+
+
 # returns the equality of opportunity difference (ideal: 0, worst: 1)
 def get_eod(clusters, preds, data):
     num_protected_matches_correct = 0
@@ -49,4 +76,36 @@ def get_eod(clusters, preds, data):
 
     print('predict_protected_match_prob:', predict_protected_match_prob)
     print('predict_nonprotected_match_prob:', predict_nonprotected_match_prob)
+    return eod
+
+
+"""
+    Version of KGs
+"""    
+# returns the equality of opportunity difference (ideal: 0, worst: 1)
+def get_eod(clusters, preds, g):
+    num_protected_matches_correct = 0
+    correct_results = 0
+
+    for cluster in clusters:
+        left_id = cluster[0]
+        right_id = cluster[1]
+
+        is_protected = g.pair_is_protected(cluster, 0)
+        
+        if left_id == right_id:
+            correct_results += 1
+            if is_protected:
+                num_protected_matches_correct += 1
+
+    if correct_results == 0:
+        return None
+
+    predict_protected_match_prob = num_protected_matches_correct / correct_results
+    predict_nonprotected_match_prob = 1 - predict_protected_match_prob
+
+    eod = predict_nonprotected_match_prob - predict_protected_match_prob
+
+    # print('predict_protected_match_prob:', predict_protected_match_prob)
+    # print('predict_nonprotected_match_prob:', predict_nonprotected_match_prob)
     return eod

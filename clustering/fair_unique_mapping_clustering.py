@@ -15,8 +15,9 @@ def run(candidates, results_limit):
     protected_candidates = [x for x in candidates if x[3]]
     nonprotected_candidates = [x for x in candidates if not x[3]]
 
-    #print(protected_candidates)
-    #print(nonprotected_candidates)
+    # print(len(protected_candidates))
+    # print(len(nonprotected_candidates))
+    # exit()
 
     nextProtected = True
     while (protected_candidates or nonprotected_candidates) and (len(matches) < results_limit):
