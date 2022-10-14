@@ -13,7 +13,7 @@ import web.library.methods as methods
 
 
 """
-    Run fai*r for RREA
+    Run fairER for RREA
 """
 
 def run():
@@ -22,7 +22,7 @@ def run():
     """
 
     os.chdir("matching/RREA/")
-    os.system("python RREA.py sampled conf_0_only_p -1")
+    os.system("python RREA.py sampled conf_1_only_p -1")
 
 
 

@@ -16,13 +16,13 @@ def run():
     """
 
     os.chdir("matching/RREA/")
-    os.system("python RREA.py sampled conf_0_only_p -1")
+    os.system("python RREA.py sampled conf_1_only_p -1")
 
 
 
 
 def main(dataset):
-    dest_path = "matching/RREA/exp_results/test_experiments/D_Y_15K_V1/conf_0_only_p/D_Y_15K_V1_sim_lists_NO_CSLS_sampled.pickle"
+    dest_path = "matching/RREA/exp_results/test_experiments/D_Y_15K_V1/conf_1_only_p/D_Y_15K_V1_sim_lists_NO_CSLS_sampled.pickle"
     isExist = os.path.exists(dest_path)
     
     """
@@ -30,7 +30,7 @@ def main(dataset):
         otherwise, run RREA to produce similarity lists and re-run for unique mapping clustering
     """
     if isExist:
-        with (open("matching/RREA/exp_results/test_experiments/D_Y_15K_V1/conf_0_only_p/D_Y_15K_V1_sim_lists_NO_CSLS_sampled.pickle", "rb")) as fp:
+        with (open("matching/RREA/exp_results/test_experiments/D_Y_15K_V1/conf_1_only_p/D_Y_15K_V1_sim_lists_NO_CSLS_sampled.pickle", "rb")) as fp:
             sim_lists_no_csls = pickle.load(fp)
         
         index_to_id = {}
