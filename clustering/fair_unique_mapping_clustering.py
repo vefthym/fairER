@@ -20,6 +20,7 @@ def run(candidates, results_limit):
     # exit()
 
     nextProtected = True
+    
     while (protected_candidates or nonprotected_candidates) and (len(matches) < results_limit):
         cand = protected_candidates.pop(0) if nextProtected else nonprotected_candidates.pop(0)
         #print(cand)
@@ -27,6 +28,8 @@ def run(candidates, results_limit):
         # unique mapping constraint check
         if cand[0] in matched_ids_left or cand[1] in matched_ids_right:
             #print('Skipping candidate: ', cand, 'for violating unique mapping constraint')
+            if (nextProtected and nonprotected_candidates) or (not nextProtected and protected_candidates):
+                nextProtected = not nextProtected
             continue
 
         # add pair to matches

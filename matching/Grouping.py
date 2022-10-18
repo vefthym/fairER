@@ -65,7 +65,8 @@ class Grouping:
                 return True
             elif self.mappings[ent] in self.n_pr_2:
                 return False
-        
+        return None
+
     # end def
     
     def group_based_on_component(self, kg1, kg2):

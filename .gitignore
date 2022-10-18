@@ -5,6 +5,7 @@
 *.png
 *.json
 *.pkl
+*.DS_Store
 __pycache__/
 matching/RREA/exp_results/
 matching/RREA/RREA_process_datasets

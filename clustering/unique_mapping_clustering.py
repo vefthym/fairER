@@ -6,7 +6,7 @@
 
 # reads a list of 3-item lists, each representing a candiate pair in the form [left_id, right_id, score]
 # returns a list of [left_id, right_id] matching results (each corresponding to a cluster for a real-world entity)
-def run(candidates):
+def run(candidates, k_results):
     matched_ids_left = set()
     matched_ids_right = set()
     matches = []
@@ -18,6 +18,9 @@ def run(candidates):
         matches.append([cand[0],cand[1]])
         matched_ids_left.add(cand[0])
         matched_ids_right.add(cand[1])
+
+        if len(matches) == k_results:
+            return matches
     return matches
 
 if __name__ == '__main__':

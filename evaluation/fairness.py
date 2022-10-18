@@ -28,7 +28,7 @@ def get_spd(clusters, preds, data):
     Version for KGs
 """
 # returns the statistical parity difference (ideal: 0, worst: 1)
-def get_spd_KG(clusters, preds, g):
+def get_spd_KG(clusters, preds, g, which_entity):
     num_protected = 0
     num_results = len(clusters) * 1.0
 
@@ -36,7 +36,7 @@ def get_spd_KG(clusters, preds, g):
         left_id = cluster[0]
         right_id = cluster[1]
 
-        is_protected = g.pair_is_protected(cluster, 0)
+        is_protected = g.pair_is_protected(cluster, which_entity)
         if is_protected:
             num_protected += 1
             
@@ -83,7 +83,7 @@ def get_eod(clusters, preds, data):
     Version of KGs
 """    
 # returns the equality of opportunity difference (ideal: 0, worst: 1)
-def get_eod(clusters, preds, g):
+def get_eod_KG(clusters, preds, g, which_entity):
     num_protected_matches_correct = 0
     correct_results = 0
 
@@ -91,7 +91,7 @@ def get_eod(clusters, preds, g):
         left_id = cluster[0]
         right_id = cluster[1]
 
-        is_protected = g.pair_is_protected(cluster, 0)
+        is_protected = g.pair_is_protected(cluster, which_entity)
         
         if left_id == right_id:
             correct_results += 1

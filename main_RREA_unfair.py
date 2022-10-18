@@ -10,19 +10,19 @@ from matching.Grouping import Grouping
         Run unfair method for RREA (unique mapping clustering)
 """
 
-def run():
+def run(sample, conf_id):
     """
         Run RREA
     """
 
     os.chdir("matching/RREA/")
-    os.system("python RREA.py sampled conf_1_only_p -1")
+    os.system("python RREA.py " + sample + " " + conf_id + " -1")
 
 
 
 
-def main(dataset):
-    dest_path = "matching/RREA/exp_results/test_experiments/D_Y_15K_V1/conf_1_only_p/D_Y_15K_V1_sim_lists_NO_CSLS_sampled.pickle"
+def main(dataset, k_results, which_entity, conf_id, sample):
+    dest_path = "matching/RREA/exp_results/test_experiments/" + dataset + "/" + conf_id + "/" + dataset + "_sim_lists_NO_CSLS_sampled.pickle"
     isExist = os.path.exists(dest_path)
     
     """
@@ -30,7 +30,7 @@ def main(dataset):
         otherwise, run RREA to produce similarity lists and re-run for unique mapping clustering
     """
     if isExist:
-        with (open("matching/RREA/exp_results/test_experiments/D_Y_15K_V1/conf_1_only_p/D_Y_15K_V1_sim_lists_NO_CSLS_sampled.pickle", "rb")) as fp:
+        with (open("matching/RREA/exp_results/test_experiments/" + dataset + "/" + conf_id + "/" + dataset + "_sim_lists_NO_CSLS_sampled.pickle", "rb")) as fp:
             sim_lists_no_csls = pickle.load(fp)
         
         index_to_id = {}
@@ -43,13 +43,13 @@ def main(dataset):
             for sim_pairs in sim_lists_no_csls[pair]:
                 candidates.append([pair[1], index_to_id[sim_pairs[0]], abs(sim_pairs[1])])
         candidates.sort(key=lambda x: x[2], reverse=True)
-        
-        results = umc.run(candidates)
+
+        results = umc.run(candidates, k_results)
         
         clusters = results
 
-        kg1 = KnowledgeGraph("1", dataset, "", "multi_directed", "sampled", "conf_1_only_p")
-        kg2 = KnowledgeGraph("2", dataset, "", "multi_directed", "sampled", "conf_1_only_p")
+        kg1 = KnowledgeGraph("1", dataset, "", "multi_directed", "sampled", conf_id)
+        kg2 = KnowledgeGraph("2", dataset, "", "multi_directed", "sampled", conf_id)
 
         g = Grouping(kg1, kg2, dataset)
         g.group_based_on_component(kg1, kg2)
@@ -61,10 +61,10 @@ def main(dataset):
         accuracy = eval.get_accuracy_KG(clusters, candidates)
         print("accuracy:", accuracy)
 
-        spd = f_eval.get_spd_KG(clusters, candidates, g)
+        spd = f_eval.get_spd_KG(clusters, candidates, g, which_entity)
         print("SPD:", spd)
 
-        eod = f_eval.get_eod(clusters, candidates, g)
+        eod = f_eval.get_eod_KG(clusters, candidates, g, which_entity)
         print("EOD:", eod)
         print()
 
@@ -81,17 +81,21 @@ def main(dataset):
         assert(len(left) == len(right))
 
         # measure tp
-        tp = 0
-        for r in results:
-            if r[0] == r[1]:
-                tp += 1
-        print(tp/700 * 100)
+        # tp = 0
+        # for r in results:
+        #     if r[0] == r[1]:
+        #         tp += 1
+        # print(tp/700 * 100)
 
     elif not isExist:
-        run()
+        run(sample, conf_id)
         
 
 if __name__ == '__main__':
 
+    k_results = 20
     dataset = "D_Y_15K_V1"
-    main(dataset)
+    which_entity = 0
+    conf_id = "conf_1_only_p"
+    sample = "sampled"
+    main(dataset, k_results, which_entity, conf_id, sample)

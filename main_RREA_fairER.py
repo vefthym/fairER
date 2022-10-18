@@ -16,18 +16,18 @@ import web.library.methods as methods
     Run fairER for RREA
 """
 
-def run():
+def run(sample, conf_id):
     """
     Purpose: Run RREA
     """
 
     os.chdir("matching/RREA/")
-    os.system("python RREA.py sampled conf_1_only_p -1")
+    os.system("python RREA.py " + sample + " " + conf_id + " -1")
 
 
 
-def main(k_results, dataset):
-    dest_path = "matching/RREA/exp_results/test_experiments/D_Y_15K_V1/conf_1_only_p/D_Y_15K_V1_sim_lists_NO_CSLS_sampled.pickle"
+def main(dataset, k_results, which_entity, conf_id, sample):
+    dest_path = "matching/RREA/exp_results/test_experiments/" + dataset + "/" + conf_id + "/" + dataset + "_sim_lists_NO_CSLS_sampled.pickle"
     isExist = os.path.exists(dest_path)
     
     """
@@ -35,7 +35,7 @@ def main(k_results, dataset):
         otherwise, run RREA to produce similarity lists and re-run for unique mapping clustering
     """
     if isExist:
-        with (open("matching/RREA/exp_results/test_experiments/D_Y_15K_V1/conf_1_only_p/D_Y_15K_V1_sim_lists_NO_CSLS_sampled.pickle", "rb")) as fp:
+        with (open("matching/RREA/exp_results/test_experiments/" + dataset + "/" + conf_id + "/" + dataset + "_sim_lists_NO_CSLS_sampled.pickle", "rb")) as fp:
             sim_lists_no_csls = pickle.load(fp)
         
         index_to_id = {}
@@ -53,16 +53,16 @@ def main(k_results, dataset):
         # Fair Unique Mapping Clustering
         #################################
 
-        kg1 = KnowledgeGraph("1", dataset, "", "multi_directed", "sampled", "conf_1_only_p")
-        kg2 = KnowledgeGraph("2", dataset, "", "multi_directed", "sampled", "conf_1_only_p")
+        kg1 = KnowledgeGraph("1", dataset, "", "multi_directed", "sampled", conf_id)
+        kg2 = KnowledgeGraph("2", dataset, "", "multi_directed", "sampled", conf_id)
 
         g = Grouping(kg1, kg2, dataset)
         g.group_based_on_component(kg1, kg2)
 
-        initial_pairs = [(int(cand[0]), int(cand[1]), int(cand[2]), g.pair_is_protected(cand[:2], 0))
+        initial_pairs = [(int(cand[0]), int(cand[1]), int(cand[2]), g.pair_is_protected(cand[:2], which_entity))
                      for cand in candidates]
-
-        clusters = fumc.run(initial_pairs, 200)
+        
+        clusters = fumc.run(initial_pairs, k_results)
 
         #############################
         # Evaluation
@@ -71,15 +71,15 @@ def main(k_results, dataset):
         accuracy = eval.get_accuracy_KG(clusters, candidates)
         print("accuracy:", accuracy)
 
-        spd = f_eval.get_spd_KG(clusters, candidates, g)
+        spd = f_eval.get_spd_KG(clusters, candidates, g, which_entity)
         print("SPD:", spd)
 
-        eod = f_eval.get_eod(clusters, candidates, g)
+        eod = f_eval.get_eod_KG(clusters, candidates, g, which_entity)
         print("EOD:", eod)
         print()
 
     elif not isExist:
-        run()
+        run(sample, conf_id)
 
     
 
@@ -87,5 +87,7 @@ if __name__ == "__main__":
     
     k_results = 20
     dataset = "D_Y_15K_V1"
-    
-    main(k_results, dataset)
+    which_entity = 0
+    conf_id = "conf_1_only_p"
+    sample = "sampled"
+    main(dataset, k_results, which_entity, conf_id, sample)
