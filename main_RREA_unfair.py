@@ -30,9 +30,9 @@ def main(dataset, k_results, which_entity, conf_id, sample):
         otherwise, run RREA to produce similarity lists and re-run for unique mapping clustering
     """
     if isExist:
-        with (open("matching/RREA/exp_results/test_experiments/" + dataset + "/" + conf_id + "/" + dataset + "_sim_lists_NO_CSLS_sampled.pickle", "rb")) as fp:
+        with (open(dest_path, "rb")) as fp:
             sim_lists_no_csls = pickle.load(fp)
-        
+
         index_to_id = {}
         for pair in sim_lists_no_csls:
             index_to_id[pair[0]] = pair[1]
@@ -48,10 +48,10 @@ def main(dataset, k_results, which_entity, conf_id, sample):
         
         clusters = results
 
-        kg1 = KnowledgeGraph("1", dataset, "", "multi_directed", "sampled", conf_id)
-        kg2 = KnowledgeGraph("2", dataset, "", "multi_directed", "sampled", conf_id)
+        kg1 = KnowledgeGraph("1", dataset, "", "multi_directed", "sampled", conf_id, "RREA")
+        kg2 = KnowledgeGraph("2", dataset, "", "multi_directed", "sampled", conf_id, "RREA")
 
-        g = Grouping(kg1, kg2, dataset)
+        g = Grouping(kg1, kg2, dataset, "RREA")
         g.group_based_on_component(kg1, kg2)
 
         #############################
@@ -87,8 +87,8 @@ def main(dataset, k_results, which_entity, conf_id, sample):
         #         tp += 1
         # print(tp/700 * 100)
 
-    elif not isExist:
-        run(sample, conf_id)
+    # elif not isExist:
+    #     run(sample, conf_id)
         
 
 if __name__ == '__main__':

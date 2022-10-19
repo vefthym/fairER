@@ -11,7 +11,7 @@ class KnowledgeGraph:
     sample = ""
     conf_id = ""
 
-    def __init__(self, id, dataset, prefix, kg_type, sample, conf_id):
+    def __init__(self, id, dataset, prefix, kg_type, sample, conf_id, method):
 
       self.id = id
       self.dataset = dataset
@@ -19,7 +19,10 @@ class KnowledgeGraph:
       self.sample = sample
       self.conf_id = conf_id
       if sample == "original":
-        path =  "matching/RREA/RREA_process_datasets/" + dataset + prefix + "_RREA/rel_triples_" + id
+        if method == "RREA":
+          path =  "matching/RREA/RREA_process_datasets/" + dataset + prefix + "_RREA/rel_triples_" + id
+        elif method == "RDGCN":
+          path =  "matching/RREA/RREA_process_datasets/" + dataset + prefix + "/rel_triples_" + id
       elif sample == "sampled":
         path =  "matching/RREA/sampled/" + dataset + "_sampled/" + conf_id + "/rel_triples_" + id
       kg = pd.read_csv(path,  sep='\t', names=["e1", "r", "e2"])
@@ -73,5 +76,47 @@ class KnowledgeGraph:
           with open(path_valid) as fp:
             for line in fp:
               pairs[int(line.split("\t")[1].rstrip())] = int(line.split("\t")[0])
+
+      return pairs
+
+
+    def get_seed_pairs_RDGCN(self, reverse=False):
+      if self.sample == "original":
+        path = "matching/RREA/RREA_process_datasets/" + self.dataset + self.prefix + "/721_5fold/2/"
+      elif self.sample == "sampled":
+        path = "matching/RREA/sampled/" + self.dataset + "_sampled/" + self.conf_id + "/721_5fold/2/"
+
+      if reverse == False:
+        pairs = {}
+        path_test = path + "test_links"
+        with open(path_test) as fp:
+          for line in fp:
+            pairs[line.split("\t")[0]] = line.split("\t")[1].rstrip()
+
+        path_train = path + "train_links"
+        with open(path_train) as fp:
+          for line in fp:
+            pairs[line.split("\t")[0]] = line.split("\t")[1].rstrip()
+
+        path_valid = path + "valid_links"
+        with open(path_valid) as fp:
+          for line in fp:
+            pairs[line.split("\t")[0]] = line.split("\t")[1].rstrip()
+      elif reverse == True:
+          pairs = {}
+          path_test = path +"test_links"
+          with open(path_test) as fp:
+            for line in fp:
+              pairs[line.split("\t")[1].rstrip()] = int(line.split("\t")[0])
+
+          path_train = path + "train_links"
+          with open(path_train) as fp:
+            for line in fp:
+              pairs[line.split("\t")[1].rstrip()] = line.split("\t")[0]
+
+          path_valid = path + "valid_links"
+          with open(path_valid) as fp:
+            for line in fp:
+              pairs[line.split("\t")[1].rstrip()] = line.split("\t")[0]
 
       return pairs

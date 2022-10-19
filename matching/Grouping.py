@@ -4,7 +4,7 @@ from matching.KG.KnowledgeGraph import KnowledgeGraph
 
 class Grouping:
 
-    def __init__(self, kg1, kg2, dataset):
+    def __init__(self, kg1, kg2, dataset, method):
         self.kg1 = kg1
         self.kg2 = kg2
         self.pr_1 = set()
@@ -15,6 +15,7 @@ class Grouping:
         self.comps_1 = set()
         self.comps_2 = set()
         self.mappings = dict()
+        self.method = method
 
     def get_comps(self, kg):
         """
@@ -74,7 +75,10 @@ class Grouping:
         Purpose: Group entities of the two kgs based on the connected component the belong
         """
 
-        self.mappings = kg1.get_seed_pairs()
+        if self.method == "RREA":
+            self.mappings = kg1.get_seed_pairs()
+        elif self.method == "RDGCN":
+            self.mappings = kg1.get_seed_pairs_RDGCN()
         
         self.comps_1 = self.get_comps(kg1)
         self.comps_2 = self.get_comps(kg2)

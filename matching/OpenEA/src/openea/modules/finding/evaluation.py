@@ -14,13 +14,13 @@ def valid(mode, transl_ents, embeds1, embeds2, mapping, top_k, threads_num, metr
     return hits1_12, mrr_12, TTA_flag
 
 
-def test(test_ent_lists, mode, embeds1, embeds2, mapping, top_k, threads_num, metric='inner', normalize=False, csls_k=0, accurate=True):
+def test(kgs, test_ent_lists, mode, embeds1, embeds2, mapping, top_k, threads_num, metric='inner', normalize=False, csls_k=0, accurate=True):
     if mapping is None:
-        alignment_rest_12, hits1_12, mr_12, mrr_12, TTA_flag, update_sim_lists, all_hits  = greedy_alignment(test_ent_lists, mode, embeds1, embeds2, top_k, threads_num,
+        alignment_rest_12, hits1_12, mr_12, mrr_12, TTA_flag, update_sim_lists, all_hits  = greedy_alignment(kgs, test_ent_lists, mode, embeds1, embeds2, top_k, threads_num,
                                                                       metric, normalize, csls_k, accurate)
     else:
         test_embeds1_mapped = np.matmul(embeds1, mapping)
-        alignment_rest_12, hits1_12, mr_12, mrr_12, TTA_flag, update_sim_lists, all_hits = greedy_alignment(test_ent_lists, mode, test_embeds1_mapped, embeds2, top_k, threads_num,
+        alignment_rest_12, hits1_12, mr_12, mrr_12, TTA_flag, update_sim_lists, all_hits = greedy_alignment(kgs, test_ent_lists, mode, test_embeds1_mapped, embeds2, top_k, threads_num,
                                                                       metric, normalize, csls_k, accurate)
 
     performance = dict()

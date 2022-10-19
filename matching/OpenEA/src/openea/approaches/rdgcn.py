@@ -353,7 +353,7 @@ class RDGCN(BasicModel):
         self.local_name_vectors = None
         self.entity_local_name_dict = None
         self.entities = None
-        self.word_embed = '../../datasets/wiki-news-300d-1M.vec'
+        self.word_embed = 'wiki-news-300d-1M.vec'
 
     def init(self):
         self.entities = self.kgs.kg1.entities_set | self.kgs.kg2.entities_set
@@ -427,15 +427,19 @@ class RDGCN(BasicModel):
         names.iloc[:, 2] = names.iloc[:, 2].str.replace(r'[{}]+'.format(string.punctuation), '').str.split(' ')
         # load word embedding
         with open(self.word_embed, 'r') as f:
-            w = f.readlines()
+            # comment 2 lines below, uncomment the 3rd line and dim = 300 for .json
+            f.seek(0)
+            w = f.read(10 - 0)
+            # w = f.readlines()
             w = pd.Series(w[1:])
+            print(w)
 
         we = w.str.split(' ')
         word = we.apply(lambda x: x[0])
         w_em = we.apply(lambda x: x[1:])
         print('concat word embeddings')
         word_em = np.stack(w_em.values, axis=0).astype(np.float)
-        word_em = np.append(word_em, np.zeros([1, 300]), axis=0)
+        word_em = np.append(word_em, np.zeros([1, 1]), axis=0)
         print('convert words to ids')
         w_in_desc = []
         for l in names.iloc[:, 2].values:
@@ -520,9 +524,10 @@ class RDGCN(BasicModel):
 
         test_ent_lists = self.kgs.test_entities1
         
-        rest_12, _, _, TTA_flag, update_sim_lists, performance = test(test_ent_lists, "test", embeds1, embeds2, None, self.args.top_k, self.args.test_threads_num,
+        rest_12, _, _, TTA_flag, update_sim_lists, performance = test(self.kgs, test_ent_lists, "test", embeds1, embeds2, None, self.args.top_k, self.args.test_threads_num,
                              metric=self.args.eval_metric, normalize=self.args.eval_norm, csls_k=0, accurate=True)
-        test(test_ent_lists, "test", embeds1, embeds2, None, self.args.top_k, self.args.test_threads_num,
+        
+        test(self.kgs, test_ent_lists, "test", embeds1, embeds2, None, self.args.top_k, self.args.test_threads_num,
              metric=self.args.eval_metric, normalize=self.args.eval_norm, csls_k=self.args.csls, accurate=True)
         if save:
             ent_ids_rest_12 = [(self.kgs.test_entities1[i], self.kgs.test_entities2[j]) for i, j in rest_12]

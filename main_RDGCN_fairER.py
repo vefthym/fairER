@@ -13,12 +13,12 @@ import web.library.methods as methods
 
 
 """
-    Run fairER for RREA
+    Run fairER for RDGCN
 """
 
 def run(sample, conf_id):
     """
-    Purpose: Run RREA
+    Purpose: Run RDGCN
     """
 
     os.chdir("matching/RREA/")
@@ -27,17 +27,17 @@ def run(sample, conf_id):
 
 
 def main(dataset, k_results, which_entity, conf_id, sample):
-    dest_path = "matching/RREA/exp_results/test_experiments/" + dataset + "/" + conf_id + "/" + dataset + "_sim_lists_NO_CSLS_sampled.pickle"
+    dest_path = "matching/RREA/exp_results/test_experiments/RDGCN/" + dataset + "/" + conf_id + "/" + dataset + "_sim_lists_NO_CSLS_sampled.pickle"
     isExist = os.path.exists(dest_path)
-    
+
     """
         If file exists, load similarity lists and perform unique mapping clustering
-        otherwise, run RREA to produce similarity lists and re-run for unique mapping clustering
+        otherwise, run RDGCN to produce similarity lists and re-run for unique mapping clustering
     """
     if isExist:
         with (open(dest_path, "rb")) as fp:
             sim_lists_no_csls = pickle.load(fp)
-        
+
         index_to_id = {}
         for pair in sim_lists_no_csls:
             index_to_id[pair[0]] = pair[1]
@@ -53,14 +53,13 @@ def main(dataset, k_results, which_entity, conf_id, sample):
         # Fair Unique Mapping Clustering
         #################################
 
-        kg1 = KnowledgeGraph("1", dataset, "", "multi_directed", "sampled", conf_id, "RREA")
-        kg2 = KnowledgeGraph("2", dataset, "", "multi_directed", "sampled", conf_id, "RREA")
+        kg1 = KnowledgeGraph("1", dataset, "", "multi_directed", "sampled", conf_id, "RDGCN")
+        kg2 = KnowledgeGraph("2", dataset, "", "multi_directed", "sampled", conf_id, "RDGCN")
 
-        g = Grouping(kg1, kg2, dataset, "RREA")
+        g = Grouping(kg1, kg2, dataset, "RDGCN")
         g.group_based_on_component(kg1, kg2)
 
-
-        initial_pairs = [(int(cand[0]), int(cand[1]), int(cand[2]), g.pair_is_protected(cand[:2], which_entity))
+        initial_pairs = [(cand[0], cand[1], int(cand[2]), g.pair_is_protected(cand[:2], which_entity))
                      for cand in candidates]
         
         clusters = fumc.run(initial_pairs, k_results)
@@ -79,8 +78,8 @@ def main(dataset, k_results, which_entity, conf_id, sample):
         print("EOD:", eod)
         print()
 
-    elif not isExist:
-        run(sample, conf_id)
+    # elif not isExist:
+    #     run(sample, conf_id)
 
     
 
@@ -89,6 +88,6 @@ if __name__ == "__main__":
     k_results = 20
     dataset = "D_Y_15K_V1"
     which_entity = 0
-    conf_id = "conf_1_only_p"
+    conf_id = "conf_1_only_p_RDGCN"
     sample = "sampled"
     main(dataset, k_results, which_entity, conf_id, sample)

@@ -10,7 +10,7 @@ from cmath import sqrt
 import pickle
 
 
-def greedy_alignment(test_ent_lists, mode, embed1, embed2, top_k, nums_threads, metric, normalize, csls_k, accurate):
+def greedy_alignment(kgs, test_ent_lists, mode, embed1, embed2, top_k, nums_threads, metric, normalize, csls_k, accurate):
     """
     Search alignment with greedy strategy.
 
@@ -42,6 +42,7 @@ def greedy_alignment(test_ent_lists, mode, embed1, embed2, top_k, nums_threads, 
     TTA_flag = 0
     sim_mat = sim(embed1, embed2, metric=metric, normalize=normalize, csls_k=csls_k)
     num = sim_mat.shape[0]
+
     updated_sim_lists = dict()
     if nums_threads > 1:
         hits = [0] * len(top_k)
@@ -52,7 +53,7 @@ def greedy_alignment(test_ent_lists, mode, embed1, embed2, top_k, nums_threads, 
         pool = multiprocessing.Pool(processes=len(search_tasks))
         for task in search_tasks:
             mat = sim_mat[task, :]
-            rests.append(pool.apply_async(calculate_rank, (test_ent_lists, mode, task, mat, top_k, accurate, num, csls_k)))
+            rests.append(pool.apply_async(calculate_rank, (kgs, test_ent_lists, mode, task, mat, top_k, accurate, num, csls_k)))
         pool.close()
         pool.join()
         for rest in rests:
@@ -63,7 +64,7 @@ def greedy_alignment(test_ent_lists, mode, embed1, embed2, top_k, nums_threads, 
             alignment_rest |= sub_hits1_rest
             updated_sim_lists.update(sub_sim_lists)
     else:
-        mr, mrr, hits, alignment_rest, updated_sim_lists = calculate_rank(test_ent_lists, mode, list(range(num)), sim_mat, top_k, accurate, num, csls_k)
+        mr, mrr, hits, alignment_rest, updated_sim_lists = calculate_rank(kgs, test_ent_lists, mode, list(range(num)), sim_mat, top_k, accurate, num, csls_k)
     assert len(alignment_rest) == num
     hits = np.array(hits) / num * 100
     for i in range(len(hits)):
@@ -160,7 +161,11 @@ def arg_sort(idx, sim_mat, prefix1, prefix2):
     return candidates
 
 
-def calculate_rank(test_ent_lists, mode, idx, sim_mat, top_k, accurate, total_num, csls_k):
+def calculate_rank(kgs, test_ent_lists, mode, idx, sim_mat, top_k, accurate, total_num, csls_k):
+    ent_ids1_rev = dict()
+    for key in kgs.ent_ids1:
+        ent_ids1_rev[kgs.ent_ids1[key]] = key
+
     assert 1 in top_k
     mr = 0
     mrr = 0
@@ -172,17 +177,27 @@ def calculate_rank(test_ent_lists, mode, idx, sim_mat, top_k, accurate, total_nu
     print(len(idx))
 
     for i in range(len(idx)):
+        rank_sim_list = list()
         gold = idx[i]
+
         if accurate:
             rank = (-sim_mat[i, :]).argsort()
+            temp_rank = list((-sim_mat[i, :]).argsort())
+
+            if mode == "test" and csls_k == 0:
+                if len(test_ent_lists) > 0:
+                    similarities_sorted = list(np.sort((-sim_mat[i, :])))
+                    # 500 for smaller sim_lists file. Otherwise, len(rank)
+                    for r in range(500):
+                        rank_sim_list.append((temp_rank[r], similarities_sorted[r]))
+                sim_lists[(gold, ent_ids1_rev[test_ent_lists[gold]])] = rank_sim_list
+
         else:
             rank = np.argpartition(-sim_mat[i, :], np.array(top_k) - 1)
         hits1_rest.add((gold, rank[0]))
         assert gold in rank
-        rank_index = np.where(rank == gold)[0][0]
 
-        if mode == "test" and csls_k == 0:
-            sim_lists[(gold, test_ent_lists[gold])] = list(rank)
+        rank_index = np.where(rank == gold)[0][0]
 
         mr += (rank_index + 1)
         mrr += 1 / (rank_index + 1)
@@ -191,7 +206,7 @@ def calculate_rank(test_ent_lists, mode, idx, sim_mat, top_k, accurate, total_nu
                 hits[j] += 1
     mr /= total_num
     mrr /= total_num
-   
+    
     return mr, mrr, hits, hits1_rest, sim_lists
 
 
