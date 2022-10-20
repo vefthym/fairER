@@ -49,8 +49,8 @@ def test_WVA(model):
               weight2 * rv_ent_embeds2 + \
               weight3 * av_ent_embeds2
     print('wvag test results:')
-    hits1_12, mrr_12 = eva.valid("valid", embeds1, embeds2, None, model.args.top_k, model.args.test_threads_num,
-                                 normalize=True)
+    hits1_12, mrr_12 = eva.valid("valid", None, embeds1, embeds2, None, model.args.top_k, model.args.test_threads_num,
+                                 metric=model.args.eval_metric, normalize=True)
     del embeds1, embeds2
     gc.collect()
     return mrr_12
@@ -115,8 +115,8 @@ def valid_WVA(model):
               weight2 * rv_ent_embeds2 + \
               weight3 * av_ent_embeds2
     print('wvag valid results:')
-    hits1_12, mrr_12 = eva.valid("valid", embeds1, embeds2, None, model.args.top_k, model.args.test_threads_num,
-                                 normalize=True)
+    hits1_12, mrr_12 = eva.valid("valid", None, embeds1, embeds2, None, model.args.top_k, model.args.test_threads_num,
+                                 metric=model.args.eval_metric, normalize=True)
 
     del nv_ent_embeds1, rv_ent_embeds1, av_ent_embeds1
     del nv_ent_embeds2, rv_ent_embeds2, av_ent_embeds2
@@ -144,8 +144,9 @@ def valid_temp(model, embed_choice='avg', w=(1, 1, 1)):
     print(embed_choice, 'valid results:')
     embeds1 = ent_embeds[model.kgs.valid_entities1,]
     embeds2 = ent_embeds[model.kgs.valid_entities2 + model.kgs.test_entities2,]
-    hits1_12, mrr_12, TTA_flag = eva.valid("valid", embeds1, embeds2, None, model.args.top_k, model.args.test_threads_num,
-                                 normalize=True)
+    test_ent_lists = model.kgs.test_entities1
+    hits1_12, mrr_12, TTA_flag = eva.valid(model.kgs, test_ent_lists, "valid", None, embeds1, embeds2, None, model.args.top_k, model.args.test_threads_num,
+                                 metric=model.args.eval_metric, normalize=True, csls_k=0, accurate=False)
     del embeds1, embeds2
     gc.collect()
     return mrr_12

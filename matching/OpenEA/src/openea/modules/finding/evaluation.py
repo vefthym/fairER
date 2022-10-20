@@ -3,13 +3,12 @@ import numpy as np
 from openea.modules.finding.alignment import greedy_alignment
 
 
-def valid(mode, transl_ents, embeds1, embeds2, mapping, top_k, threads_num, metric='inner', normalize=False, csls_k=0, accurate=False):
+def valid(kgs, test_ent_lists, mode, transl_ents, embeds1, embeds2, mapping, top_k, threads_num, metric='inner', normalize=False, csls_k=0, accurate=False):
     if mapping is None:
-        _, hits1_12, mr_12, mrr_12, TTA_flag, _ = greedy_alignment(mode, embeds1, embeds2, top_k, threads_num,
-                                                      metric, normalize, csls_k, accurate)
+        _, hits1_12, mr_12, mrr_12, TTA_flag, _, _ = greedy_alignment(kgs, test_ent_lists, mode, embeds1, embeds2, top_k, threads_num, metric, normalize, csls_k, accurate)
     else:
         test_embeds1_mapped = np.matmul(embeds1, mapping)
-        _, hits1_12, mr_12, mrr_12, TTA_flag, _ = greedy_alignment(mode, test_embeds1_mapped, embeds2, top_k, threads_num,
+        _, hits1_12, mr_12, mrr_12, TTA_flag, _ = greedy_alignment(kgs, test_ent_lists, mode, test_embeds1_mapped, embeds2, top_k, threads_num,
                                                       metric, normalize, csls_k, accurate)
     return hits1_12, mrr_12, TTA_flag
 

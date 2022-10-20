@@ -122,9 +122,10 @@ class BasicModel:
     def valid(self, stop_metric, t):
         TTA_flag = False
         embeds1, embeds2, mapping = self._eval_valid_embeddings()
-        hits1_12, mrr_12, TTA_flag = valid(embeds1, embeds2, mapping, self.args.top_k,
-                                 self.args.test_threads_num, metric=self.args.eval_metric,
-                                 normalize=self.args.eval_norm, csls_k=0, accurate=False)
+        test_ent_lists = self.kgs.test_entities1
+        hits1_12, mrr_12, TTA_flag = valid(self.kgs, test_ent_lists, "valid", None, embeds1, embeds2, mapping, self.args.top_k, self.args.test_threads_num,
+                                 metric=self.args.eval_metric, normalize=self.args.eval_norm, csls_k=0, accurate=False)
+                                 
         # if TTA_flag == 0.10 or TTA_flag == 0.20:
         #     print("TTA " + str(TTA_flag) + " = {:.3f} s.".format(time.time() - t))
         # elif TTA_flag == 0.30:
@@ -133,14 +134,17 @@ class BasicModel:
         return hits1_12 if stop_metric == 'hits1' else mrr_12
 
     def test(self, save=True):
+        print("test from basic model")
         embeds1, embeds2, mapping = self._eval_test_embeddings()
-        rest_12, _, _, TTA_flag  = test(embeds1, embeds2, mapping, self.args.top_k, self.args.test_threads_num,
+        test_ent_lists = self.kgs.test_entities1
+        rest_12, _, _, TTA_flag, update_sim_lists, performance  = test(self.kgs, test_ent_lists, "test", embeds1, embeds2, mapping, self.args.top_k, self.args.test_threads_num,
                              metric=self.args.eval_metric, normalize=self.args.eval_norm, csls_k=0, accurate=True)
-        test(embeds1, embeds2, mapping, self.args.top_k, self.args.test_threads_num,
-             metric=self.args.eval_metric, normalize=self.args.eval_norm, csls_k=self.args.csls, accurate=True)
+                             
+        test(self.kgs, test_ent_lists, "test", embeds1, embeds2, mapping, self.args.top_k, self.args.test_threads_num,
+                             metric=self.args.eval_metric, normalize=self.args.eval_norm, csls_k=self.args.csls, accurate=True)
         if save:
             ent_ids_rest_12 = [(self.kgs.test_entities1[i], self.kgs.test_entities2[j]) for i, j in rest_12]
-            rd.save_results(self.out_folder, ent_ids_rest_12)
+            rd.save_results(self.args.dataset, self.args.conf_id, self.args.sampled, self.out_folder, ent_ids_rest_12, update_sim_lists, performance)
 
     def retest(self):
         dir = self.out_folder.split("/")
