@@ -27,6 +27,17 @@ def main(dataset, k_results, which_entity, conf_id, sample, method_sim_list):
         with (open(dest_path, "rb")) as fp:
             sim_lists_no_csls = pickle.load(fp)
 
+        # Corrects the wrong entity-metric pairs of similarity lists of RDGCN
+        # This happens because of manhattan metric used for this method
+        if method_sim_list == "RDGCN":
+            for pair in sim_lists_no_csls:
+                temp_measures = list()
+                for p in range(len(sim_lists_no_csls[pair])):
+                    temp_measures.append(sim_lists_no_csls[pair][p][1])
+                temp_measures.sort(reverse=True)
+                for p in range(len(sim_lists_no_csls[pair])):
+                    sim_lists_no_csls[pair][p] = (sim_lists_no_csls[pair][p][0], temp_measures[p]) 
+
         index_to_id = {}
         for pair in sim_lists_no_csls:
             index_to_id[pair[0]] = pair[1]
@@ -75,6 +86,6 @@ if __name__ == "__main__":
     which_entity = 0
     conf_id = "conf_1_only_p_RDGCN"
     sample = "sampled"
-    method_sim_list = "MultiKE"
+    method_sim_list = "RDGCN"
 
     main(dataset, k_results, which_entity, conf_id, sample, method_sim_list)

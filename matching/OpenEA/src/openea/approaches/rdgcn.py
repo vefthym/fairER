@@ -441,7 +441,7 @@ class RDGCN(BasicModel):
         w_em = we.apply(lambda x: x[1:])
         print('concat word embeddings')
         word_em = np.stack(w_em.values, axis=0).astype(np.float)
-        word_em = np.append(word_em, np.zeros([1, 1]), axis=0)
+        word_em = np.append(word_em, np.zeros([1, 300]), axis=0)
         print('convert words to ids')
         w_in_desc = []
         for l in names.iloc[:, 2].values:

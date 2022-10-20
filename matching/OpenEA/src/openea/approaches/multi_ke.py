@@ -188,7 +188,6 @@ def read_word2vec(file_path, vector_dimension):
                 continue
             v = np.array(list(map(float, line[1:])), dtype=np.float32)
             word2vec[line[0]] = v
-            break
     file.close()
     print("ok")
     return word2vec

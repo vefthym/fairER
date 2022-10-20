@@ -24,7 +24,7 @@ def run(sample, conf_id):
 def main(dataset, k_results, which_entity, conf_id, sample):
     dest_path = "matching/RREA/exp_results/test_experiments/" + dataset + "/" + conf_id + "/" + dataset + "_sim_lists_NO_CSLS_sampled.pickle"
     isExist = os.path.exists(dest_path)
-    
+
     """
         If file exists, load similarity lists and perform unique mapping clustering
         otherwise, run RREA to produce similarity lists and re-run for unique mapping clustering
