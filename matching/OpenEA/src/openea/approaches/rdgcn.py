@@ -427,10 +427,12 @@ class RDGCN(BasicModel):
         names.iloc[:, 2] = names.iloc[:, 2].str.replace(r'[{}]+'.format(string.punctuation), '').str.split(' ')
         # load word embedding
         with open(self.word_embed, 'r') as f:
+
             # comment 2 lines below, uncomment the 3rd line and dim = 300 for .json
-            f.seek(0)
-            w = f.read(10 - 0)
-            # w = f.readlines()
+            # f.seek(0)
+            # w = f.read(10 - 0)
+            
+            w = f.readlines()
             w = pd.Series(w[1:])
             print(w)
 
