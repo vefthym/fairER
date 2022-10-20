@@ -11,28 +11,17 @@ import evaluation.accuracy as eval
 import evaluation.fairness as f_eval
 import web.library.methods as methods
 
-
 """
-    Run fairER for RDGCN
+        Run fairER method for OpenEA method (unique mapping clustering)
 """
 
-def run(sample, conf_id):
-    """
-    Purpose: Run RDGCN
-    """
-
-    os.chdir("matching/RREA/")
-    os.system("python RREA.py " + sample + " " + conf_id + " -1")
-
-
-
-def main(dataset, k_results, which_entity, conf_id, sample):
-    dest_path = "matching/RREA/exp_results/test_experiments/RDGCN/" + dataset + "/" + conf_id + "/" + dataset + "_sim_lists_NO_CSLS_sampled.pickle"
+def main(dataset, k_results, which_entity, conf_id, sample, method_sim_list):
+    dest_path = "matching/RREA/exp_results/test_experiments/" + method_sim_list + "/" + dataset + "/" + conf_id + "/" + dataset + "_sim_lists_NO_CSLS_sampled.pickle"
     isExist = os.path.exists(dest_path)
 
     """
         If file exists, load similarity lists and perform unique mapping clustering
-        otherwise, run RDGCN to produce similarity lists and re-run for unique mapping clustering
+        otherwise, manually run OpenEA method to produce similarity lists and re-run for unique mapping clustering
     """
     if isExist:
         with (open(dest_path, "rb")) as fp:
@@ -78,10 +67,6 @@ def main(dataset, k_results, which_entity, conf_id, sample):
         print("EOD:", eod)
         print()
 
-    # elif not isExist:
-    #     run(sample, conf_id)
-
-    
 
 if __name__ == "__main__":
     
@@ -90,4 +75,6 @@ if __name__ == "__main__":
     which_entity = 0
     conf_id = "conf_1_only_p_RDGCN"
     sample = "sampled"
-    main(dataset, k_results, which_entity, conf_id, sample)
+    method_sim_list = "MultiKE"
+
+    main(dataset, k_results, which_entity, conf_id, sample, method_sim_list)

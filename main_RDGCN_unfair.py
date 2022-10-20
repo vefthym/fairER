@@ -7,17 +7,18 @@ from matching.KG.KnowledgeGraph import KnowledgeGraph
 from matching.Grouping import Grouping
 
 """
-        Run unfair method for RDGCN (unique mapping clustering)
+        Run unfair method for OpenEA method (unique mapping clustering)
 """
 
-def main(dataset, k_results, which_entity, conf_id, sample):
-    dest_path = "matching/RREA/exp_results/test_experiments/RDGCN/" + dataset + "/" + conf_id + "/" + dataset + "_sim_lists_NO_CSLS_sampled.pickle"
+def main(dataset, k_results, which_entity, conf_id, sample, method_sim_list):
+    dest_path = "matching/RREA/exp_results/test_experiments/" + method_sim_list + "/" + dataset + "/" + conf_id + "/" + dataset + "_sim_lists_NO_CSLS_sampled.pickle"
     isExist = os.path.exists(dest_path)
     
     """
         If file exists, load similarity lists and perform unique mapping clustering
-        otherwise, run RDGCN to produce similarity lists and re-run for unique mapping clustering
+        otherwise, manually run OpenEA method to produce similarity lists and re-run for unique mapping clustering
     """
+
     if isExist:
         with (open(dest_path, "rb")) as fp:
             sim_lists_no_csls = pickle.load(fp)
@@ -70,11 +71,12 @@ def main(dataset, k_results, which_entity, conf_id, sample):
         assert(len(left) == len(right))
 
         # measure tp
-        # tp = 0
-        # for r in results:
-        #     if r[0] == r[1]:
-        #         tp += 1
-        # print(tp/700 * 100)
+        tp = 0
+        for r in results:
+            print(r)
+            if r[0] == r[1]:
+                tp += 1
+        print(tp/len(results) * 100)
         
 
 if __name__ == '__main__':
@@ -84,4 +86,6 @@ if __name__ == '__main__':
     which_entity = 0
     conf_id = "conf_1_only_p_RDGCN"
     sample = "sampled"
-    main(dataset, k_results, which_entity, conf_id, sample)
+    method_sim_list = "MultiKE"
+
+    main(dataset, k_results, which_entity, conf_id, sample, method_sim_list)
