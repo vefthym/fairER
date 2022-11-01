@@ -53,11 +53,20 @@ def main(dataset, k_results, which_entity, conf_id, sample, method_sim_list):
         # Fair Unique Mapping Clustering
         #################################
 
-        kg1 = KnowledgeGraph("1", dataset, "", "multi_directed", "sampled", conf_id, "RDGCN")
-        kg2 = KnowledgeGraph("2", dataset, "", "multi_directed", "sampled", conf_id, "RDGCN")
+        kg1 = KnowledgeGraph("1", dataset, "", "multi_directed", sample, conf_id, "RDGCN")
+        kg2 = KnowledgeGraph("2", dataset, "", "multi_directed", sample, conf_id, "RDGCN")
 
         g = Grouping(kg1, kg2, dataset, "RDGCN")
         g.group_based_on_component(kg1, kg2)
+
+        # print("pr1: ")
+        # print(len(g.pr_1))
+        # print("pr2: ")
+        # print(len(g.pr_2))
+        # print("n_pr1: ")
+        # print(len(g.n_pr_1))
+        # print("n_pr2: ")
+        # print(len(g.n_pr_2))
 
         initial_pairs = [(cand[0], cand[1], int(cand[2]), g.pair_is_protected(cand[:2], which_entity))
                      for cand in candidates]
@@ -78,14 +87,42 @@ def main(dataset, k_results, which_entity, conf_id, sample, method_sim_list):
         print("EOD:", eod)
         print()
 
+    else:
+        print("Printing only the statistics")
+        kg1 = KnowledgeGraph("1", dataset, "", "multi_directed", sample, conf_id, "RDGCN")
+        kg2 = KnowledgeGraph("2", dataset, "", "multi_directed", sample, conf_id, "RDGCN")
+
+        g = Grouping(kg1, kg2, dataset, "RDGCN")
+        g.group_based_on_component(kg1, kg2)
+        # print("pr1: ")
+        # print(len(g.pr_1))
+        # print("pr2: ")
+        # print(len(g.pr_2))
+        # print("n_pr1: ")
+        # print(len(g.n_pr_1))
+        # print("n_pr2: ")
+        # print(len(g.n_pr_2))
 
 if __name__ == "__main__":
     
+    
     k_results = 20
-    dataset = "D_Y_15K_V1"
+    # dataset = "D_W_15K_V1"
     which_entity = 0
-    conf_id = "conf_3_only_p_RDGCN"
-    sample = "sampled"
-    method_sim_list = "MultiKE"
+    
+    # for ORIGINAL datasets 
+    # main("D_W_15K_V1", k_results, which_entity, "original", "original", "RDGCN")
+    # exit()
 
-    main(dataset, k_results, which_entity, conf_id, sample, method_sim_list)
+    sample = "sampled"
+
+    method_sim_list = ["RDGCN", "MultiKE"]
+    for m in method_sim_list:
+        print("Method: " + m)
+        for d in ["D_Y_15K_V1", "D_W_15K_V1"]:
+            dataset = d
+            print("\tDataset: " + dataset)
+            for c in [1, 3]:
+                conf_id = "conf_" + str(c) + "_only_p_RDGCN"
+                print("\t\t" + conf_id)
+                main(dataset, k_results, which_entity, conf_id, sample, m)

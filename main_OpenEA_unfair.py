@@ -93,7 +93,7 @@ def main(dataset, k_results, which_entity, conf_id, sample, method_sim_list):
 if __name__ == '__main__':
 
     k_results = 20
-    dataset = "D_Y_15K_V1"
+    dataset = "D_W_15K_V1"
     which_entity = 0
     conf_id = "conf_3_only_p_RDGCN"
     sample = "sampled"

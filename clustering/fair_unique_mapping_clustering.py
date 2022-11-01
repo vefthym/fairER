@@ -28,8 +28,10 @@ def run(candidates, results_limit):
         # unique mapping constraint check
         if cand[0] in matched_ids_left or cand[1] in matched_ids_right:
             #print('Skipping candidate: ', cand, 'for violating unique mapping constraint')
-            if (nextProtected and nonprotected_candidates) or (not nextProtected and protected_candidates):
-                nextProtected = not nextProtected
+            if(len(protected_candidates) == 0):
+                nextProtected = False
+            elif(len(protected_candidates) == 0):
+                nextProtected = True
             continue
 
         # add pair to matches
