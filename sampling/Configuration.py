@@ -5,7 +5,7 @@ class Configuration:
 
     c = None
 
-    def __init__(self, dataset, prefix, measure, sampling_size, p, conf_id, method, sampling_method, export_sampled=False):
+    def __init__(self, dataset, prefix, measure, sampling_size, p, conf_id, method, sampling_method, attr_thres, export_sampled=False):
         self.id = conf_id
         self.dataset = dataset
         self.prefix = prefix
@@ -15,7 +15,7 @@ class Configuration:
         self.export_sampled = export_sampled
         self.method = method
         self.sampling_method = sampling_method
-    
+        self.attr_thres = attr_thres
     def export(self, path):
         with open(path, "w") as fp:
             fp.write("timestamp: " + str(datetime.now()))
@@ -32,7 +32,7 @@ class Configuration:
             fp.write("\n")
             fp.write("p: " + str(self.p))
             fp.write("\n")
-            fp.write("c: " + str(self.c))
+            fp.write("attr_thres: " + str(self.attr_thres))
             fp.write("\n")
             fp.write("method: " + self.method)
             fp.write("\n")

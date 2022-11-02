@@ -203,3 +203,19 @@ class Utils:
     #                 fp2.write("\t")
     #                 fp2.write(ids_to_uris[e2])
     #                 fp2.write("\n")
+
+
+    def convert_attributes(dataset):
+
+        for kg in ["1", "2"]:
+
+            uris_to_ids = {}
+            with open("matching/RREA/RREA_process_datasets/" + dataset + "_RREA/ent_ids_" + kg) as fp:
+                for line in fp:
+                    uris_to_ids[line.split("\t")[1].rstrip()] = line.split("\t")[0]
+
+            with open("matching/RREA/RREA_process_datasets/" + dataset + "/attr_triples_" + kg) as fp:
+                with open("matching/RREA/RREA_process_datasets/" + dataset + "_RREA/attr_triples_" + kg, "w") as fp2:
+                    for line in fp:
+                        ent = uris_to_ids[line.split("\t")[0]]
+                        fp2.write(ent + "\t" + line.split("\t")[1] + "\t" + line.split("\t")[2])

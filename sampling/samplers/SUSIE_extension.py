@@ -42,7 +42,7 @@ class SUSIE_extension:
         return comps_dict
 
     @staticmethod
-    def RJ_only_p(kg1_mdi, kg2_mdi, kg1_mun, kg2_mun, sampling_size, p):
+    def RJ_only_p(kg1_mdi, kg2_mdi, kg1_mun, kg2_mun, sampling_size, p, attr_thres):
 
         complete_graph1 = kg1_mun.graph
         complete_graph2 = kg2_mun.graph
@@ -172,4 +172,7 @@ class SUSIE_extension:
         sampled_filtered_kg = nx.from_pandas_edgelist(filtered_kg1, source='e1', target='e2', edge_attr=True, create_using=nx.MultiDiGraph())
         sampled_filtered_kg2 = nx.from_pandas_edgelist(filtered_kg2, source='e1', target='e2', edge_attr=True, create_using=nx.MultiDiGraph())
 
-        return node_pairs, node_pairs2, ents, ents2, sampled_filtered_kg, sampled_filtered_kg2, filtered_kg1, filtered_kg2
+        filtered_attr_kg1 = kg1_mdi.attr_df.loc[kg1_mdi.attr_df['e1'].isin(ents)]
+        filtered_attr_kg2 = kg2_mdi.attr_df.loc[kg2_mdi.attr_df['e1'].isin(ents2)]
+
+        return node_pairs, node_pairs2, ents, ents2, sampled_filtered_kg, sampled_filtered_kg2, filtered_kg1, filtered_kg2, filtered_attr_kg1, filtered_attr_kg2

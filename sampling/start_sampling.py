@@ -29,8 +29,9 @@ def start_sampling(conf):
     print("\n-----START SAMPLING WITH ONLY P-----")
 
     if sampling_method == "SUSIE_ext":
-        _, _, ents1, ents2, sampled_graph1, sampled_graph2, sampled_df, sampled_df2 = SUSIE_extension.RJ_only_p(kg1_mdi, kg2_mdi, kg1_mun, kg2_mun, sampling_size, p)
-    elif sampling_method == "SUSIE_ext":
+        attr_thres = conf.attr_thres
+        _, _, ents1, ents2, sampled_graph1, sampled_graph2, sampled_df, sampled_df2, sampled_attr_df1, sampled_attr_df2 = SUSIE_extension.RJ_only_p(kg1_mdi, kg2_mdi, kg1_mun, kg2_mun, sampling_size, p, attr_thres)
+    elif sampling_method == "SUSIE":    
         _, _, ents1, ents2, sampled_graph1, sampled_graph2, sampled_df, sampled_df2 = SUSIE.RJ_only_p(kg1_mdi, kg2_mdi, kg1_mun, kg2_mun, sampling_size, p)
     
     print(sampled_graph1.number_of_nodes())
@@ -50,4 +51,7 @@ def start_sampling(conf):
             os.makedirs(dest_path)
         sampled_df.to_csv("matching/RREA/sampled/" + dataset + "_sampled/" + conf_id + "_" + method + "/rel_triples_1", sep="\t", index=False, columns=["e1", "r", "e2"], header=False)  
         sampled_df2.to_csv("matching/RREA/sampled/" + dataset + "_sampled/" + conf_id + "_" + method + "/rel_triples_2", sep="\t", index=False, columns=["e1", "r", "e2"], header=False)
+
+        sampled_attr_df1.to_csv("matching/RREA/sampled/" + dataset + "_sampled/" + conf_id + "_" + method + "/attr_triples_1", sep="\t", index=False, columns=["e1", "attr", "val"], header=False)  
+        sampled_attr_df2.to_csv("matching/RREA/sampled/" + dataset + "_sampled/" + conf_id + "_" + method + "/attr_triples_2", sep="\t", index=False, columns=["e1", "attr", "val"], header=False)
         conf.export("matching/RREA/sampled/" + dataset + "_sampled/" + conf_id + "_" + method + "/" + "configuration.txt")
