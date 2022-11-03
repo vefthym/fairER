@@ -2,6 +2,7 @@ import sys
 import os
 
 from numpy import array
+from sampling.start_analysis import start_analysis
 from sampling.start_sampling import start_sampling
 
 from sampling.Configuration import Configuration
@@ -47,6 +48,17 @@ if __name__ == '__main__':
     # Convert OpenEA-based datasets' attributes to be compatible to RREA
     if args[0] == "convert_attributes":
         Utils.convert_attributes("D_Y_15K_V1")
+
+    if args[0] == "analysis":
+        
+        if args[1] == "original":
+            sample = "original"
+            conf_id = "original"
+        elif args[1] == "sampled":
+            sample = "sampled"
+            conf_id = args[2]
+
+        start_analysis("D_Y_15K_V1", "", "useless", sample, conf_id, "RREA")
 
     # TODO
     # convert sampled data of RREA to be compatible with OpenEA methods

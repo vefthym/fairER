@@ -9,7 +9,6 @@ from sampling.utils import Utils
 
 
 def start_sampling(conf):
-    print("edo")
     conf_id = conf.id
     measure = conf.measure
     dataset = conf.dataset
