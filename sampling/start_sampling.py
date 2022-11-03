@@ -1,4 +1,5 @@
 from tkinter.font import names
+from sampling.Statistics import Statistics
 from sampling.samplers.SUSIE_extension import *
 from sampling.samplers.SUSIE import *
 from matching.KG.KnowledgeGraph import KnowledgeGraph
@@ -26,15 +27,16 @@ def start_sampling(conf):
     kg2_mun = KnowledgeGraph("2", dataset, prefix, "multi_undirected", "original", "original", method)
 
     print("\n-----START SAMPLING WITH ONLY P-----")
+    print(Statistics.basic_statistics(kg1_mun))
 
     if sampling_method == "SUSIE_ext":
         attr_thres = conf.attr_thres
-        _, _, ents1, ents2, sampled_graph1, sampled_graph2, sampled_df, sampled_df2, sampled_attr_df1, sampled_attr_df2 = SUSIE_extension.RJ_only_p(kg1_mdi, kg2_mdi, kg1_mun, kg2_mun, sampling_size, p, attr_thres)
+        sus = SUSIE_extension(p, attr_thres, sampling_size)
+        _, _, ents1, ents2, sampled_graph1, sampled_graph2, sampled_df, sampled_df2, sampled_attr_df1, sampled_attr_df2 = sus.RJ_only_p(kg1_mdi, kg2_mdi, kg1_mun, kg2_mun)
     elif sampling_method == "SUSIE":    
         _, _, ents1, ents2, sampled_graph1, sampled_graph2, sampled_df, sampled_df2 = SUSIE.RJ_only_p(kg1_mdi, kg2_mdi, kg1_mun, kg2_mun, sampling_size, p)
     
     print(sampled_graph1.number_of_nodes())
-    
     print(sampled_graph2.number_of_nodes())
 
     Utils.check_embedding_constraints(kg1_mdi, ents1, ents2)

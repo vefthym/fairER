@@ -6,6 +6,19 @@ class Statistics:
         pass
 
     @staticmethod
+    def basic_statistics(kg):
+        
+        nodes = kg.graph.number_of_nodes()
+        edges = kg.graph.number_of_edges()
+        attributes = len(kg.attr_df)
+        
+        rel_dens = edges / nodes
+        attr_dens = attributes / nodes
+        sum_ent_names_atrs = kg.attr_df.loc[kg.attr_df["attr"] == 'skos:prefLabel'].count()[0] + kg.attr_df.loc[kg.attr_df["attr"] == 'http://dbpedia.org/ontology/birthName'].count()[0]
+
+        return rel_dens, attr_dens, sum_ent_names_atrs
+
+    @staticmethod
     def get_comps_dict(comp):
         comps_dict = {}
         for c in comp:
@@ -32,9 +45,9 @@ class Statistics:
 
             for sub in comps_dict[comp]:
                 temp = 0
-                
+
                 for ent in sub:
                     temp += Statistics.get_ent_attr_degree(ent, kg.attr_df)
                 attr_degree_comp[comp].append(( sub, (temp / len(sub)) ))
 
-        print(attr_degree_comp)
+        return attr_degree_comp

@@ -101,108 +101,113 @@ class Utils:
                 fp.write("\n")
 
 
-    # def convert_sampling(conf_id, dataset):
+    def convert_sampling(conf_id, dataset):
 
-    #     kg1 = KnowledgeGraph("1", dataset, "", "multi_directed", "sampled", conf_id)
+        kg1 = KnowledgeGraph("1", dataset, "", "multi_directed", "sampled", conf_id, "RREA")
 
-    #     nodes_1 = kg1.graph.nodes()
-    #     ids_to_uris = {}
-    #     with open("../RREA_process_datasets/" + dataset + "_RREA/ent_ids_1") as fp:
-    #         for line in fp:
-    #             ids_to_uris[int(line.split("\t")[0])] = line.split("\t")[1].rstrip()
+        RREA_process_RREA = "matching/RREA/RREA_process_datasets/" + dataset + "_RREA/"
+        RREA_process_RDGCN = "matching/RREA/RREA_process_datasets/" + dataset
+        dest_RREA = "matching/RREA/sampled/" + dataset + "_sampled/" + conf_id
+        dest_RDGCN = "matching/RREA/sampled/" + dataset + "_sampled/" + conf_id.replace("RREA", "RDGCN") 
 
-    #     uris_to_ids = {}
-    #     with open("../RREA_process_datasets/" + dataset + "_RREA/ent_ids_1") as fp:
-    #         for line in fp:
-    #             uris_to_ids[line.split("\t")[1].rstrip()] = line.split("\t")[0]
+        nodes_1 = kg1.graph.nodes()
+        ids_to_uris = {}
+        with open(RREA_process_RREA + "/ent_ids_1") as fp:
+            for line in fp:
+                ids_to_uris[int(line.split("\t")[0])] = line.split("\t")[1].rstrip()
 
-    #     nodes_1_conv = list()
-    #     for n in nodes_1:
-    #         nodes_1_conv.append(ids_to_uris[n])
+        uris_to_ids = {}
+        with open(RREA_process_RREA + "/ent_ids_1") as fp:
+            for line in fp:
+                uris_to_ids[line.split("\t")[1].rstrip()] = line.split("\t")[0]
 
-    #     attr_1 = {}
-    #     with open("../RREA_process_datasets/" + dataset + "/attr_triples_1") as fp:
-    #         with open("sampled/" + dataset + "_sampled/" + conf_id + "_RDGCN" + "/attr_triples_1", "w") as fp2:
-    #             for line in fp:
-    #                 ent = line.split("\t")[0]
-    #                 if ent in nodes_1_conv:
-    #                     fp2.write(ent + "\t" + line.split("\t")[1] + "\t" + line.split("\t")[2])
+        nodes_1_conv = list()
+        for n in nodes_1:
+            nodes_1_conv.append(ids_to_uris[n])
 
-    #     with open("sampled/" + dataset + "_sampled/" + conf_id + "/rel_triples_1") as fp:
-    #         with open("sampled/" + dataset + "_sampled/" + conf_id + "_RDGCN" + "/rel_triples_1", "w") as fp2:
-    #             for line in fp:
-    #                 fp2.write(ids_to_uris[int(line.split("\t")[0])] + "\t" + line.split("\t")[1] + "\t" + ids_to_uris[int(line.split("\t")[2].rstrip())] + "\n")
+        attr_1 = {}
+        with open(RREA_process_RDGCN + "/attr_triples_1") as fp:
+            with open(dest_RDGCN + "/attr_triples_1", "w") as fp2:
+                for line in fp:
+                    ent = line.split("\t")[0]
+                    if ent in nodes_1_conv:
+                        fp2.write(ent + "\t" + line.split("\t")[1] + "\t" + line.split("\t")[2])
 
-
-    #     kg1 = KnowledgeGraph("2", dataset, "", "multi_directed", "sampled", conf_id)
-
-    #     nodes_1 = kg1.graph.nodes()
-    #     with open("../RREA_process_datasets/" + dataset + "_RREA/ent_ids_2") as fp:
-    #         for line in fp:
-    #             ids_to_uris[int(line.split("\t")[0])] = line.split("\t")[1].rstrip()
-
-    #     uris_to_ids = {}
-    #     with open("../RREA_process_datasets/" + dataset + "_RREA/ent_ids_2") as fp:
-    #         for line in fp:
-    #             uris_to_ids[line.split("\t")[1].rstrip()] = line.split("\t")[0]
-
-    #     nodes_1_conv = list()
-    #     for n in nodes_1:
-    #         nodes_1_conv.append(ids_to_uris[n])
-
-    #     attr_1 = {}
-    #     with open("../RREA_process_datasets/" + dataset + "/attr_triples_2") as fp:
-    #         with open("sampled/" + dataset + "_sampled/" + conf_id + "_RDGCN" + "/attr_triples_2", "w") as fp2:
-    #             for line in fp:
-    #                 ent = line.split("\t")[0]
-    #                 if ent in nodes_1_conv:
-    #                     fp2.write(ent + "\t" + line.split("\t")[1] + "\t" + line.split("\t")[2])
-
-    #     with open("sampled/" + dataset + "_sampled/" + conf_id + "/rel_triples_2") as fp:
-    #         with open("sampled/" + dataset + "_sampled/" + conf_id + "_RDGCN" + "/rel_triples_2", "w") as fp2:
-    #             for line in fp:
-    #                 fp2.write(ids_to_uris[int(line.split("\t")[0])] + "\t" + line.split("\t")[1] + "\t" + ids_to_uris[int(line.split("\t")[2].rstrip())] + "\n")
+        with open(dest_RREA + "/rel_triples_1") as fp:
+            with open(dest_RDGCN + "/rel_triples_1", "w") as fp2:
+                for line in fp:
+                    fp2.write(ids_to_uris[int(line.split("\t")[0])] + "\t" + line.split("\t")[1] + "\t" + ids_to_uris[int(line.split("\t")[2].rstrip())] + "\n")
 
 
-    #     with open("sampled/" + dataset + "_sampled/" + conf_id + "/721_5fold/2/ent_links") as fp:
-    #         with open("sampled/" + dataset + "_sampled/" + conf_id + "_RDGCN" + "/721_5fold/2/ent_links", "w") as fp2:
-    #             for line in fp:
-    #                 e1 = int(line.split("\t")[0])
-    #                 e2 = int(line.split("\t")[1].rstrip())
-    #                 fp2.write(ids_to_uris[e1])
-    #                 fp2.write("\t")
-    #                 fp2.write(ids_to_uris[e2])
-    #                 fp2.write("\n")
+        kg1 = KnowledgeGraph("2", dataset, "", "multi_directed", "sampled", conf_id, "RREA")
 
-    #     with open("sampled/" + dataset + "_sampled/" + conf_id + "/721_5fold/2/test_links") as fp:
-    #         with open("sampled/" + dataset + "_sampled/" + conf_id + "_RDGCN" + "/721_5fold/2/test_links", "w") as fp2:
-    #             for line in fp:
-    #                 e1 = int(line.split("\t")[0])
-    #                 e2 = int(line.split("\t")[1].rstrip())
-    #                 fp2.write(ids_to_uris[e1])
-    #                 fp2.write("\t")
-    #                 fp2.write(ids_to_uris[e2])
-    #                 fp2.write("\n")
+        nodes_1 = kg1.graph.nodes()
+        with open(RREA_process_RREA + "/ent_ids_2") as fp:
+            for line in fp:
+                ids_to_uris[int(line.split("\t")[0])] = line.split("\t")[1].rstrip()
+
+        uris_to_ids = {}
+        with open(RREA_process_RREA + "/ent_ids_2") as fp:
+            for line in fp:
+                uris_to_ids[line.split("\t")[1].rstrip()] = line.split("\t")[0]
+
+        nodes_1_conv = list()
+        for n in nodes_1:
+            nodes_1_conv.append(ids_to_uris[n])
+
+        attr_1 = {}
+        with open(RREA_process_RDGCN + "/attr_triples_2") as fp:
+            with open(dest_RDGCN + "/attr_triples_2", "w") as fp2:
+                for line in fp:
+                    ent = line.split("\t")[0]
+                    if ent in nodes_1_conv:
+                        fp2.write(ent + "\t" + line.split("\t")[1] + "\t" + line.split("\t")[2])
+
+        with open(dest_RREA + "/rel_triples_2") as fp:
+            with open(dest_RDGCN + "/rel_triples_2", "w") as fp2:
+                for line in fp:
+                    fp2.write(ids_to_uris[int(line.split("\t")[0])] + "\t" + line.split("\t")[1] + "\t" + ids_to_uris[int(line.split("\t")[2].rstrip())] + "\n")
+
+
+        with open(dest_RREA + "/721_5fold/2/ent_links") as fp:
+            with open(dest_RDGCN + "/721_5fold/2/ent_links", "w") as fp2:
+                for line in fp:
+                    e1 = int(line.split("\t")[0])
+                    e2 = int(line.split("\t")[1].rstrip())
+                    fp2.write(ids_to_uris[e1])
+                    fp2.write("\t")
+                    fp2.write(ids_to_uris[e2])
+                    fp2.write("\n")
+
+        with open(dest_RREA + "/721_5fold/2/test_links") as fp:
+            with open(dest_RDGCN + "/721_5fold/2/test_links", "w") as fp2:
+                for line in fp:
+                    e1 = int(line.split("\t")[0])
+                    e2 = int(line.split("\t")[1].rstrip())
+                    fp2.write(ids_to_uris[e1])
+                    fp2.write("\t")
+                    fp2.write(ids_to_uris[e2])
+                    fp2.write("\n")
         
-    #     with open("sampled/" + dataset + "_sampled/" + conf_id + "/721_5fold/2/train_links") as fp:
-    #         with open("sampled/" + dataset + "_sampled/" + conf_id + "_RDGCN" + "/721_5fold/2/train_links", "w") as fp2:
-    #             for line in fp:
-    #                 e1 = int(line.split("\t")[0])
-    #                 e2 = int(line.split("\t")[1].rstrip())
-    #                 fp2.write(ids_to_uris[e1])
-    #                 fp2.write("\t")
-    #                 fp2.write(ids_to_uris[e2])
-    #                 fp2.write("\n")
+        with open(dest_RREA + "/721_5fold/2/train_links") as fp:
+            with open(dest_RDGCN + "/721_5fold/2/train_links", "w") as fp2:
+                for line in fp:
+                    e1 = int(line.split("\t")[0])
+                    e2 = int(line.split("\t")[1].rstrip())
+                    fp2.write(ids_to_uris[e1])
+                    fp2.write("\t")
+                    fp2.write(ids_to_uris[e2])
+                    fp2.write("\n")
 
-    #     with open("sampled/" + dataset + "_sampled/" + conf_id + "/721_5fold/2/valid_links") as fp:
-    #         with open("sampled/" + dataset + "_sampled/" + conf_id + "_RDGCN" + "/721_5fold/2/valid_links", "w") as fp2:
-    #             for line in fp:
-    #                 e1 = int(line.split("\t")[0])
-    #                 e2 = int(line.split("\t")[1].rstrip())
-    #                 fp2.write(ids_to_uris[e1])
-    #                 fp2.write("\t")
-    #                 fp2.write(ids_to_uris[e2])
-    #                 fp2.write("\n")
+        with open(dest_RREA + "/721_5fold/2/valid_links") as fp:
+            with open(dest_RDGCN + "/721_5fold/2/valid_links", "w") as fp2:
+                for line in fp:
+                    e1 = int(line.split("\t")[0])
+                    e2 = int(line.split("\t")[1].rstrip())
+                    fp2.write(ids_to_uris[e1])
+                    fp2.write("\t")
+                    fp2.write(ids_to_uris[e2])
+                    fp2.write("\n")
 
 
     def convert_attributes(dataset):

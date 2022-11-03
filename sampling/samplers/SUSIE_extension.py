@@ -3,12 +3,31 @@ import networkx as nx
 import numpy as np
 import random
 import itertools
-import statistics as st
+
+from sampling.Statistics import Statistics
 
 class SUSIE_extension:
 
-    def __init__(self):
-        pass
+    attr_thres = None
+
+    def __init__(self, p, attr_thres, sampling_size):
+
+        self.p = p
+        self.attr_thres = attr_thres
+        self.sampling_size = sampling_size
+
+    def filter_comps(self, comp, attrs_per_comp):
+
+        filtered = []
+        for c in comp:
+            for elem in attrs_per_comp[len(c)]:
+                if c == elem[0]:
+                    attr_degree = elem[1]
+                    break
+            if attr_degree <= self.attr_thres:
+                filtered.append(c)
+                
+        return filtered
 
     @staticmethod
     def get_curr_node(comps_dict, disconnected):
@@ -41,8 +60,7 @@ class SUSIE_extension:
                 comps_dict[len(c)].add(i)
         return comps_dict
 
-    @staticmethod
-    def RJ_only_p(kg1_mdi, kg2_mdi, kg1_mun, kg2_mun, sampling_size, p, attr_thres):
+    def RJ_only_p(self, kg1_mdi, kg2_mdi, kg1_mun, kg2_mun):
 
         complete_graph1 = kg1_mun.graph
         complete_graph2 = kg2_mun.graph
@@ -56,9 +74,22 @@ class SUSIE_extension:
         comp1 = nx.connected_components(kg1_mun.graph)
         comp2 = nx.connected_components(kg2_mun.graph)
 
-        comps_dict1 = SUSIE_extension.get_comps_dict(list(comp1))
-        comps_dict2 = SUSIE_extension.get_comps_dict(list(comp2))
-        
+        attrs_per_comp1 = Statistics.attrs_per_comp(kg1_mun)
+        attrs_per_comp2 = Statistics.attrs_per_comp(kg2_mun)
+
+        comps1 = self.filter_comps(comp1, attrs_per_comp1)
+        # print("comps 1")
+        # print(comps1)
+        # print(len(comps1))
+        comps2 = self.filter_comps(comp2, attrs_per_comp2)
+        print("comps 2")
+        # print(comps2)
+        # print(len(comps2))
+        # exit()
+
+        comps_dict1 = SUSIE_extension.get_comps_dict(list(comps1))
+        comps_dict2 = SUSIE_extension.get_comps_dict(list(comps2))
+
         seed_pairs = kg1_mun.get_seed_pairs()
         rev_seed_pairs = kg2_mun.get_seed_pairs(reverse=True)
 
@@ -76,7 +107,7 @@ class SUSIE_extension:
         nodes_before1 = 0
         nodes_before2 = 0
 
-        while sampled_filtered_kg.number_of_nodes() < sampling_size and sampled_filtered_kg2.number_of_nodes() < sampling_size:
+        while sampled_filtered_kg.number_of_nodes() < self.sampling_size and sampled_filtered_kg2.number_of_nodes() < self.sampling_size:
             print(sampled_filtered_kg.number_of_nodes())
             if isKG1:
                 curr_kg, curr_sampled_kg, curr_second_sampled_kg, curr_node, curr_node_match = complete_graph1, sampled_graph, sampled_graph2, curr_node, seed_pairs[curr_node]
@@ -104,7 +135,7 @@ class SUSIE_extension:
                 comps_dict2 = SUSIE_extension.my_remove_node(curr_node, comps_dict2)
                 comps_dict2 = SUSIE_extension.my_remove_node(chosen_node, comps_dict2)
             
-            choice = np.random.choice(['jump', 'random_walk'], 1, p=[p, 1 - p])
+            choice = np.random.choice(['jump', 'random_walk'], 1, p=[self.p, 1 - self.p])
             if isKG1:
                 if iteration1 % 100 == 0:
                     if sampled_filtered_kg.number_of_nodes() - nodes_before1 < 2:

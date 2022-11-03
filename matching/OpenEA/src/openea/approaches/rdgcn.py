@@ -369,6 +369,7 @@ class RDGCN(BasicModel):
         if name_attribute_list is None:
             if 'D_Y' in self.args.training_data:
                 name_attribute_list = {'skos:prefLabel', 'http://dbpedia.org/ontology/birthName'}
+                print("name_attribute_list")
             elif 'D_W' in self.args.training_data:
                 name_attribute_list = {'http://www.wikidata.org/entity/P373', 'http://www.wikidata.org/entity/P1476'}
             elif 'modified_rrea' in self.args.training_data:
@@ -434,7 +435,6 @@ class RDGCN(BasicModel):
             
             w = f.readlines()
             w = pd.Series(w[1:])
-            print(w)
 
         we = w.str.split(' ')
         word = we.apply(lambda x: x[0])
