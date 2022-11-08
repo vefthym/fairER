@@ -7,6 +7,10 @@ class Statistics:
 
     @staticmethod
     def basic_statistics(kg):
+
+        # for node in kg.graph.nodes():
+        #     print("node" + str(node) + " degree: " + str(Statistics.get_ent_attr_degree(node, kg.attr_df)))
+        # exit()
         
         nodes = kg.graph.number_of_nodes()
         edges = kg.graph.number_of_edges()
@@ -26,10 +30,19 @@ class Statistics:
                 comps_dict[len(c)] = list()
             comps_dict[len(c)].append(c)
         return comps_dict
-
+    
     @staticmethod
     def get_ent_attr_degree(ent, df):
-        return df.loc[df['e1'] == ent].count()[0]
+        
+        if ent in df['e1'].value_counts().to_dict().keys():
+            return df['e1'].value_counts().to_dict()[ent]
+        else:
+            return 0
+
+    @staticmethod
+    def generate_attr_degree_dict(df):
+        
+        return df['e1'].value_counts().to_dict()
 
     @staticmethod
     def attrs_per_comp(kg):

@@ -28,6 +28,7 @@ def start_sampling(conf):
 
     print("\n-----START SAMPLING WITH ONLY P-----")
     print(Statistics.basic_statistics(kg1_mun))
+    print(Statistics.basic_statistics(kg2_mun))
 
     if sampling_method == "SUSIE_ext":
         attr_thres = conf.attr_thres

@@ -15,8 +15,16 @@ if __name__ == '__main__':
 
     if args[0] == "sampling_ext":
         conf_array = {
-            "conf_-1_ext": {
+           "conf_-1_ext_thres_5": {
                 "p": 0.15,
+                "attr_thres": 5
+            },
+            "conf_-2_ext_thres_5": {
+                "p": 0.50,
+                "attr_thres": 5
+            },
+            "conf_-3_ext_thres_5": {
+                "p": 0.85,
                 "attr_thres": 5
             },
             "conf_0_ext": {
