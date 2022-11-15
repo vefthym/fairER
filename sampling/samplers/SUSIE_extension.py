@@ -26,10 +26,10 @@ class SUSIE_extension:
             return 0
 
     def filter_neighbors(self, cand_neighbors, kg1_mun, kg2_mun, kg_num):
-
+        
         attr_degree_dict1 = Statistics.generate_attr_degree_dict(kg1_mun.attr_df)
         attr_degree_dict2 = Statistics.generate_attr_degree_dict(kg2_mun.attr_df)
-
+        degree_pairs = list()
         temp = set()
         for node in cand_neighbors:
             if kg_num == "1":
@@ -38,24 +38,36 @@ class SUSIE_extension:
             elif kg_num == "2":
                 node_attr_degree1 = SUSIE_extension.get_attr_degree(kg1_mun.get_seed_pairs(reverse = True)[node], attr_degree_dict1)
                 node_attr_degree2 = SUSIE_extension.get_attr_degree(node, attr_degree_dict2)
-
-            if node_attr_degree1 <= self.attr_thres and node_attr_degree2 <= self.attr_thres:
+            
+            # degree_pairs.append((node_attr_degree1, node_attr_degree2))
+            if node_attr_degree1 > self.attr_thres and node_attr_degree2 > self.attr_thres:
                 temp.add(node)
 
-        if len(list(temp)) == 0:
-            return cand_neighbors
+        # if len(list(temp)) == 0:
+            
+        #     sums = list()
+        #     for d in degree_pairs:
+        #         sums.append(d[0] + d[1])
+        #     val, idx = min((val, idx) for (idx, val) in enumerate(sums))
+        #     temp = []
+        #     temp.append(cand_neighbors[idx])
+        #     return temp
+
 
         return list(temp)
 
 
 
     def filter_nodes(self, comp, kg1_mun, kg2_mun, kg_num):
+
         attr_degree_dict1 = Statistics.generate_attr_degree_dict(kg1_mun.attr_df)
         attr_degree_dict2 = Statistics.generate_attr_degree_dict(kg2_mun.attr_df)
+
         filtered = []
         for c in comp:
             temp_set = set()
             for node in c:
+
                 if kg_num == "1":
                     node_attr_degree1 = SUSIE_extension.get_attr_degree(node, attr_degree_dict1)
                     node_attr_degree2 = SUSIE_extension.get_attr_degree(kg1_mun.get_seed_pairs()[node], attr_degree_dict2)
@@ -63,24 +75,55 @@ class SUSIE_extension:
                     node_attr_degree1 = SUSIE_extension.get_attr_degree(kg1_mun.get_seed_pairs(reverse = True)[node], attr_degree_dict1)
                     node_attr_degree2 = SUSIE_extension.get_attr_degree(node, attr_degree_dict2)
 
-                if node_attr_degree1 <= self.attr_thres and node_attr_degree2 <= self.attr_thres:
+                if node_attr_degree1 > self.attr_thres and node_attr_degree2 > self.attr_thres:
                     temp_set.add(node)
             filtered.append(temp_set)
                 
         return filtered
 
-    @staticmethod
-    def get_curr_node(comps_dict, disconnected):
+    def get_curr_node(self, comps_dict, disconnected, curr_kg, isKG1, kg1_mun, kg2_mun):
         
         if len(disconnected) != 0:
             curr_node = np.random.choice(disconnected)
             disconnected.remove(curr_node)
+            cand_neighbors = [curr_kg.nodes[n]['id'] for n in curr_kg.neighbors(curr_node)]
         else:
             keys = list(comps_dict.keys())
             curr_key = np.random.choice(keys)
-            curr_node = np.random.choice(list(comps_dict[curr_key]))
+            cands_nodes = list(comps_dict[curr_key])
+            curr_node = np.random.choice(list(cands_nodes))
+            cands_nodes.remove(curr_node)
 
-        return curr_node, disconnected
+            cand_neighbors = [curr_kg.nodes[n]['id'] for n in curr_kg.neighbors(curr_node)]
+
+            if isKG1:
+                cand_neighbors = self.filter_neighbors(cand_neighbors, kg1_mun, kg2_mun, "1")
+            elif not isKG1:
+                cand_neighbors = self.filter_neighbors(cand_neighbors, kg1_mun, kg2_mun, "2")
+            
+            while len(cand_neighbors) == 0:
+
+                # In case, we do not want to change component size
+
+                # if len(cands_nodes) == 0:
+                #     keys = list(comps_dict.keys())
+                #     curr_key = np.random.choice(keys)
+                #     cands_nodes = list(comps_dict[curr_key])
+                
+                keys = list(comps_dict.keys())
+                curr_key = np.random.choice(keys)
+                cands_nodes = list(comps_dict[curr_key])
+                
+                curr_node = np.random.choice(list(cands_nodes))
+                cands_nodes.remove(curr_node)
+                cand_neighbors = [curr_kg.nodes[n]['id'] for n in curr_kg.neighbors(curr_node)]
+
+                if isKG1:
+                    cand_neighbors = self.filter_neighbors(cand_neighbors, kg1_mun, kg2_mun, "1")
+                elif not isKG1:
+                    cand_neighbors = self.filter_neighbors(cand_neighbors, kg1_mun, kg2_mun, "2")
+
+        return curr_node, disconnected, cand_neighbors
 
     @staticmethod
     def my_remove_node(chosen, comps_dict):
@@ -117,20 +160,24 @@ class SUSIE_extension:
 
         comp1 = nx.connected_components(kg1_mun.graph)
         comp2 = nx.connected_components(kg2_mun.graph)
+        print("edo pre")
 
-        # comps1 = self.filter_nodes(comp1, kg1_mun, kg2_mun, "1")
-        # comps2 = self.filter_nodes(comp2, kg1_mun, kg2_mun, "2")
+        comps1 = self.filter_nodes(comp1, kg1_mun, kg2_mun, "1")
+        print("edo post")
+        comps2 = self.filter_nodes(comp2, kg1_mun, kg2_mun, "2")
        
         # comps_dict1 = SUSIE_extension.get_comps_dict(list(comps1))
         # comps_dict2 = SUSIE_extension.get_comps_dict(list(comps2))
-        # file_to_write = open("comps_dict1" + ".pickle", "wb")
+        # file_to_write = open("comps_dict1_thres_" + str(self.attr_thres) + ".pickle", "wb")
         # pickle.dump(comps_dict1, file_to_write)
-        # file_to_write = open("comps_dict2" + ".pickle", "wb")
+        # file_to_write = open("comps_dict2_thres_" + str(self.attr_thres) + ".pickle", "wb")
         # pickle.dump(comps_dict2, file_to_write)
 
-        file = open("comps_dict1.pickle",'rb')
+        # Load cached filtered components dictionary
+
+        file = open("comps_dict1_thres_" + str(self.attr_thres) + ".pickle",'rb')
         comps_dict1 = pickle.load(file)
-        file = open("comps_dict2.pickle",'rb')
+        file = open("comps_dict2_thres_" + str(self.attr_thres) + ".pickle",'rb')
         comps_dict2 = pickle.load(file)
 
         seed_pairs = kg1_mun.get_seed_pairs()
@@ -143,7 +190,7 @@ class SUSIE_extension:
         disconnected1 = []
         disconnected2 = []
         isKG1 = True
-        curr_node, disconnected1 = SUSIE_extension.get_curr_node(comps_dict1, [])
+        curr_node, disconnected1, cand_neighbors = self.get_curr_node(comps_dict1, [], complete_graph1, isKG1, kg1_mun, kg2_mun)
 
         iteration1 = 0
         iteration2 = 0
@@ -152,16 +199,12 @@ class SUSIE_extension:
 
         while sampled_filtered_kg.number_of_nodes() < self.sampling_size and sampled_filtered_kg2.number_of_nodes() < self.sampling_size:
             print(sampled_filtered_kg.number_of_nodes())
+
             if isKG1:
                 curr_kg, curr_sampled_kg, curr_second_sampled_kg, curr_node, curr_node_match = complete_graph1, sampled_graph, sampled_graph2, curr_node, seed_pairs[curr_node]
             else:
                 curr_kg, curr_sampled_kg, curr_second_sampled_kg, curr_node, curr_node_match = complete_graph2, sampled_graph2, sampled_graph, curr_node, rev_seed_pairs[curr_node]
-            cand_neighbors = [curr_kg.nodes[n]['id'] for n in curr_kg.neighbors(curr_node)]
-
-            if isKG1:
-                cand_neighbors = self.filter_neighbors(cand_neighbors, kg1_mun, kg2_mun, "1")
-            elif not isKG1:
-                cand_neighbors = self.filter_neighbors(cand_neighbors, kg1_mun, kg2_mun, "2")
+            # cand_neighbors = [curr_kg.nodes[n]['id'] for n in curr_kg.neighbors(curr_node)]
 
             index_of_edge = random.randint(0, len(cand_neighbors) - 1)
             chosen_node = cand_neighbors[index_of_edge]
@@ -202,9 +245,9 @@ class SUSIE_extension:
             elif choice == 'jump':
                 isKG1 = not isKG1
                 if isKG1:
-                    curr_node, disconnected1 = SUSIE_extension.get_curr_node(comps_dict1, disconnected1)
+                    curr_node, disconnected1, cand_neighbors = self.get_curr_node(comps_dict1, disconnected1, complete_graph1, isKG1, kg1_mun, kg2_mun)
                 else:
-                    curr_node, disconnected2 = SUSIE_extension.get_curr_node(comps_dict2, disconnected2)
+                    curr_node, disconnected2, cand_neighbors = self.get_curr_node(comps_dict2, disconnected2, complete_graph2, isKG1, kg1_mun, kg2_mun)
 
             # keeps parallel edges
             filtered_kg1 = kg1_mdi.df.loc[kg1_mdi.df['e1'].isin(sampled_graph.nodes()) & kg1_mdi.df['e2'].isin(sampled_graph.nodes())]
