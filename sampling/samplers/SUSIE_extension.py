@@ -40,7 +40,7 @@ class SUSIE_extension:
                 node_attr_degree2 = SUSIE_extension.get_attr_degree(node, attr_degree_dict2)
             
             # degree_pairs.append((node_attr_degree1, node_attr_degree2))
-            if node_attr_degree1 > self.attr_thres and node_attr_degree2 > self.attr_thres:
+            if node_attr_degree1 >= self.attr_thres and node_attr_degree2 >= self.attr_thres:
                 temp.add(node)
 
         # if len(list(temp)) == 0:
@@ -75,7 +75,7 @@ class SUSIE_extension:
                     node_attr_degree1 = SUSIE_extension.get_attr_degree(kg1_mun.get_seed_pairs(reverse = True)[node], attr_degree_dict1)
                     node_attr_degree2 = SUSIE_extension.get_attr_degree(node, attr_degree_dict2)
 
-                if node_attr_degree1 > self.attr_thres and node_attr_degree2 > self.attr_thres:
+                if node_attr_degree1 >= self.attr_thres and node_attr_degree2 >= self.attr_thres:
                     temp_set.add(node)
             filtered.append(temp_set)
                 
@@ -160,25 +160,22 @@ class SUSIE_extension:
 
         comp1 = nx.connected_components(kg1_mun.graph)
         comp2 = nx.connected_components(kg2_mun.graph)
-        print("edo pre")
 
         comps1 = self.filter_nodes(comp1, kg1_mun, kg2_mun, "1")
-        print("edo post")
         comps2 = self.filter_nodes(comp2, kg1_mun, kg2_mun, "2")
-       
-        # comps_dict1 = SUSIE_extension.get_comps_dict(list(comps1))
-        # comps_dict2 = SUSIE_extension.get_comps_dict(list(comps2))
-        # file_to_write = open("comps_dict1_thres_" + str(self.attr_thres) + ".pickle", "wb")
-        # pickle.dump(comps_dict1, file_to_write)
-        # file_to_write = open("comps_dict2_thres_" + str(self.attr_thres) + ".pickle", "wb")
-        # pickle.dump(comps_dict2, file_to_write)
+        comps_dict1 = SUSIE_extension.get_comps_dict(list(comps1))
+        comps_dict2 = SUSIE_extension.get_comps_dict(list(comps2))
+        file_to_write = open("comps_dict1_thres_" + str(self.attr_thres) + ".pickle", "wb")
+        pickle.dump(comps_dict1, file_to_write)
+        file_to_write = open("comps_dict2_thres_" + str(self.attr_thres) + ".pickle", "wb")
+        pickle.dump(comps_dict2, file_to_write)
 
         # Load cached filtered components dictionary
 
-        file = open("comps_dict1_thres_" + str(self.attr_thres) + ".pickle",'rb')
-        comps_dict1 = pickle.load(file)
-        file = open("comps_dict2_thres_" + str(self.attr_thres) + ".pickle",'rb')
-        comps_dict2 = pickle.load(file)
+        # file = open("comps_dict1_thres_" + str(self.attr_thres) + ".pickle",'rb')
+        # comps_dict1 = pickle.load(file)
+        # file = open("comps_dict2_thres_" + str(self.attr_thres) + ".pickle",'rb')
+        # comps_dict2 = pickle.load(file)
 
         seed_pairs = kg1_mun.get_seed_pairs()
         rev_seed_pairs = kg2_mun.get_seed_pairs(reverse=True)

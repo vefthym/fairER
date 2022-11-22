@@ -74,8 +74,8 @@ class KGs:
 
 
 def read_kgs_from_folder(training_data_folder, division, mode, ordered, remove_unlinked=False):
-    if 'dbp15k' in training_data_folder.lower() or 'dwy100k' in training_data_folder.lower():
-        return read_kgs_from_dbp_dwy(training_data_folder, division, mode, ordered, remove_unlinked=remove_unlinked)
+    # if 'dbp15k' in training_data_folder.lower() or 'dwy100k' in training_data_folder.lower():
+    #     return read_kgs_from_dbp_dwy(training_data_folder, division, mode, ordered, remove_unlinked=remove_unlinked)
     kg1_relation_triples, _, _ = read_relation_triples(training_data_folder + 'rel_triples_1')
     kg2_relation_triples, _, _ = read_relation_triples(training_data_folder + 'rel_triples_2')
     kg1_attribute_triples, _, _ = read_attribute_triples(training_data_folder + 'attr_triples_1')

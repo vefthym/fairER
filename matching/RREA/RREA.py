@@ -49,13 +49,14 @@ elif mycsls > 0:
 
 measure = "test_experiments"
 sample = sample
-dataset = "D_W_15K_V1"
+dataset = "D_Y_15K_V1_RRΕΑ_test_assumption"
 prefix = ""
 
 if sample == "sampled":
     run_path = "sampled/" + dataset + "_sampled/" + conf_id + "/"
 elif sample == "original":
-    run_path = "RREA_process_datasets/" + dataset + prefix + "_RREA/"
+    # run_path = "RREA_process_datasets/" + dataset + prefix + "_RREA/"
+    run_path = "RREA_process_datasets/" + dataset + "/"
 
 print(csls_mode)
 print(conf_id)

@@ -1,4 +1,6 @@
+from matching.KG.KnowledgeGraph import KnowledgeGraph
 import networkx as nx
+import pandas as pd
 
 class Statistics:
 
@@ -18,9 +20,10 @@ class Statistics:
         
         rel_dens = edges / nodes
         attr_dens = attributes / nodes
-        sum_ent_names_atrs = kg.attr_df.loc[kg.attr_df["attr"] == 'skos:prefLabel'].count()[0] + kg.attr_df.loc[kg.attr_df["attr"] == 'http://dbpedia.org/ontology/birthName'].count()[0]
+        ents_birth = set(kg.attr_df["e1"][kg.attr_df["attr"] == 'http://dbpedia.org/ontology/birthName'])
+        ents_label = set(kg.attr_df["e1"][kg.attr_df["attr"] == 'skos:prefLabel'])
 
-        return rel_dens, attr_dens, sum_ent_names_atrs
+        return nodes, rel_dens, attr_dens, len(ents_birth.union(ents_label))
 
     @staticmethod
     def get_comps_dict(comp):
@@ -64,3 +67,137 @@ class Statistics:
                 attr_degree_comp[comp].append(( sub, (temp / len(sub)) ))
 
         return attr_degree_comp
+
+    @staticmethod
+    def weakly_conn_comps(num_kg, method, dataset, prefix, thres):
+        print("wcc_" + "KG" + num_kg)
+        wcc_dict = dict()
+        kg_mdi = KnowledgeGraph(num_kg, dataset, prefix, "multi_directed", "original", "original", method)
+        wcc_dict["original"] = nx.number_weakly_connected_components(kg_mdi.graph)/kg_mdi.graph.number_of_nodes()
+
+        for i in [-1]:
+            conf_id = "conf_" + str(i) + "_ext_thres_" + str(thres) + "_" + method
+            kg_mdi = KnowledgeGraph(num_kg, dataset, prefix, "multi_directed", "sampled", conf_id, method)
+            wcc_dict[conf_id] = nx.number_weakly_connected_components(kg_mdi.graph)/kg_mdi.graph.number_of_nodes()
+        
+        wcc_df = pd.DataFrame.from_dict(wcc_dict, orient='index').T
+
+        wcc_df = wcc_df.rename(columns={
+            'conf_-1_ext_thres_' + str(thres) + method: '0 ',
+            'conf_-2_ext_thres_' + str(thres) + method: '0.15 ',
+            'conf_-3_ext_thres_' + str(thres) + method: '0.85 ',
+        })
+
+        print(wcc_df.T)
+        print("---------------------------------")
+
+    @staticmethod
+    def avg_rels_per_entity(num_kg, method, dataset, prefix, thres):
+        print("deg_" + "KG" + num_kg)
+        kg =  KnowledgeGraph(num_kg, dataset, prefix, "multi_directed", "original", "original", method).graph
+        nodes_deg = kg.degree()
+
+        counter = 0
+        for pair in nodes_deg:
+            counter += pair[1]
+        avg_node_deg = counter / kg.number_of_nodes()
+
+        b_dict = dict()
+        b_dict["original"] = avg_node_deg
+
+        for i in [-1]:
+            conf_id = "conf_" + str(i) + "_ext_thres_" + str(thres) + "_" + method
+            kg = KnowledgeGraph(num_kg, dataset, prefix, "multi_directed", "sampled", conf_id, method).graph
+            nodes_deg = kg.degree()
+
+            counter = 0
+            for pair in nodes_deg:
+                counter += pair[1]
+            avg_node_deg = counter / kg.number_of_nodes()
+            b_dict[conf_id] = avg_node_deg
+        
+        df = pd.DataFrame.from_dict(b_dict, orient='index').T
+
+        df = df.rename(columns={
+            'conf_-1_ext_thres_' + str(thres) + method: '0 ',
+            'conf_-2_ext_thres_' + str(thres) + method: '0.15 ',
+            'conf_-3_ext_thres_' + str(thres) + method: '0.85 ',
+        })
+
+        df = df.T
+        print(df)
+        print("---------------------------------")
+
+    @staticmethod
+    def max_comp(num_kg, method, dataset, prefix, thres):
+        print("maxCS_" + "KG" + num_kg)
+        kg =  KnowledgeGraph(num_kg, dataset, prefix, "multi_directed", "original", "original", method)
+        comps = sorted(nx.weakly_connected_components(kg.graph), key=len)
+
+        max_len = len(comps[-1])/kg.graph.number_of_nodes()
+
+        b_dict = dict()
+        b_dict["original"] = max_len
+
+        for i in [-1]:
+            conf_id = "conf_" + str(i) + "_ext_thres_" + str(thres) + "_" + method
+            
+            kg = KnowledgeGraph(num_kg, dataset, prefix, "multi_directed", "sampled", conf_id, method)
+            comps = sorted(nx.weakly_connected_components(kg.graph), key=len)
+            max_len = len(comps[-1])/kg.graph.number_of_nodes()
+            b_dict[conf_id] = max_len
+        
+        df = pd.DataFrame.from_dict(b_dict, orient='index').T
+
+        df = df.rename(columns={
+            'conf_-1_ext_thres_' + str(thres) + method: '0 ',
+            'conf_-2_ext_thres_' + str(thres) + method: '0.15 ',
+            'conf_-3_ext_thres_' + str(thres) + method: '0.85 ',
+        })
+
+        df = df.T
+        print(df)
+        print("---------------------------------")
+
+
+
+    @staticmethod
+    def avg_attrs_per_entity(num_kg, method, dataset, prefix, thres):
+        print("attr_deg_" + "KG" + num_kg)
+        kg =  KnowledgeGraph(num_kg, dataset, prefix, "multi_directed", "original", "original", method)
+        
+        counter = 0
+        for n in kg.graph.nodes():
+            
+            if n in kg.attr_dict:
+                counter += len(kg.attr_dict[n])
+
+        avg_attr_node_deg = counter / kg.graph.number_of_nodes()
+
+        b_dict = dict()
+        b_dict["original"] = avg_attr_node_deg
+
+        for i in [-1]:
+            conf_id = "conf_" + str(i) + "_ext_thres_" + str(thres) + "_" + method
+            kg = KnowledgeGraph(num_kg, dataset, prefix, "multi_directed", "sampled", conf_id, method)
+            
+            counter = 0
+            for n in kg.graph.nodes():
+                
+                if n in kg.attr_dict:
+                    counter += len(kg.attr_dict[n])
+
+            avg_attr_node_deg = counter / kg.graph.number_of_nodes()
+            b_dict[conf_id] = avg_attr_node_deg
+        
+        df = pd.DataFrame.from_dict(b_dict, orient='index').T
+
+        df = df.rename(columns={
+            'conf_-1_ext_thres_' + str(thres) + method: '0 ',
+            'conf_-2_ext_thres_' + str(thres) + method: '0.15 ',
+            'conf_-3_ext_thres_' + str(thres) + method: '0.85 ',
+        })
+
+        df = df.T
+        print(df)
+        print("---------------------------------")

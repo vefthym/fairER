@@ -11,6 +11,7 @@ class KnowledgeGraph:
     sample = ""
     conf_id = ""
     attr_df = ""
+    attr_dict = ""
 
     def __init__(self, id, dataset, prefix, kg_type, sample, conf_id, method):
 
@@ -21,6 +22,7 @@ class KnowledgeGraph:
       self.conf_id = conf_id
       self.attr_df = ""
       self.method = method
+      self.attr_dict = ""
       
       KnowledgeGraph.load_rel_graph(self, kg_type, method)
       KnowledgeGraph.load_attr_graph(self, method)
@@ -153,5 +155,19 @@ class KnowledgeGraph:
       
       kg = pd.read_csv(path,  sep='\t', names=["e1", "attr", "val"])
       self.attr_df = kg
+
+      attr_dict = {}
+      with open(path, "r") as fp:
+        for line in fp:
+          ent = line.split("\t")[0]
+          attr = line.split("\t")[1]
+
+          if ent not in attr_dict.keys():
+            attr_dict[ent] = list()
+
+          attr_dict[ent].append(attr)
+
+      self.attr_dict = attr_dict
+
       # print("Loaded attribute types:")
       # print("\t" + str(len(pd.unique(self.attr_df["attr"]))))

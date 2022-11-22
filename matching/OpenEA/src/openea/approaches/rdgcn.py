@@ -372,9 +372,9 @@ class RDGCN(BasicModel):
                 print("name_attribute_list")
             elif 'D_W' in self.args.training_data:
                 name_attribute_list = {'http://www.wikidata.org/entity/P373', 'http://www.wikidata.org/entity/P1476'}
-            elif 'modified_rrea' in self.args.training_data:
-                print("bbc_attrs")
-                name_attribute_list = {'http://xmlns.com/foaf/0.1/name', 'rdfs:label'}
+            # elif 'modified_rrea' in self.args.training_data:
+            #     print("bbc_attrs")
+            #     name_attribute_list = {'http://xmlns.com/foaf/0.1/name', 'rdfs:label'}
             else:
                 name_attribute_list = {}
 

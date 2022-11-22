@@ -108,7 +108,15 @@ class Utils:
         RREA_process_RREA = "matching/RREA/RREA_process_datasets/" + dataset + "_RREA/"
         RREA_process_RDGCN = "matching/RREA/RREA_process_datasets/" + dataset
         dest_RREA = "matching/RREA/sampled/" + dataset + "_sampled/" + conf_id
-        dest_RDGCN = "matching/RREA/sampled/" + dataset + "_sampled/" + conf_id.replace("RREA", "RDGCN") 
+        dest_RDGCN = "matching/RREA/sampled/" + dataset + "_sampled/" + conf_id.replace("RREA", "RDGCN")
+
+        isExist = os.path.exists(dest_RDGCN)
+        if isExist:
+            if input("are you sure you want to override " + dest_RDGCN + " ? (y/n) ") != "y":
+                exit()
+        if not isExist:
+            os.makedirs(dest_RDGCN)
+            os.makedirs(dest_RDGCN + "/721_5fold/2/")
 
         nodes_1 = kg1.graph.nodes()
         ids_to_uris = {}
