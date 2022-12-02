@@ -129,6 +129,11 @@ class Utils:
             for line in fp:
                 uris_to_ids[line.split("\t")[1].rstrip()] = line.split("\t")[0]
 
+        rel_ids_to_uris = {}
+        with open(RREA_process_RREA + "/rel_ids_1") as fp:
+            for line in fp:
+                rel_ids_to_uris[line.split("\t")[0]] = line.split("\t")[1].rstrip()
+
         nodes_1_conv = list()
         for n in nodes_1:
             nodes_1_conv.append(ids_to_uris[n])
@@ -144,7 +149,7 @@ class Utils:
         with open(dest_RREA + "/rel_triples_1") as fp:
             with open(dest_RDGCN + "/rel_triples_1", "w") as fp2:
                 for line in fp:
-                    fp2.write(ids_to_uris[int(line.split("\t")[0])] + "\t" + line.split("\t")[1] + "\t" + ids_to_uris[int(line.split("\t")[2].rstrip())] + "\n")
+                    fp2.write(ids_to_uris[int(line.split("\t")[0])] + "\t" + rel_ids_to_uris[line.split("\t")[1]] + "\t" + ids_to_uris[int(line.split("\t")[2].rstrip())] + "\n")
 
 
         kg1 = KnowledgeGraph("2", dataset, "", "multi_directed", "sampled", conf_id, "RREA")
@@ -163,6 +168,11 @@ class Utils:
         for n in nodes_1:
             nodes_1_conv.append(ids_to_uris[n])
 
+        rel_ids_to_uris = {}
+        with open(RREA_process_RREA + "/rel_ids_2") as fp:
+            for line in fp:
+                rel_ids_to_uris[line.split("\t")[0]] = line.split("\t")[1].rstrip()
+
         attr_1 = {}
         with open(RREA_process_RDGCN + "/attr_triples_2") as fp:
             with open(dest_RDGCN + "/attr_triples_2", "w") as fp2:
@@ -174,7 +184,7 @@ class Utils:
         with open(dest_RREA + "/rel_triples_2") as fp:
             with open(dest_RDGCN + "/rel_triples_2", "w") as fp2:
                 for line in fp:
-                    fp2.write(ids_to_uris[int(line.split("\t")[0])] + "\t" + line.split("\t")[1] + "\t" + ids_to_uris[int(line.split("\t")[2].rstrip())] + "\n")
+                    fp2.write(ids_to_uris[int(line.split("\t")[0])] + "\t" + rel_ids_to_uris[line.split("\t")[1]] + "\t" + ids_to_uris[int(line.split("\t")[2].rstrip())] + "\n")
 
 
         with open(dest_RREA + "/721_5fold/2/ent_links") as fp:
@@ -232,3 +242,102 @@ class Utils:
                     for line in fp:
                         ent = uris_to_ids[line.split("\t")[0]]
                         fp2.write(ent + "\t" + line.split("\t")[1] + "\t" + line.split("\t")[2])
+
+
+    def generate_rels(dataset):
+
+        RREA_process_RREA = "matching/RREA/RREA_process_datasets/" + dataset + "_RREA/"
+        RREA_process_RDGCN = "matching/RREA/RREA_process_datasets/" + dataset
+        
+
+        for num in [1, 2]:
+            mapped = {}
+
+            rel_ids = list()
+            with open(RREA_process_RREA + "/rel_triples_" + str(num), "r") as fp:
+                for line in fp:
+                    rel_ids.append(line.split("\t")[1])
+
+            rel_uris = list()
+            with open(RREA_process_RDGCN + "/rel_triples_" + str(num), "r") as fp:
+                for line in fp:
+                    rel_uris.append(line.split("\t")[1])
+
+            for i in range(len(rel_ids)):
+                mapped[rel_ids[i]] = rel_uris[i]
+
+            with open(RREA_process_RREA + "rel_ids_" + str(num), "w") as fp:
+                for rel in mapped:
+                    fp.write(rel)
+                    fp.write("\t")
+                    fp.write(mapped[rel])
+                    fp.write("\n")
+
+
+    def convert_to_ttl(conf_id, dataset):
+
+        if conf_id == "original":
+            path = "matching/RREA/RREA_process_datasets/" + dataset
+            dest_path = "matching/kba/" + dataset + "/" + "original" + "/"
+            mapping_path = path + "/ent_links"
+        elif "conf" in conf_id:
+            path = "matching/RREA/sampled/" + dataset + "_sampled/" + conf_id
+            dest_path = "matching/kba/" + dataset + "/" + conf_id + "/"
+            mapping_path = path + "/721_5fold/2/ent_links"
+
+        isExist = os.path.exists(dest_path)
+        if isExist:
+            if input("are you sure you want to override " + dest_path + " ? (y/n) ") != "y":
+                exit()
+        if not isExist:
+            os.makedirs(dest_path)
+
+        with open(path + "/rel_triples_1") as fp:
+            with open(dest_path + "/rel_triples_1.ttl", "w") as fp2:
+                for line in fp:
+                        
+                    s = "<" + line.split("\t")[0] + ">"
+                    p = "<" + line.split("\t")[1] + ">"
+                    o = "<" + line.split("\t")[2].rstrip() + ">"
+
+                    fp2.write( s + "\t" + p + "\t" + o + "\t" + ".\n")
+
+        with open(path + "/rel_triples_2") as fp:
+            with open(dest_path + "/rel_triples_2.ttl", "w") as fp2:
+                for line in fp:
+                        
+                    s = "<http://yago-knowledge.org/resource/" + line.split("\t")[0] + ">"
+                    p = "<http://yago-knowledge.org/ontology/" + line.split("\t")[1] + ">"
+                    o = "<http://yago-knowledge.org/resource/" + line.split("\t")[2].rstrip() + ">"
+
+                    fp2.write( s + "\t" + p + "\t" + o + "\t" + ".\n")
+
+        with open(mapping_path) as fp:
+            with open(dest_path + "/ent_links.ttl", "w") as fp2:
+                for line in fp:
+
+                    s = "<http://dbpedia.org/resource/" + line.split("\t")[0] + ">"
+                    p = "<http://www.w3.org/2002/07/owl#sameAs>"
+                    o = "<http://yago-knowledge.org/resource/" + line.split("\t")[1].rstrip() + ">"
+
+                    fp2.write( s + "\t" + p + "\t" + o + "\t" + ".\n")
+
+        with open(path + "/attr_triples_1") as fp:
+            with open(dest_path + "/attr_triples_1.ttl", "w") as fp2:
+                for line in fp:
+                        
+                    s = "<" + line.split("\t")[0] + ">"
+                    p = "<" + line.split("\t")[1] + ">"
+                    o = line.split("\t")[2].rstrip()
+
+                    fp2.write( s + "\t" + p + "\t" + o + "\t" + ".\n")
+
+        with open(path + "/attr_triples_2") as fp:
+            with open(dest_path + "/attr_triples_2.ttl", "w") as fp2:
+                for line in fp:
+                        
+                    s = "<http://yago-knowledge.org/resource/" + line.split("\t")[0] + ">"
+                    p = "<http://yago-knowledge.org/ontology/" + line.split("\t")[1] + ">"
+                    o = line.split("\t")[2].rstrip()
+
+                    fp2.write( s + "\t" + p + "\t" + o + "\t" + ".\n")

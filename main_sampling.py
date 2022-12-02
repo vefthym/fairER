@@ -15,19 +15,15 @@ if __name__ == '__main__':
 
     if args[0] == "sampling_ext":
         conf_array = {
-           "conf_-1_ext_thres_0": {
+           "conf_-1_or_thres_4": {
                 "p": 0.15,
-                "attr_thres": 0
+                "attr_thres": 4
             },
-            "conf_-1_ext_thres_1": {
-                "p": 0.15,
-                "attr_thres": 1
-            },
-            "conf_-2_ext_thres_4": {
+            "conf_-2_or_thres_4": {
                 "p": 0.50,
                 "attr_thres": 4
             },
-            "conf_-3_ext_thres_4": {
+            "conf_-3_or_thres_4": {
                 "p": 0.85,
                 "attr_thres": 4
             }
@@ -51,9 +47,16 @@ if __name__ == '__main__':
             conf_id = args[2]
             thres = args[3]
 
-        start_analysis("D_Y_15K_V1", "", "useless", sample, conf_id, "RDGCN", thres)
+        start_analysis("D_Y_15K_V1", "", "useless", sample, conf_id, "RREA", thres)
 
     # convert sampled data of RREA to be compatible with OpenEA methods
     if args[0] == "convert_sampling":
         conf_id = args[1]
         Utils.convert_sampling(conf_id, "D_Y_15K_V1")
+
+    if args[0] == "generate_rels":
+        Utils.generate_rels("D_Y_15K_V1")
+
+    if args[0] == "convert_to_ttl":
+        conf_id = args[1]
+        Utils.convert_to_ttl(conf_id, "D_Y_15K_V1")

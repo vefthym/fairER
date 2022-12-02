@@ -16,6 +16,8 @@ class SUSIE_extension:
         self.p = p
         self.attr_thres = attr_thres
         self.sampling_size = sampling_size
+        self.attr_degree_dict1 = ""
+        self.attr_degree_dict2 = ""
 
     @staticmethod
     def get_attr_degree(ent, attr_degree_dict):
@@ -27,72 +29,61 @@ class SUSIE_extension:
 
     def filter_neighbors(self, cand_neighbors, kg1_mun, kg2_mun, kg_num):
         
-        attr_degree_dict1 = Statistics.generate_attr_degree_dict(kg1_mun.attr_df)
-        attr_degree_dict2 = Statistics.generate_attr_degree_dict(kg2_mun.attr_df)
-        degree_pairs = list()
         temp = set()
         for node in cand_neighbors:
             if kg_num == "1":
-                node_attr_degree1 = SUSIE_extension.get_attr_degree(node, attr_degree_dict1)
-                node_attr_degree2 = SUSIE_extension.get_attr_degree(kg1_mun.get_seed_pairs()[node], attr_degree_dict2)
+                node_attr_degree1 = SUSIE_extension.get_attr_degree(node, self.attr_degree_dict1)
+                node_attr_degree2 = SUSIE_extension.get_attr_degree(kg1_mun.get_seed_pairs()[node], self.attr_degree_dict2)
             elif kg_num == "2":
-                node_attr_degree1 = SUSIE_extension.get_attr_degree(kg1_mun.get_seed_pairs(reverse = True)[node], attr_degree_dict1)
-                node_attr_degree2 = SUSIE_extension.get_attr_degree(node, attr_degree_dict2)
+                node_attr_degree1 = SUSIE_extension.get_attr_degree(kg1_mun.get_seed_pairs(reverse = True)[node], self.attr_degree_dict1)
+                node_attr_degree2 = SUSIE_extension.get_attr_degree(node, self.attr_degree_dict2)
             
-            # degree_pairs.append((node_attr_degree1, node_attr_degree2))
-            if node_attr_degree1 >= self.attr_thres and node_attr_degree2 >= self.attr_thres:
+            if node_attr_degree1 >= self.attr_thres or node_attr_degree2 >= self.attr_thres:
                 temp.add(node)
-
-        # if len(list(temp)) == 0:
-            
-        #     sums = list()
-        #     for d in degree_pairs:
-        #         sums.append(d[0] + d[1])
-        #     val, idx = min((val, idx) for (idx, val) in enumerate(sums))
-        #     temp = []
-        #     temp.append(cand_neighbors[idx])
-        #     return temp
-
 
         return list(temp)
 
+    def satisfies(self, node, kg1_mun, isKG1):
 
-
-    def filter_nodes(self, comp, kg1_mun, kg2_mun, kg_num):
-
-        attr_degree_dict1 = Statistics.generate_attr_degree_dict(kg1_mun.attr_df)
-        attr_degree_dict2 = Statistics.generate_attr_degree_dict(kg2_mun.attr_df)
-
-        filtered = []
-        for c in comp:
-            temp_set = set()
-            for node in c:
-
-                if kg_num == "1":
-                    node_attr_degree1 = SUSIE_extension.get_attr_degree(node, attr_degree_dict1)
-                    node_attr_degree2 = SUSIE_extension.get_attr_degree(kg1_mun.get_seed_pairs()[node], attr_degree_dict2)
-                elif kg_num == "2":
-                    node_attr_degree1 = SUSIE_extension.get_attr_degree(kg1_mun.get_seed_pairs(reverse = True)[node], attr_degree_dict1)
-                    node_attr_degree2 = SUSIE_extension.get_attr_degree(node, attr_degree_dict2)
-
-                if node_attr_degree1 >= self.attr_thres and node_attr_degree2 >= self.attr_thres:
-                    temp_set.add(node)
-            filtered.append(temp_set)
+        if isKG1:
+            node_attr_degree1 = SUSIE_extension.get_attr_degree(node, self.attr_degree_dict1)
+            node_attr_degree2 = SUSIE_extension.get_attr_degree(kg1_mun.get_seed_pairs()[node], self.attr_degree_dict2)
+        elif not isKG1:
+            node_attr_degree1 = SUSIE_extension.get_attr_degree(kg1_mun.get_seed_pairs(reverse = True)[node], self.attr_degree_dict1)
+            node_attr_degree2 = SUSIE_extension.get_attr_degree(node, self.attr_degree_dict2)
+        
+        if node_attr_degree1 >= self.attr_thres or node_attr_degree2 >= self.attr_thres:
+            return True
                 
-        return filtered
+        return False
 
     def get_curr_node(self, comps_dict, disconnected, curr_kg, isKG1, kg1_mun, kg2_mun):
         
+
         if len(disconnected) != 0:
             curr_node = np.random.choice(disconnected)
             disconnected.remove(curr_node)
             cand_neighbors = [curr_kg.nodes[n]['id'] for n in curr_kg.neighbors(curr_node)]
         else:
+
             keys = list(comps_dict.keys())
             curr_key = np.random.choice(keys)
             cands_nodes = list(comps_dict[curr_key])
+
             curr_node = np.random.choice(list(cands_nodes))
             cands_nodes.remove(curr_node)
+
+            while not self.satisfies(curr_node, kg1_mun, isKG1):
+
+                if len(cands_nodes) == 0:
+                    print("No nodes for jump remains")
+                    keys = list(comps_dict.keys())
+                    curr_key = np.random.choice(keys)
+                    cands_nodes = list(comps_dict[curr_key])
+
+                curr_node = np.random.choice(list(cands_nodes))
+                cands_nodes.remove(curr_node)
+
 
             cand_neighbors = [curr_kg.nodes[n]['id'] for n in curr_kg.neighbors(curr_node)]
 
@@ -105,14 +96,15 @@ class SUSIE_extension:
 
                 # In case, we do not want to change component size
 
-                # if len(cands_nodes) == 0:
-                #     keys = list(comps_dict.keys())
-                #     curr_key = np.random.choice(keys)
-                #     cands_nodes = list(comps_dict[curr_key])
-                
-                keys = list(comps_dict.keys())
-                curr_key = np.random.choice(keys)
-                cands_nodes = list(comps_dict[curr_key])
+                if len(cands_nodes) == 0:
+                    print("No nodes with neighbors remain")
+                    keys = list(comps_dict.keys())
+                    curr_key = np.random.choice(keys)
+                    cands_nodes = list(comps_dict[curr_key])
+
+                # keys = list(comps_dict.keys())
+                # curr_key = np.random.choice(keys)
+                # cands_nodes = list(comps_dict[curr_key])
                 
                 curr_node = np.random.choice(list(cands_nodes))
                 cands_nodes.remove(curr_node)
@@ -149,8 +141,8 @@ class SUSIE_extension:
         complete_graph1 = kg1_mun.graph
         complete_graph2 = kg2_mun.graph
 
-        attr_degree_dict1 = Statistics.generate_attr_degree_dict(kg1_mun.attr_df)
-        attr_degree_dict2 = Statistics.generate_attr_degree_dict(kg2_mun.attr_df)
+        self.attr_degree_dict1 = Statistics.generate_attr_degree_dict(kg1_mun.attr_df)
+        self.attr_degree_dict2 = Statistics.generate_attr_degree_dict(kg2_mun.attr_df)
 
         for n, data in complete_graph1.nodes(data=True):
             complete_graph1.nodes[n]['id'] = n
@@ -161,21 +153,8 @@ class SUSIE_extension:
         comp1 = nx.connected_components(kg1_mun.graph)
         comp2 = nx.connected_components(kg2_mun.graph)
 
-        comps1 = self.filter_nodes(comp1, kg1_mun, kg2_mun, "1")
-        comps2 = self.filter_nodes(comp2, kg1_mun, kg2_mun, "2")
-        comps_dict1 = SUSIE_extension.get_comps_dict(list(comps1))
-        comps_dict2 = SUSIE_extension.get_comps_dict(list(comps2))
-        file_to_write = open("comps_dict1_thres_" + str(self.attr_thres) + ".pickle", "wb")
-        pickle.dump(comps_dict1, file_to_write)
-        file_to_write = open("comps_dict2_thres_" + str(self.attr_thres) + ".pickle", "wb")
-        pickle.dump(comps_dict2, file_to_write)
-
-        # Load cached filtered components dictionary
-
-        # file = open("comps_dict1_thres_" + str(self.attr_thres) + ".pickle",'rb')
-        # comps_dict1 = pickle.load(file)
-        # file = open("comps_dict2_thres_" + str(self.attr_thres) + ".pickle",'rb')
-        # comps_dict2 = pickle.load(file)
+        comps_dict1 = SUSIE_extension.get_comps_dict(list(comp1))
+        comps_dict2 = SUSIE_extension.get_comps_dict(list(comp2))
 
         seed_pairs = kg1_mun.get_seed_pairs()
         rev_seed_pairs = kg2_mun.get_seed_pairs(reverse=True)
@@ -201,7 +180,6 @@ class SUSIE_extension:
                 curr_kg, curr_sampled_kg, curr_second_sampled_kg, curr_node, curr_node_match = complete_graph1, sampled_graph, sampled_graph2, curr_node, seed_pairs[curr_node]
             else:
                 curr_kg, curr_sampled_kg, curr_second_sampled_kg, curr_node, curr_node_match = complete_graph2, sampled_graph2, sampled_graph, curr_node, rev_seed_pairs[curr_node]
-            # cand_neighbors = [curr_kg.nodes[n]['id'] for n in curr_kg.neighbors(curr_node)]
 
             index_of_edge = random.randint(0, len(cand_neighbors) - 1)
             chosen_node = cand_neighbors[index_of_edge]
@@ -239,7 +217,17 @@ class SUSIE_extension:
 
             if choice == 'random_walk':
                 curr_node = chosen_node
-            elif choice == 'jump':
+                cand_neighbors = [curr_kg.nodes[n]['id'] for n in curr_kg.neighbors(curr_node)]
+                if isKG1:
+                    cand_neighbors = self.filter_neighbors(cand_neighbors, kg1_mun, kg2_mun, "1")
+                elif not isKG1:
+                    cand_neighbors = self.filter_neighbors(cand_neighbors, kg1_mun, kg2_mun, "2")
+                if len(cand_neighbors) == 0:
+                    print("No neighbors to walk")
+                    choice = "jump"
+
+            # Use of if, because we want to force jump, in case n neighbors to walk
+            if choice == 'jump':
                 isKG1 = not isKG1
                 if isKG1:
                     curr_node, disconnected1, cand_neighbors = self.get_curr_node(comps_dict1, disconnected1, complete_graph1, isKG1, kg1_mun, kg2_mun)

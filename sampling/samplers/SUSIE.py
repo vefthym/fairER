@@ -19,6 +19,7 @@ class SUSIE:
         else:
             keys = list(comps_dict.keys())
             curr_key = np.random.choice(keys)
+            print(curr_key)
             curr_node = np.random.choice(list(comps_dict[curr_key]))
 
         return curr_node, disconnected
@@ -77,7 +78,7 @@ class SUSIE:
         nodes_before2 = 0
 
         while sampled_filtered_kg.number_of_nodes() < sampling_size and sampled_filtered_kg2.number_of_nodes() < sampling_size:
-            print(sampled_filtered_kg.number_of_nodes())
+            # print(sampled_filtered_kg.number_of_nodes())
             if isKG1:
                 curr_kg, curr_sampled_kg, curr_second_sampled_kg, curr_node, curr_node_match = complete_graph1, sampled_graph, sampled_graph2, curr_node, seed_pairs[curr_node]
             else:
