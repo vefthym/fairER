@@ -1,5 +1,7 @@
 from sklearn.model_selection import train_test_split
 import os
+from rdflib import Literal
+from rdflib.namespace import XSD, NamespaceManager
 
 from matching.KG.KnowledgeGraph import KnowledgeGraph
 
@@ -285,6 +287,17 @@ class Utils:
             dest_path = "matching/kba/" + dataset + "/" + conf_id + "/"
             mapping_path = path + "/721_5fold/2/ent_links"
 
+
+        # with open(path + "/attr_triples_2") as fp:
+        #     for line in fp:
+                        
+        #         s = "<http://yago-knowledge.org/resource/" + line.split("\t")[0] + ">"
+        #         p = "<http://yago-knowledge.org/ontology/" + line.split("\t")[1] + ">"
+        #         o = line.split("\t")[2].rstrip()
+        #         if "^^" not in o and '"@' not in o:
+        #             print(Literal(o).n3()) 
+        # exit()
+
         isExist = os.path.exists(dest_path)
         if isExist:
             if input("are you sure you want to override " + dest_path + " ? (y/n) ") != "y":
@@ -316,7 +329,7 @@ class Utils:
             with open(dest_path + "/ent_links.ttl", "w") as fp2:
                 for line in fp:
 
-                    s = "<http://dbpedia.org/resource/" + line.split("\t")[0] + ">"
+                    s = "<" + line.split("\t")[0] + ">"
                     p = "<http://www.w3.org/2002/07/owl#sameAs>"
                     o = "<http://yago-knowledge.org/resource/" + line.split("\t")[1].rstrip() + ">"
 
@@ -330,6 +343,9 @@ class Utils:
                     p = "<" + line.split("\t")[1] + ">"
                     o = line.split("\t")[2].rstrip()
 
+                    if "^^" not in o and '"@' not in o:
+                        o = Literal(o).n3()
+                        
                     fp2.write( s + "\t" + p + "\t" + o + "\t" + ".\n")
 
         with open(path + "/attr_triples_2") as fp:
@@ -339,5 +355,8 @@ class Utils:
                     s = "<http://yago-knowledge.org/resource/" + line.split("\t")[0] + ">"
                     p = "<http://yago-knowledge.org/ontology/" + line.split("\t")[1] + ">"
                     o = line.split("\t")[2].rstrip()
+
+                    if "^^" not in o and '"@' not in o:
+                        o = Literal(o).n3() 
 
                     fp2.write( s + "\t" + p + "\t" + o + "\t" + ".\n")

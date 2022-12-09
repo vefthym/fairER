@@ -47,7 +47,7 @@ if __name__ == '__main__':
             conf_id = args[2]
             thres = args[3]
 
-        start_analysis("D_Y_15K_V1", "", "useless", sample, conf_id, "RREA", thres)
+        start_analysis("D_W_15K_V1", "", "useless", sample, conf_id, "RREA", thres)
 
     # convert sampled data of RREA to be compatible with OpenEA methods
     if args[0] == "convert_sampling":

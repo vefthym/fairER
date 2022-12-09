@@ -75,8 +75,9 @@ class Statistics:
         kg_mdi = KnowledgeGraph(num_kg, dataset, prefix, "multi_directed", "original", "original", method)
         # wcc_dict["original"] = nx.number_weakly_connected_components(kg_mdi.graph)/kg_mdi.graph.number_of_nodes()
 
-        for i in [-3]:
-            conf_id = "conf_" + str(i) + "_or_thres_" + str(thres) + "_" + method
+        for i in [0, 3]:
+            # conf_id = "conf_" + str(i) + "_or_thres_" + str(thres) + "_" + method
+            conf_id = "conf_" + str(i) + "_only_p_RDGCN"
             kg_mdi = KnowledgeGraph(num_kg, dataset, prefix, "multi_directed", "sampled", conf_id, method)
             wcc_dict[conf_id] = nx.number_weakly_connected_components(kg_mdi.graph)/kg_mdi.graph.number_of_nodes()
         
@@ -99,8 +100,9 @@ class Statistics:
         b_dict = dict()
         # b_dict["original"] = avg_node_deg
 
-        for i in [-3]:
-            conf_id = "conf_" + str(i) + "_or_thres_" + str(thres) + "_" + method
+        for i in [0, 3]:
+            # conf_id = "conf_" + str(i) + "_or_thres_" + str(thres) + "_" + method
+            conf_id = "conf_" + str(i) + "_only_p_RDGCN"
             kg = KnowledgeGraph(num_kg, dataset, prefix, "multi_directed", "sampled", conf_id, method).graph
             nodes_deg = kg.degree()
 
@@ -127,9 +129,9 @@ class Statistics:
         b_dict = dict()
         # b_dict["original"] = max_len
 
-        for i in [-3]:
-            conf_id = "conf_" + str(i) + "_or_thres_" + str(thres) + "_" + method
-            
+        for i in [0, 3]:
+            # conf_id = "conf_" + str(i) + "_or_thres_" + str(thres) + "_" + method
+            conf_id = "conf_" + str(i) + "_only_p_RDGCN"
             kg = KnowledgeGraph(num_kg, dataset, prefix, "multi_directed", "sampled", conf_id, method)
             comps = sorted(nx.weakly_connected_components(kg.graph), key=len)
             max_len = len(comps[-1])/kg.graph.number_of_nodes()
@@ -158,8 +160,9 @@ class Statistics:
         b_dict = dict()
         b_dict["original"] = avg_attr_node_deg
 
-        for i in [-3]:
-            conf_id = "conf_" + str(i) + "_or_thres_" + str(thres) + "_" + method
+        for i in [0, 3]:
+            # conf_id = "conf_" + str(i) + "_or_thres_" + str(thres) + "_" + method
+            conf_id = "conf_" + str(i) + "_only_p_RDGCN"
             kg = KnowledgeGraph(num_kg, dataset, prefix, "multi_directed", "sampled", conf_id, method)
             
             counter = 0

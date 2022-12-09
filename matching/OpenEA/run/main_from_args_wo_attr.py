@@ -29,18 +29,19 @@ def get_model(model_name):
 
 
 if __name__ == '__main__':
-    t = time.time()
-    args = load_args(sys.argv[1])
-    args.training_data = args.training_data + sys.argv[2] + '/'
-    args.dataset_division = sys.argv[3]
-    print(args)
-    kgs = read_kgs_from_folder(args.training_data, args.dataset_division, args.alignment_module, args.ordered)
-    model = get_model(args.embedding_module)()
-    model.set_args(args)
-    model.set_kgs(kgs)
-    model.init()
-    model.run()
-    model.test()
-    model.save()
-    print("Total run time = {:.3f} s.".format(time.time() - t))
+   args = load_args(sys.argv[1])
+   if "conf_" in args.conf_id:
+        args.training_data = args.training_data + args.dataset + '/' + args.conf_id + '/'
+   else:
+        args.training_data = args.training_data + args.dataset + '/'
 
+   print(args)
+   kgs = read_kgs_from_folder(args.training_data, args.dataset_division, args.alignment_module, args.ordered)
+   model = get_model(args.embedding_module)()
+   model.set_args(args)
+   model.set_kgs(kgs)
+   model.init()
+   model.run()
+   model.test()
+   model.save()
+   print("Total run time = {:.3f} s.".format(time.time() - t))

@@ -144,8 +144,9 @@ def valid_temp(model, embed_choice='avg', w=(1, 1, 1)):
     print(embed_choice, 'valid results:')
     embeds1 = ent_embeds[model.kgs.valid_entities1,]
     embeds2 = ent_embeds[model.kgs.valid_entities2 + model.kgs.test_entities2,]
-    hits1_12, mrr_12 = eva.valid(embeds1, embeds2, None, model.args.top_k, model.args.test_threads_num,
-                                 normalize=True)
+    test_ent_lists = model.kgs.test_entities1
+    hits1_12, mrr_12, TTA_flag = eva.valid(model.kgs, test_ent_lists, "valid", None, embeds1, embeds2, None, model.args.top_k, model.args.test_threads_num,
+                                 metric=model.args.eval_metric, normalize=True, csls_k=0, accurate=False)
     del embeds1, embeds2
     gc.collect()
     return mrr_12
@@ -876,7 +877,7 @@ class MultiKE(BasicModel):
                 # valid_temp(self, embed_choice='final')
                 # valid_temp(self, embed_choice='avg')
                 # valid_WVA(self)
-                flag = self.valid(self.args.stop_metric)
+                flag = self.valid(self.args.stop_metric, t)
                 self.flag1, self.flag2, self.early_stop = early_stop(self.flag1, self.flag2, flag)
                 if self.early_stop or i == self.args.max_epoch:
                     break
