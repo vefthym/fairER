@@ -125,7 +125,7 @@ class KnowledgeGraph:
           path =  "matching/RREA/RREA_process_datasets/" + self.dataset + self.prefix + "/rel_triples_" + self.id
       elif self.sample == "sampled":
         path =  "matching/RREA/sampled/" + self.dataset + "_sampled/" + self.conf_id + "/rel_triples_" + self.id
-      
+
       kg = pd.read_csv(path,  sep='\t', names=["e1", "r", "e2"])
       self.df = kg
 
@@ -152,8 +152,8 @@ class KnowledgeGraph:
           path =  "matching/RREA/RREA_process_datasets/" + self.dataset + self.prefix + "/attr_triples_" + self.id
       elif self.sample == "sampled":
         path =  "matching/RREA/sampled/" + self.dataset + "_sampled/" + self.conf_id + "/attr_triples_" + self.id
-      
-      kg = pd.read_csv(path,  sep='\t', names=["e1", "attr", "val"])
+
+      kg = pd.read_csv(path,  sep='\t', names=["e1", "attr", "val"], warn_bad_lines=True, error_bad_lines=False)
       self.attr_df = kg
 
       attr_dict = {}

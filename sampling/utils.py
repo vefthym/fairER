@@ -287,6 +287,16 @@ class Utils:
             dest_path = "matching/kba/" + dataset + "/" + conf_id + "/"
             mapping_path = path + "/721_5fold/2/ent_links"
 
+        intersection_preds = {
+        "http://dbpedia.org/ontology/populationDensity": 'http://yago-knowledge.org/ontology/hasPopulationDensity',
+        "http://dbpedia.org/ontology/height": 'http://yago-knowledge.org/ontology/hasHeight',
+        "http://dbpedia.org/ontology/revenue": 'http://yago-knowledge.org/ontology/hasRevenue',
+        "http://dbpedia.org/ontology/area": 'http://yago-knowledge.org/ontology/hasArea',
+        "http://dbpedia.org/ontology/influenced": 'http://yago-knowledge.org/ontology/influences',
+        "http://dbpedia.org/ontology/language": 'http://yago-knowledge.org/ontology/hasOfficialLanguage',
+        "http://dbpedia.org/ontology/capital": 'http://yago-knowledge.org/ontology/hasCapital',
+        "http://dbpedia.org/ontology/doctoralAdvisor": 'http://yago-knowledge.org/ontology/hasAcademicAdvisor',
+        "http://xmlns.com/foaf/0.1/name": 'http://yago-knowledge.org/ontology/skos:prefLabel'}
 
         # with open(path + "/attr_triples_2") as fp:
         #     for line in fp:
@@ -308,9 +318,14 @@ class Utils:
         with open(path + "/rel_triples_1") as fp:
             with open(dest_path + "/rel_triples_1.ttl", "w") as fp2:
                 for line in fp:
+
+                    if line.split("\t")[1] in intersection_preds:
+                        p2 = intersection_preds[line.split("\t")[1]]
+                    else:
+                        p2 = line.split("\t")[1]
                         
                     s = "<" + line.split("\t")[0] + ">"
-                    p = "<" + line.split("\t")[1] + ">"
+                    p = "<" + p2 + ">"
                     o = "<" + line.split("\t")[2].rstrip() + ">"
 
                     fp2.write( s + "\t" + p + "\t" + o + "\t" + ".\n")
@@ -338,9 +353,14 @@ class Utils:
         with open(path + "/attr_triples_1") as fp:
             with open(dest_path + "/attr_triples_1.ttl", "w") as fp2:
                 for line in fp:
-                        
+
+                    if line.split("\t")[1] in intersection_preds:
+                        p2 = intersection_preds[line.split("\t")[1]]
+                    else:
+                        p2 = line.split("\t")[1]
+
                     s = "<" + line.split("\t")[0] + ">"
-                    p = "<" + line.split("\t")[1] + ">"
+                    p = "<" + p2 + ">"
                     o = line.split("\t")[2].rstrip()
 
                     if "^^" not in o and '"@' not in o:

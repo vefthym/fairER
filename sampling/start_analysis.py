@@ -7,11 +7,13 @@ def start_analysis(dataset, prefix, measure, sample, conf_id, method, thres):
     kg1_mdi = KnowledgeGraph("1", dataset, prefix, "multi_directed", sample, conf_id, method)
     kg2_mdi = KnowledgeGraph("2", dataset, prefix, "multi_directed", sample, conf_id, method)
 
-    kg1_mun = KnowledgeGraph("1", dataset, prefix, "multi_undirected", sample, conf_id, method)
-    kg2_mun = KnowledgeGraph("2", dataset, prefix, "multi_undirected", sample, conf_id, method)
+    # kg1_mun = KnowledgeGraph("1", dataset, prefix, "multi_undirected", sample, conf_id, method)
+    # kg2_mun = KnowledgeGraph("2", dataset, prefix, "multi_undirected", sample, conf_id, method)
 
-    # print(Statistics.basic_statistics(kg1_mun))
-    # print(Statistics.basic_statistics(kg2_mun))
+    # print(Statistics.basic_statistics(kg1_mdi))
+    # print(Statistics.basic_statistics(kg2_mdi))
+
+    # Statistics.explore("1", method, dataset, prefix, thres)
 
     Statistics.weakly_conn_comps("1", method, dataset, prefix, thres)
     Statistics.weakly_conn_comps("2", method, dataset, prefix, thres)

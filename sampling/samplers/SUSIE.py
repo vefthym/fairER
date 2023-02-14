@@ -18,8 +18,11 @@ class SUSIE:
             disconnected.remove(curr_node)
         else:
             keys = list(comps_dict.keys())
+            # keys_above_t = []
+            # for key in keys:
+            #     if key >= 1:
+            #         keys_above_t.append(key)
             curr_key = np.random.choice(keys)
-            print(curr_key)
             curr_node = np.random.choice(list(comps_dict[curr_key]))
 
         return curr_node, disconnected
@@ -77,26 +80,49 @@ class SUSIE:
         nodes_before1 = 0
         nodes_before2 = 0
 
+        if curr_node in seed_pairs:
+            curr_node_match = seed_pairs[curr_node]
+        else:
+            curr_node_match = None
+
         while sampled_filtered_kg.number_of_nodes() < sampling_size and sampled_filtered_kg2.number_of_nodes() < sampling_size:
-            # print(sampled_filtered_kg.number_of_nodes())
+            print(sampled_filtered_kg.number_of_nodes())
             if isKG1:
-                curr_kg, curr_sampled_kg, curr_second_sampled_kg, curr_node, curr_node_match = complete_graph1, sampled_graph, sampled_graph2, curr_node, seed_pairs[curr_node]
+                if curr_node in seed_pairs:
+                    curr_node_match = seed_pairs[curr_node]
+                else:
+                    curr_node_match = None
+                curr_kg, curr_sampled_kg, curr_second_sampled_kg, curr_node = complete_graph1, sampled_graph, sampled_graph2, curr_node
             else:
-                curr_kg, curr_sampled_kg, curr_second_sampled_kg, curr_node, curr_node_match = complete_graph2, sampled_graph2, sampled_graph, curr_node, rev_seed_pairs[curr_node]
+                if curr_node in rev_seed_pairs:
+                    curr_node_match = rev_seed_pairs[curr_node]
+                else:
+                    curr_node_match = None
+                curr_kg, curr_sampled_kg, curr_second_sampled_kg, curr_node = complete_graph2, sampled_graph2, sampled_graph, curr_node
+
             cand_neighbors = [curr_kg.nodes[n]['id'] for n in curr_kg.neighbors(curr_node)]
 
             index_of_edge = random.randint(0, len(cand_neighbors) - 1)
             chosen_node = cand_neighbors[index_of_edge]
 
             if isKG1:
-                matched_chosen_node = seed_pairs[chosen_node]
+                if chosen_node in seed_pairs:
+                    matched_chosen_node = seed_pairs[chosen_node]
+                else:
+                    matched_chosen_node = None
             else:
-                matched_chosen_node = rev_seed_pairs[chosen_node]
+                if chosen_node in rev_seed_pairs:
+                    matched_chosen_node = rev_seed_pairs[chosen_node]
+                else:
+                    matched_chosen_node = None
 
             curr_sampled_kg.add_node(curr_node)
-            curr_second_sampled_kg.add_node(curr_node_match)
+            if curr_node_match != None:
+                curr_second_sampled_kg.add_node(curr_node_match)
+
             curr_sampled_kg.add_node(chosen_node)
-            curr_second_sampled_kg.add_node(matched_chosen_node)
+            if matched_chosen_node != None:
+                curr_second_sampled_kg.add_node(matched_chosen_node)
 
             if isKG1:
                 comps_dict1 = SUSIE.my_remove_node(curr_node, comps_dict1)
@@ -157,20 +183,24 @@ class SUSIE:
         print(len(ents))
         print(len(ents2))
 
-        if len(ents) < len(ents2):
-            print("den einai idio")
-            for e in ents2.copy():
-                if rev_seed_pairs[e] in disconnected1:
-                    ents2.remove(e)
-        elif len(ents) > len(ents2):
-            print("den einai idio2")
-            for e in ents.copy():
-                if seed_pairs[e] in disconnected2:
-                    ents.remove(e)
+        # if len(ents) < len(ents2):
+        #     print("den einai idio")
+        #     for e in ents2.copy():
+        #         if rev_seed_pairs[e] in disconnected1:
+        #             ents2.remove(e)
+        # elif len(ents) > len(ents2):
+        #     print("den einai idio2")
+        #     for e in ents.copy():
+        #         if seed_pairs[e] in disconnected2:
+        #             ents.remove(e)
         
         filtered_kg1 = kg1_mdi.df.loc[kg1_mdi.df['e1'].isin(ents) & kg1_mdi.df['e2'].isin(ents)]
         filtered_kg2 = kg2_mdi.df.loc[kg2_mdi.df['e1'].isin(ents2) & kg2_mdi.df['e2'].isin(ents2)]
         sampled_filtered_kg = nx.from_pandas_edgelist(filtered_kg1, source='e1', target='e2', edge_attr=True, create_using=nx.MultiDiGraph())
         sampled_filtered_kg2 = nx.from_pandas_edgelist(filtered_kg2, source='e1', target='e2', edge_attr=True, create_using=nx.MultiDiGraph())
 
-        return node_pairs, node_pairs2, ents, ents2, sampled_filtered_kg, sampled_filtered_kg2, filtered_kg1, filtered_kg2
+        filtered_attr_kg1 = kg1_mdi.attr_df.loc[kg1_mdi.attr_df['e1'].isin(ents)]
+        filtered_attr_kg2 = kg2_mdi.attr_df.loc[kg2_mdi.attr_df['e1'].isin(ents2)]
+
+        return node_pairs, node_pairs2, ents, ents2, sampled_filtered_kg, sampled_filtered_kg2, filtered_kg1, filtered_kg2, filtered_attr_kg1, filtered_attr_kg2
+        # return node_pairs, node_pairs2, ents, ents2, sampled_filtered_kg, sampled_filtered_kg2, filtered_kg1, filtered_kg2

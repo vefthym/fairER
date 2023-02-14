@@ -13,24 +13,49 @@ if __name__ == '__main__':
 
     args = sys.argv[1:]
 
-    if args[0] == "sampling_ext":
+    # if args[0] == "sampling_ext":
+    #     conf_array = {
+    #        "conf_-1_or_thres_4": {
+    #             "p": 0.15,
+    #             "attr_thres": 4
+    #         },
+    #         "conf_-2_or_thres_4": {
+    #             "p": 0.50,
+    #             "attr_thres": 4
+    #         },
+    #         "conf_-3_or_thres_4": {
+    #             "p": 0.85,
+    #             "attr_thres": 4
+    #         }
+    #     }
+
+    if args[0] == "sampling":
         conf_array = {
-           "conf_-1_or_thres_4": {
+           "conf_0_only_p": {
+                "p": 0,
+                "attr_thres": -1
+            },
+            "conf_1_only_p": {
                 "p": 0.15,
-                "attr_thres": 4
+                "attr_thres": -1
             },
-            "conf_-2_or_thres_4": {
+            "conf_2_only_p": {
                 "p": 0.50,
-                "attr_thres": 4
+                "attr_thres": -1
             },
-            "conf_-3_or_thres_4": {
+            "conf_3_only_p": {
                 "p": 0.85,
-                "attr_thres": 4
+                "attr_thres": -1
+            },
+            "conf_4_only_p": {
+                "p": 1,
+                "attr_thres": -1
             }
         }
         conf_id = args[1]
         method = args[2]
-        conf = Configuration("D_Y_15K_V1", "", "useless", 1000, conf_array[conf_id]["p"], conf_id, method, "SUSIE_ext", conf_array[conf_id]["attr_thres"], export_sampled=True)
+        # conf = Configuration("D_Y_15K_V1", "", "useless", 1000, conf_array[conf_id]["p"], conf_id, method, "SUSIE_ext", conf_array[conf_id]["attr_thres"], export_sampled=True)
+        conf = Configuration("mem_exp_no_1to1", "", "useless", 1000, conf_array[conf_id]["p"], conf_id, method, "SUSIE", conf_array[conf_id]["attr_thres"], export_sampled=True)
         start_sampling(conf)
 
     # Convert OpenEA-based datasets' attributes to be compatible to RREA
@@ -47,7 +72,7 @@ if __name__ == '__main__':
             conf_id = args[2]
             thres = args[3]
 
-        start_analysis("D_W_15K_V1", "", "useless", sample, conf_id, "RREA", thres)
+        start_analysis("mem_exp_no_1to1", "", "useless", sample, conf_id, "RREA", thres)
 
     # convert sampled data of RREA to be compatible with OpenEA methods
     if args[0] == "convert_sampling":

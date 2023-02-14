@@ -27,20 +27,21 @@ def start_sampling(conf):
     kg2_mun = KnowledgeGraph("2", dataset, prefix, "multi_undirected", "original", "original", method)
 
     print("\n-----START SAMPLING WITH ONLY P-----")
-    print(Statistics.basic_statistics(kg1_mun))
-    print(Statistics.basic_statistics(kg2_mun))
+    # print(Statistics.basic_statistics(kg1_mun))
+    # print(Statistics.basic_statistics(kg2_mun))
 
     if sampling_method == "SUSIE_ext":
         attr_thres = conf.attr_thres
         sus = SUSIE_extension(p, attr_thres, sampling_size)
         _, _, ents1, ents2, sampled_graph1, sampled_graph2, sampled_df, sampled_df2, sampled_attr_df1, sampled_attr_df2 = sus.RJ_only_p(kg1_mdi, kg2_mdi, kg1_mun, kg2_mun)
     elif sampling_method == "SUSIE":    
-        _, _, ents1, ents2, sampled_graph1, sampled_graph2, sampled_df, sampled_df2 = SUSIE.RJ_only_p(kg1_mdi, kg2_mdi, kg1_mun, kg2_mun, sampling_size, p)
+        _, _, ents1, ents2, sampled_graph1, sampled_graph2, sampled_df, sampled_df2, sampled_attr_df1, sampled_attr_df2 = SUSIE.RJ_only_p(kg1_mdi, kg2_mdi, kg1_mun, kg2_mun, sampling_size, p)
+        # _, _, ents1, ents2, sampled_graph1, sampled_graph2, sampled_df, sampled_df2 = SUSIE.RJ_only_p(kg1_mdi, kg2_mdi, kg1_mun, kg2_mun, sampling_size, p)
     
     print(sampled_graph1.number_of_nodes())
     print(sampled_graph2.number_of_nodes())
 
-    Utils.check_embedding_constraints(kg1_mdi, ents1, ents2)
+    # Utils.check_embedding_constraints(kg1_mdi, ents1, ents2)
     
     if export_sampled:
         Utils.generate_seeds_and_splittings(dataset, prefix, ents1, ents2, "matching/RREA/sampled/" + dataset + "_sampled/" + conf_id + "_" + method + "/721_5fold/2/", method)

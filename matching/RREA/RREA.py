@@ -47,9 +47,9 @@ if mycsls == -1:
 elif mycsls > 0:
     csls_mode = "WITH_CSLS"
 
-measure = "test_experiments"
+measure = "OAEI"
 sample = sample
-dataset = "D_Y_15K_V1_RRΕΑ_test_assumption"
+dataset = "mem_exp_no_1to1_RREA"
 prefix = ""
 
 if sample == "sampled":

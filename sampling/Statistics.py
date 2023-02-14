@@ -13,7 +13,7 @@ class Statistics:
         # for node in kg.graph.nodes():
         #     print("node" + str(node) + " degree: " + str(Statistics.get_ent_attr_degree(node, kg.attr_df)))
         # exit()
-        
+        print(nx.number_strongly_connected_components(kg.graph)/kg.graph.number_of_nodes())
         nodes = kg.graph.number_of_nodes()
         edges = kg.graph.number_of_edges()
         attributes = len(kg.attr_df)
@@ -73,18 +73,20 @@ class Statistics:
         print("wcc_" + "KG" + num_kg)
         wcc_dict = dict()
         kg_mdi = KnowledgeGraph(num_kg, dataset, prefix, "multi_directed", "original", "original", method)
-        # wcc_dict["original"] = nx.number_weakly_connected_components(kg_mdi.graph)/kg_mdi.graph.number_of_nodes()
 
-        for i in [0, 3]:
-            # conf_id = "conf_" + str(i) + "_or_thres_" + str(thres) + "_" + method
-            conf_id = "conf_" + str(i) + "_only_p_RDGCN"
+        wcc_dict["original"] = nx.number_weakly_connected_components(kg_mdi.graph)/kg_mdi.graph.number_of_nodes()
+        
+        for i in [0, 1, 2, 3, 4]:
+        #     # conf_id = "conf_" + str(i) + "_or_thres_" + str(thres) + "_" + method
+            conf_id = "conf_" + str(i) + "_only_p_RREA"
             kg_mdi = KnowledgeGraph(num_kg, dataset, prefix, "multi_directed", "sampled", conf_id, method)
             wcc_dict[conf_id] = nx.number_weakly_connected_components(kg_mdi.graph)/kg_mdi.graph.number_of_nodes()
-        
+
         wcc_df = pd.DataFrame.from_dict(wcc_dict, orient='index').T
 
         print(wcc_df.T)
         print("---------------------------------")
+
 
     @staticmethod
     def avg_rels_per_entity(num_kg, method, dataset, prefix, thres):
@@ -98,11 +100,12 @@ class Statistics:
         avg_node_deg = counter / kg.number_of_nodes()
 
         b_dict = dict()
-        # b_dict["original"] = avg_node_deg
+        b_dict["original"] = avg_node_deg
 
-        for i in [0, 3]:
+        for i in [0, 1, 2, 3, 4]:
             # conf_id = "conf_" + str(i) + "_or_thres_" + str(thres) + "_" + method
-            conf_id = "conf_" + str(i) + "_only_p_RDGCN"
+            conf_id = "conf_" + str(i) + "_only_p_RREA"
+
             kg = KnowledgeGraph(num_kg, dataset, prefix, "multi_directed", "sampled", conf_id, method).graph
             nodes_deg = kg.degree()
 
@@ -123,20 +126,18 @@ class Statistics:
         print("maxCS_" + "KG" + num_kg)
         kg =  KnowledgeGraph(num_kg, dataset, prefix, "multi_directed", "original", "original", method)
         comps = sorted(nx.weakly_connected_components(kg.graph), key=len)
-
         max_len = len(comps[-1])/kg.graph.number_of_nodes()
-
         b_dict = dict()
-        # b_dict["original"] = max_len
+        b_dict["original"] = max_len
 
-        for i in [0, 3]:
+        for i in [0, 1, 2, 3, 4]:
             # conf_id = "conf_" + str(i) + "_or_thres_" + str(thres) + "_" + method
-            conf_id = "conf_" + str(i) + "_only_p_RDGCN"
+            conf_id = "conf_" + str(i) + "_only_p_RREA"
             kg = KnowledgeGraph(num_kg, dataset, prefix, "multi_directed", "sampled", conf_id, method)
             comps = sorted(nx.weakly_connected_components(kg.graph), key=len)
             max_len = len(comps[-1])/kg.graph.number_of_nodes()
             b_dict[conf_id] = max_len
-        
+
         df = pd.DataFrame.from_dict(b_dict, orient='index').T
         df = df.T
         print(df)
@@ -179,3 +180,18 @@ class Statistics:
         df = df.T
         print(df)
         print("---------------------------------")
+
+
+    @staticmethod
+    def explore(num_kg, method, dataset, prefix, thres):
+        conf_id = "conf_" + str(2) + "_only_p"
+
+        kg = KnowledgeGraph(num_kg, dataset, prefix, "multi_directed", "sampled", conf_id, method).graph
+        nodes_deg = kg.degree()
+
+        max_deg = 0
+        for pair in nodes_deg:
+            if pair[1] > max_deg:
+                max_deg = pair[1]
+                max_pair = pair
+        print(max_pair)
