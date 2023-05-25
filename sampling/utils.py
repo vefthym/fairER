@@ -170,7 +170,7 @@ class Utils:
         for n in nodes_1:
             nodes_1_conv.append(ids_to_uris[n])
 
-        rel_ids_to_uris = {}
+        # rel_ids_to_uris = {}
         with open(RREA_process_RREA + "/rel_ids_2") as fp:
             for line in fp:
                 rel_ids_to_uris[line.split("\t")[0]] = line.split("\t")[1].rstrip()
@@ -290,11 +290,11 @@ class Utils:
         intersection_preds = {
         "http://dbpedia.org/ontology/populationDensity": 'http://yago-knowledge.org/ontology/hasPopulationDensity',
         "http://dbpedia.org/ontology/height": 'http://yago-knowledge.org/ontology/hasHeight',
-        "http://dbpedia.org/ontology/revenue": 'http://yago-knowledge.org/ontology/hasRevenue',
-        "http://dbpedia.org/ontology/area": 'http://yago-knowledge.org/ontology/hasArea',
+        # "http://dbpedia.org/ontology/revenue": 'http://yago-knowledge.org/ontology/hasRevenue',
+        # "http://dbpedia.org/ontology/area": 'http://yago-knowledge.org/ontology/hasArea',
         "http://dbpedia.org/ontology/influenced": 'http://yago-knowledge.org/ontology/influences',
         "http://dbpedia.org/ontology/language": 'http://yago-knowledge.org/ontology/hasOfficialLanguage',
-        "http://dbpedia.org/ontology/capital": 'http://yago-knowledge.org/ontology/hasCapital',
+        # "http://dbpedia.org/ontology/capital": 'http://yago-knowledge.org/ontology/hasCapital',
         "http://dbpedia.org/ontology/doctoralAdvisor": 'http://yago-knowledge.org/ontology/hasAcademicAdvisor',
         "http://xmlns.com/foaf/0.1/name": 'http://yago-knowledge.org/ontology/skos:prefLabel'}
 

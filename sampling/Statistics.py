@@ -13,7 +13,6 @@ class Statistics:
         # for node in kg.graph.nodes():
         #     print("node" + str(node) + " degree: " + str(Statistics.get_ent_attr_degree(node, kg.attr_df)))
         # exit()
-        print(nx.number_strongly_connected_components(kg.graph)/kg.graph.number_of_nodes())
         nodes = kg.graph.number_of_nodes()
         edges = kg.graph.number_of_edges()
         attributes = len(kg.attr_df)
@@ -72,35 +71,35 @@ class Statistics:
     def weakly_conn_comps(num_kg, method, dataset, prefix, thres):
         print("wcc_" + "KG" + num_kg)
         wcc_dict = dict()
-        kg_mdi = KnowledgeGraph(num_kg, dataset, prefix, "multi_directed", "original", "original", method)
+        # kg_mdi = KnowledgeGraph(num_kg, dataset, prefix, "multi_directed", "original", "original", method)
 
-        wcc_dict["original"] = nx.number_weakly_connected_components(kg_mdi.graph)/kg_mdi.graph.number_of_nodes()
-        
+        # wcc_dict["original"] = nx.number_weakly_connected_components(kg_mdi.graph)/kg_mdi.graph.number_of_nodes()
+        # print(nx.number_weakly_connected_components(kg_mdi.graph))
         for i in [0, 1, 2, 3, 4]:
         #     # conf_id = "conf_" + str(i) + "_or_thres_" + str(thres) + "_" + method
             conf_id = "conf_" + str(i) + "_only_p_RREA"
             kg_mdi = KnowledgeGraph(num_kg, dataset, prefix, "multi_directed", "sampled", conf_id, method)
             wcc_dict[conf_id] = nx.number_weakly_connected_components(kg_mdi.graph)/kg_mdi.graph.number_of_nodes()
+            # print(nx.number_weakly_connected_components(kg_mdi.graph))
 
         wcc_df = pd.DataFrame.from_dict(wcc_dict, orient='index').T
-
         print(wcc_df.T)
         print("---------------------------------")
 
 
     @staticmethod
     def avg_rels_per_entity(num_kg, method, dataset, prefix, thres):
-        print("deg_" + "KG" + num_kg)
-        kg =  KnowledgeGraph(num_kg, dataset, prefix, "multi_directed", "original", "original", method).graph
-        nodes_deg = kg.degree()
+        # print("deg_" + "KG" + num_kg)
+        # kg =  KnowledgeGraph(num_kg, dataset, prefix, "multi_directed", "original", "original", method).graph
+        # nodes_deg = kg.degree()
 
-        counter = 0
-        for pair in nodes_deg:
-            counter += pair[1]
-        avg_node_deg = counter / kg.number_of_nodes()
+        # counter = 0
+        # for pair in nodes_deg:
+        #     counter += pair[1]
+        # avg_node_deg = counter / kg.number_of_nodes()
 
         b_dict = dict()
-        b_dict["original"] = avg_node_deg
+        # b_dict["original"] = avg_node_deg
 
         for i in [0, 1, 2, 3, 4]:
             # conf_id = "conf_" + str(i) + "_or_thres_" + str(thres) + "_" + method
@@ -124,11 +123,11 @@ class Statistics:
     @staticmethod
     def max_comp(num_kg, method, dataset, prefix, thres):
         print("maxCS_" + "KG" + num_kg)
-        kg =  KnowledgeGraph(num_kg, dataset, prefix, "multi_directed", "original", "original", method)
-        comps = sorted(nx.weakly_connected_components(kg.graph), key=len)
-        max_len = len(comps[-1])/kg.graph.number_of_nodes()
+        # kg =  KnowledgeGraph(num_kg, dataset, prefix, "multi_directed", "original", "original", method)
+        # comps = sorted(nx.weakly_connected_components(kg.graph), key=len)
+        # max_len = len(comps[-1])/kg.graph.number_of_nodes()
         b_dict = dict()
-        b_dict["original"] = max_len
+        # b_dict["original"] = max_len
 
         for i in [0, 1, 2, 3, 4]:
             # conf_id = "conf_" + str(i) + "_or_thres_" + str(thres) + "_" + method

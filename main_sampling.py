@@ -3,6 +3,7 @@ import os
 
 from numpy import array
 from sampling.start_analysis import start_analysis
+from sampling.start_results_analysis import start_result_analysis
 from sampling.start_sampling import start_sampling
 
 from sampling.Configuration import Configuration
@@ -72,16 +73,27 @@ if __name__ == '__main__':
             conf_id = args[2]
             thres = args[3]
 
-        start_analysis("mem_exp_no_1to1", "", "useless", sample, conf_id, "RREA", thres)
+        start_analysis("mem_exp_no_1to1", "", "useless", sample, conf_id, "RDGCN", thres)
 
     # convert sampled data of RREA to be compatible with OpenEA methods
     if args[0] == "convert_sampling":
         conf_id = args[1]
-        Utils.convert_sampling(conf_id, "D_Y_15K_V1")
+        Utils.convert_sampling(conf_id, "mem_exp_no_1to1")
 
     if args[0] == "generate_rels":
         Utils.generate_rels("D_Y_15K_V1")
 
     if args[0] == "convert_to_ttl":
         conf_id = args[1]
-        Utils.convert_to_ttl(conf_id, "D_Y_15K_V1")
+        Utils.convert_to_ttl(conf_id, "D_Y_15K_V2")
+
+    if args[0] == "results_analysis":
+        conf_id = ""
+        if args[1] == "original":
+            sample = "original"
+            conf_id = "original"
+        elif args[1] == "sampled":
+            sample = "sampled"
+            if len(args) > 2:
+                conf_id = args[2]
+        start_result_analysis("D_Y_15K_V1", "", "degree", sample, conf_id)

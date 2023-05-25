@@ -12,7 +12,7 @@ def start_analysis(dataset, prefix, measure, sample, conf_id, method, thres):
 
     # print(Statistics.basic_statistics(kg1_mdi))
     # print(Statistics.basic_statistics(kg2_mdi))
-
+    # exit()
     # Statistics.explore("1", method, dataset, prefix, thres)
 
     Statistics.weakly_conn_comps("1", method, dataset, prefix, thres)
