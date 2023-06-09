@@ -39,15 +39,14 @@ def prepare_deepmatcher_dataset(dataset_path, left='tableA.csv', right='tableB.c
 
 
 def run(dataset):
-
-    deepmatcher_datasets = os.path.join('..', 'resources', 'Datasets')
+    deepmatcher_datasets = os.path.join(os.getcwd(), 'resources', 'Datasets')
     dataset = os.path.join(deepmatcher_datasets, dataset)
     prepare_deepmatcher_dataset(dataset)
 
 
 
 if __name__ == '__main__':
-    deepmatcher_datasets = os.path.join('..', 'resources', 'Datasets')
+    deepmatcher_datasets = os.path.join('resources', 'Datasets')
 
     dataset = os.path.join(deepmatcher_datasets, 'Beer')
     prepare_deepmatcher_dataset(dataset)

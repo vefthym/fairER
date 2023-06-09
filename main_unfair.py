@@ -29,7 +29,7 @@ def run(data, data_path, train, valid, test, k_results):
     # Unique Mapping Clustering
     #############################
 
-    original_clusters = umc.run(initial_pairs[:k_results])
+    original_clusters = umc.run(initial_pairs[:k_results], k_results)
     # print("\nclustering results:\n", original_clusters)
 
 

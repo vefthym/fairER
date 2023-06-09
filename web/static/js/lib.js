@@ -14,7 +14,15 @@ function has_condition() {
 }
 
 function has_cached_data() {
+
     var dataset = $('#dataset-val').val();
+    var dataset_type = $('#dataset-val').select2("data")[0].type
+
+    // Disable sampling and KG methods
+    // if(dataset_type == "tab") {
+
+    // }
+    
     clear_all_containers();
 
     if (non_cached_datasets.includes(dataset)){

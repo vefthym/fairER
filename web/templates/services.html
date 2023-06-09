@@ -57,21 +57,6 @@
         </a>
     </div>
     <div class="requests-main-container container">
-        <label for="method-val" id="select-method-label"><b>Select a Method:</b></label>
-        <div class="container" id="methods-container">
-
-            <select class="form-select" id="method-val">
-                <!-- <optgroup class="select2-result-selectable" label="Tabular">
-
-                </optgroup>
-
-                <optgroup class="select2-result-selectable" label="Graph">
-                    
-                </optgroup> -->
-
-            </select>
-            
-        </div>
         <label for="dataset-val" id="select-dataset-label"><b>Select a Dataset:</b></label>
         <div class="container-fluid" id="datasets-container">
 
@@ -80,6 +65,37 @@
             </select>
             
         </div>
+       
+        <label for="method-val" id="select-method-label"><b>Select a Method:</b></label>
+        <div class="container-fluid" id="methods-container">
+
+            <select class="form-select" id="method-val">
+
+            </select>
+            
+        </div>
+
+        <div class="container-fluid" id="group_labels">
+            <label for="sampling-val" class="select-sampling-label" style="width: 46% !important;"><b>Sampling:</b></label>
+            <label for="jump_prob" class="select-sampling-label"><b>Jump Prob.</b></label>
+            <label for="sampl_size" class="select-sampling-label" style="margin-left: 46px !important;"><b>Sampling Size</b></label>
+            <label for="min_comp" class="select-sampling-label" style="margin-left: 26px !important;"><b>Min Comp.</b></label>
+        </div>
+
+        <div class="container-fluid" id="sampling-container">
+
+            <select class="form-select" id="sampling-val">
+          
+            </select>
+
+            <input type="text" class="form-control hypers" id="jump_prob" name="jump_prob" value="0.15">
+            <input type="text" class="form-control hypers" id="sampl_size" name="sampl_size" value="1000">
+            <input type="text" class="form-control hypers" id="min_comp" name="min_comp" value="1">
+
+            <!-- <button type="button" class="btn btn-secondary" id="start_sampling">Start Sampling</button> -->
+            
+        </div>
+       
         <div id="datasets-info-container">
             
         </div>
@@ -103,7 +119,7 @@
                 <div class="container fairER-container">
                     <div class="btn-group container" role="group">
                         <button type="button" class="btn btn-secondary"
-                            onclick="get_evaluation('fairER', 'fairer-container')">
+                            onclick="run_exp('fairER', 'fairer-container')">
                             Evaluation Results
                         </button>
                         <button type="button" class="btn btn-secondary"
@@ -123,7 +139,7 @@
             <div class="tab-pane fade" id="Unfair" role="tabpanel" aria-labelledby="Unfair-tab">
                 <div class="container btn-group" role="group">
                     <button type="button" class="btn btn-secondary"
-                            onclick="get_evaluation('unfair', 'unfair-container')">
+                            onclick="run_exp('unfair', 'unfair-container')">
                             Evaluation Results
                         </button>
                     <button type="button" class="btn btn-secondary"

@@ -172,7 +172,7 @@ def getEvaluationResults():
             methods.runUnfair(dataset)
 
         # open the file that was created
-    with open(os.path.join('data', 'json_data', 'evaluation_data.json')) as json_file:
+    with open(os.path.join(os.getcwd(), 'web', 'data', 'json_data', 'evaluation_data.json')) as json_file:
             data = json.load(json_file)  # get the data from this file
 
     accuracy = str(data['accuracy'])
@@ -214,7 +214,7 @@ def getPreds():
             methods.runUnfair(dataset) 
 
         # open the file that was created
-        with open(os.path.join('data', 'json_data', 'preds_data.json')) as json_file:
+        with open(os.path.join(os.getcwd() + '/web/' + 'data', 'json_data', 'preds_data.json')) as json_file:
             data = json.load(json_file)  # get the data from this file
 
         response = app.response_class(
@@ -258,7 +258,7 @@ def getClust():
         else:
             methods.runUnfair(dataset)
 
-        with open(os.path.join('data', 'json_data', 'clusters_data.json')) as json_file:
+        with open(os.path.join(os.getcwd() + '/web/' + 'data', 'json_data', 'clusters_data.json')) as json_file:
             data = json.load(json_file)
 
         response = app.response_class(
@@ -643,7 +643,8 @@ def downloadDMdatasets():
         The response is in JSON format.
     """
     try:
-        methods.download_dataset()
+        
+        methods.download_dm_dataset()
         methods.read_dm_datasets()
         response = app.response_class(
             response = json.dumps({'status': 'succeed'}),
@@ -663,7 +664,34 @@ def downloadDMdatasets():
         )
         return response
 
+@app.route("/requests/downloadKGdatasets", methods=['POST'])
+def downloadKGdatasets():
+    """
+        Downloads and sets up all the datasets from ...
+        (link for datasets)
 
+        The response is in JSON format.
+    """
+    try:
+        methods.download_kg_dataset()
+        methods.read_kg_datasets()
+        response = app.response_class(
+            response = json.dumps({'status': 'succeed'}),
+            mimetype = 'application/json'
+        )
+        return response
+    except Exception as e:
+        exception_type, exception_object, exception_traceback = sys.exc_info()
+        filename = exception_traceback.tb_frame.f_code.co_filename
+        line_number = exception_traceback.tb_lineno
+        func_name = inspect.stack()[0][3] 
+        response = app.response_class(
+            response=json.dumps({'exception_type': str(exception_type), 'exception': str(e),
+                                'func_name': str(func_name+'()'), 'filename': str(filename),    
+                                'line_number': str(line_number)}),
+            mimetype='application/json'
+        )
+        return response
 
 @app.route("/requests/tupleIsProtectedJSON", methods=['POST'])
 def tupleIsProtectedJSON():
@@ -840,6 +868,38 @@ def deleteDataset():
         response = app.response_class(
                 response = json.dumps({'status': str(status)}),
                 mimetype = 'application/json'
+        )
+        return response
+    except Exception as e:
+        exception_type, exception_object, exception_traceback = sys.exc_info()
+        filename = exception_traceback.tb_frame.f_code.co_filename
+        line_number = exception_traceback.tb_lineno
+        func_name = inspect.stack()[0][3] 
+        response = app.response_class(
+            response=json.dumps({'exception_type': str(exception_type), 'exception': str(e),
+                                'func_name': str(func_name+'()'), 'filename': str(filename),    
+                                'line_number': str(line_number)}),
+            mimetype='application/json'
+        )
+        return response
+
+
+@app.route('/requests/runSampling', methods=['GET'])
+def startSampling():
+    """
+        ...
+    """
+    try:
+
+        dataset = request.args.get('dataset')
+        method = request.args.get('method')
+        p = request.args.get('p')
+        s = request.args.get('s')
+        t = request.args.get('t')
+        methods.run_sampling(dataset, method, p, s, t)
+        response = app.response_class(
+            response=json.dumps({'message': "done"}),
+            mimetype='application/json'
         )
         return response
     except Exception as e:

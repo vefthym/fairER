@@ -417,6 +417,46 @@ function get_predictions(alg, container_id) {
     });
 }
 
+function run_sampling() {
+
+
+    // [TODO] check for cached sampled
+
+    var dataset = $('#dataset-val').val()
+    var method = $('#method-val').val()
+    var p = $('#jump_prob').val()
+    var s = $('#sampl_size').val()
+    var t = $('#min_comp').val()
+
+    $.ajax({
+        type: "GET",
+        url: "/requests/runSampling?dataset=" + dataset + "?method=" + method + "?p=" + p + "?s=" + s + "?t=" + t,
+        dataType: 'text',
+        success: function (response) {
+            const obj = JSON.parse(response);
+            //If there is no exception 
+            if (obj.exception == undefined) {
+                alert("sampling done")
+            }
+            //If there is an exception, print details about it
+            else print_exception(obj.exception_type, obj.exception, obj.filename, obj.func_name, obj.line_number)
+        },
+        error: function (error) {
+            console.log(error);
+        }
+    });
+}
+
+function run_exp(alg, container){
+
+    sampling = $("#sampling-val").val()
+    if (sampling == "SUSIE") {
+        run_sampling();
+    }
+
+    get_evaluation(alg, container)
+}
+
 
 /* Prints the clusters in the 'container_id' html element */
 function get_clusters(alg, container_id) {
@@ -649,20 +689,50 @@ function upload_dataset() {
                     datasets_names_list = response.datasets_list
                     non_cached_datasets = response.non_cached_datasets
                     datasets_without_condition = response.datasets_without_condition
+                    
+                    // [TODO] Testing purpose. DELETE IT !
+                    // datasets_names_list.length = 0
+
                     if (datasets_names_list.length == 0) {
                         $("#select-dataset-label").html("")
                         $("#datasets-container").css("display", "block");
                         $("#datasets-container").css("text-align", "center");
                         htmlRes = '<p style="color:red">No datasets found on system!</p>' +
-                            '<b><p>Press the button to download the Datasets from DeepMatcher.</b></p>' +
-                            '<button type="button" class="btn btn-success" onclick="download_dm_datasets()">Download</button>';
+                            '<b><p>Press the button to download the Datasets from DeepMatcher and OpenEA.</b></p>' +
+                            '<button type="button" class="btn btn-success" onclick="download_datasets()">Download</button>';
                         $('#datasets-container').html(htmlRes)
+
+                        // Hide if no datasets
+                        $('#sampling-val').addClass("hidden");
+                        $('#group_labels').addClass("hidden");
+                        $('#select-method-label').addClass("hidden");
+                        $('#method-val').addClass("hidden");
+                        $('.hypers').addClass("hidden");
                     }
                     else {
+
+                        $('#sampling-val').removeClass("hidden");
+                        $('#group_labels').removeClass("hidden");
+                        $('#select-method-label').removeClass("hidden");
+                        $('#method-val').removeClass("hidden");
+                        $('.hypers').removeClass("hidden");
+
                         var data = [];
-                        datasets_names_list.forEach(item =>
-                            data.push({ id: item, text: item })
-                        );
+                        var kg_data = []
+                        var tab_data = []
+                        datasets_names_list.forEach(item => {
+                            if (item.includes("D_W") || item.includes("D_Y")) {
+                                if(!item.includes("_RREA")){
+                                    type = "kg";
+                                    kg_data.push({ id: item, text: item, type: type})
+                                }
+                            }
+                            else if (!item.includes("mdb")) {
+                                    type = "tab";
+                                    tab_data.push({ id: item, text: item, type: type});
+                            }
+                            data.push({ id: item, text: item, type: type})
+                    });
                         $('#datasets-container').html('<select id="dataset-val" style="width:80%;" onchange="has_cached_data()"></select>')
     
                         let statistics_btn = document.createElement("button");
@@ -690,10 +760,18 @@ function upload_dataset() {
                         });
                         $("#datasets-container").append(delete_btn)
 
-
+                        $("#datasets-container").append(upload_btn)
     
                         $("#dataset-val").select2({
-                            data: data
+                            data: [{
+                                id: '',
+                                text: 'Tabular',
+                                children: tab_data
+                            },{
+                                id: '',
+                                text: 'Knowledge Graph',
+                                children: kg_data
+                            }]
                         })
 
                         $('#method-val').select2({
@@ -705,11 +783,24 @@ function upload_dataset() {
                                 ]
                             },{
                                 id: '',
-                                text: 'Graph',
+                                text: 'Knowledge Graph',
                                 children: [
                                     { id: 'rrea', text: 'RREA' },
                                     { id: 'rdgcn', text: 'RDGCN' },
+                                    { id: 'multike', text: 'MultiKE' },
+                                    { id: 'bert_int', text: 'BERT-INT' },
                                 ]
+                            }]
+                        })
+
+                        $("#sampling-val").select2({
+                            data: [{
+                                id: 'no_sampling',
+                                text: 'No Sampling'
+                            },
+                            {
+                                id: 'SUSIE',
+                                text: 'SUSIE'
                             }]
                         })
                         
@@ -726,8 +817,8 @@ function upload_dataset() {
     });
 
 
-/* Downloads Deepmatcher datasets */
-function download_dm_datasets() {
+/* Downloads Deepmatcher and Knowledge Graph datasets */
+function download_datasets() {
     htmlRes = '<b><p>Datasets are dowloading.</b></p><p>Estimated time: 30sec.</p>' +
         '<div class="loader"></div>';
     $('#datasets-container').html(htmlRes)
@@ -737,16 +828,52 @@ function download_dm_datasets() {
         success: function (response) {
             //If there is no exception 
             if (response.exception == undefined) {
-                $('#datasets-container').html('')
+                // $('#datasets-container').html('')
                 Swal.fire({
                     position: 'center',
                     icon: 'success',
                     title: 'Done!',
-                    text: 'The page will be reloaded.',
-                    showConfirmButton: false,
-                    timer: 3000
-                })
-                setTimeout(function () { location.reload(); }, 3000);
+                    text: 'Datasets for matching tabular data were downloaded.',
+                    showConfirmButton: true,
+                    // timer: 3000
+                }).then((response) => {
+                    $.ajax({
+                        url: '/requests/downloadKGdatasets',
+                        type: 'POST',
+                        success: function (response) {
+                            //If there is no exception 
+                            if (response.exception == undefined) {
+                                $('#datasets-container').html('')
+                                Swal.fire({
+                                    position: 'center',
+                                    icon: 'success',
+                                    title: 'Done!',
+                                    text: 'Datasets for matching knowledge graphs were downloaded.',
+                                    showConfirmButton: true,
+                                    // timer: 3000
+                                }).then((response)=>{
+
+                                    Swal.fire({
+                                        position: 'center',
+                                        // icon: 'success',
+                                        // title: 'The page will be reloaded',
+                                        text: 'The page will be reloaded.',
+                                        showConfirmButton: false,
+                                        timer: 2000
+                                    })
+
+                                    setTimeout(function () { location.reload(); }, 3000);
+                                  })
+                            }
+                            //If there is an exception, print details about it
+                            else print_exception(response.exception_type, response.exception, response.filename, response.func_name, response.line_number)
+                        },
+                        error: function (error) {
+                            console.log(error);
+                        }
+                    });
+                  });
+                // setTimeout(function () { location.reload(); }, 3000);
             }
             //If there is an exception, print details about it
             else print_exception(response.exception_type, response.exception, response.filename, response.func_name, response.line_number)
@@ -755,6 +882,8 @@ function download_dm_datasets() {
             console.log(error);
         }
     });
+
+    
 }
 
 

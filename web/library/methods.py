@@ -1,3 +1,4 @@
+import io
 import pandas as pd
 import json
 import os
@@ -8,11 +9,13 @@ import zipfile
 import requests
 import shutil
 import base64
+import gdown
+from sampling.start_sampling import *
 
 from pathlib import Path
-sys.path.append(os.path.abspath('../'))
+sys.path.append(os.path.abspath('./'))
 import util, read_datasets, main_fairER, main_unfair, statistics
-
+sys.path.append(os.path.abspath('../'))
 
 def runFairER(dataset, explanation):
     """
@@ -30,9 +33,9 @@ def runFairER(dataset, explanation):
     """
     cur_dir = os.path.abspath(".")
     if int(explanation) == 0:
-        main_fairER.main(os.path.join(cur_dir, '..', 'resources','Datasets',dataset), 'joined_train.csv', 'joined_valid.csv', 'joined_test.csv', explanation)
+        main_fairER.main(os.path.join(cur_dir, 'resources','Datasets',dataset), 'joined_train.csv', 'joined_valid.csv', 'joined_test.csv', explanation)
     else:
-        main_fairER.main(os.path.join(cur_dir, '..', 'resources','Datasets',dataset), 'merged_train.csv', 'merged_valid.csv', 'merged_test.csv', explanation)
+        main_fairER.main(os.path.join(cur_dir, 'resources','Datasets',dataset), 'merged_train.csv', 'merged_valid.csv', 'merged_test.csv', explanation)
 
 
 def runUnfair(dataset):
@@ -47,7 +50,7 @@ def runUnfair(dataset):
         Precondition: dataset is String.
     """
     cur_dir = os.path.abspath(".")
-    main_unfair.main(os.path.join(cur_dir, '..', 'resources','Datasets',dataset), 'joined_train.csv', 'joined_valid.csv', 'joined_test.csv', 20) # k==20
+    main_unfair.main(os.path.join(cur_dir, 'resources','Datasets',dataset), 'joined_train.csv', 'joined_valid.csv', 'joined_test.csv', 20) # k==20
 
 
 
@@ -244,7 +247,7 @@ def getAttributes(table, dataset):
         file = 'tableA.csv'
     else:
         file = 'tableB.csv'
-    with open('../resources/Datasets/'+dataset+'/'+file, errors='ignore') as csv_file:
+    with open(os.getcwd() + '/resources/Datasets/'+dataset+'/'+file, errors='ignore') as csv_file:
         csv_reader = csv.reader(csv_file, delimiter=',')
         list_of_column_names = []
 
@@ -352,7 +355,7 @@ def eval_to_json(accuracy, spd, eod):
     """
     data = {'accuracy': accuracy, 'SPD': spd, 'EOD': eod}
     json_string = json.dumps(data)
-    with open('data/json_data/evaluation_data.json', 'w+') as outfile:
+    with open(os.getcwd() + '/web/' + 'data/json_data/evaluation_data.json', 'w+') as outfile:
         outfile.write(json_string)
 
 
@@ -372,7 +375,7 @@ def clusters_to_json(clusters):
     data = {"clusters": json_string}
 
     json_string = json.dumps(data)
-    with open('data/json_data/clusters_data.json', 'w+') as outfile:
+    with open(os.getcwd() + '/web/' + 'data/json_data/clusters_data.json', 'w+') as outfile:
         outfile.write(json_string)
 
 
@@ -381,7 +384,7 @@ def preds_to_json(data_path):
         Writes the predictions to a json file.
     """
     csv_to_json(data_path + '/dm_results.csv',
-                'data/json_data/preds_data.json') 
+                os.getcwd() + '/web/' + 'data/json_data/preds_data.json') 
 
 
 
@@ -398,12 +401,11 @@ def extract_dataset(filename):
     directory = os.path.splitext(filename)[0]
 
     cur_dir = os.path.abspath(".")
-    path = os.path.join(cur_dir, '..',  'resources', 'Datasets', directory)
+    path = os.path.join(cur_dir,  'resources', 'Datasets', directory)
     os.mkdir(path)
     figures_path = os.path.join(path, 'figures')
     os.mkdir(figures_path)
-    
-    with zipfile.ZipFile(os.path.join(dataset_path, filename), 'r') as zip_ref:
+    with zipfile.ZipFile(os.path.join(cur_dir, "web", dataset_path, filename), 'r') as zip_ref:
         zip_ref.extractall(path)
 
 
@@ -427,19 +429,21 @@ def delete_dataset_zip(filename):
     """
         Deletes the downloaded zip file
     """
+
+    # [TODO] Path needs to be changed
     path = os.path.join('data', 'datasets', filename)
     if os.path.exists(path):
         os.remove(path)
-
 
 
 def datasets_names_to_json():
     """
         Returns a list with the names of all the available datasets
     """
+    
     datasets_list = [] 
     cur_dir = os.path.abspath(".")
-    rootdir = os.path.join(cur_dir, '..', 'resources', 'Datasets')
+    rootdir = os.path.join(cur_dir, 'resources', 'Datasets')
 
     for path in Path(rootdir).iterdir():
         if path.is_dir():
@@ -482,7 +486,7 @@ def non_cached_datasets():
     non_cached_datasets = []
 
     parent_dir = Path(os.getcwd()).parent.absolute()
-    os.chdir(parent_dir)
+    # os.chdir(parent_dir)
     datasets_dir = os.path.join('resources', 'Datasets')
     for path in Path(datasets_dir).iterdir():
         if path.is_dir():
@@ -490,27 +494,32 @@ def non_cached_datasets():
             if not os.path.isfile(dm_results):
                 non_cached_datasets.append(os.path.basename(path))
     
-    os.chdir(os.path.join(os.getcwd(),'web'))
+    # os.chdir(os.path.join(os.getcwd(),'web'))
     return non_cached_datasets
 
 
 
 
-def download_dataset():
+def download_dm_dataset():
     """
         Downloads and sets up all the DM datasets from https://github.com/anhaidgroup/deepmatcher/blob/master/Datasets.md
     """
+    
+    import os
+    cwd = os.getcwd()
+
     Beer_url = 'http://pages.cs.wisc.edu/~anhai/data1/deepmatcher_data/Structured/Beer/beer_exp_data.zip'
     downloaded_obj = requests.get(Beer_url)
-    with open(os.path.join('data', 'datasets', 'Beer.zip'), "wb") as file:
+    with open(os.path.join('web', 'data', 'datasets', 'Beer.zip'), "wb") as file:
         file.write(downloaded_obj.content)
     extract_dataset('Beer.zip')
     delete_dataset_zip('Beer.zip')
+    
     export_exp_data('Beer')
-
+    
     iTunes_Amazon_url = 'http://pages.cs.wisc.edu/~anhai/data1/deepmatcher_data/Structured/iTunes-Amazon/itunes_amazon_exp_data.zip'
     downloaded_obj = requests.get(iTunes_Amazon_url)
-    with open(os.path.join('data', 'datasets', 'iTunes-Amazon.zip'), "wb") as file:
+    with open(os.path.join('web', 'data', 'datasets', 'iTunes-Amazon.zip'), "wb") as file:
         file.write(downloaded_obj.content)
     extract_dataset('iTunes-Amazon.zip')
     delete_dataset_zip('iTunes-Amazon.zip')
@@ -519,7 +528,7 @@ def download_dataset():
     
     DBLP_ACM_url = 'http://pages.cs.wisc.edu/~anhai/data1/deepmatcher_data/Structured/DBLP-ACM/dblp_acm_exp_data.zip'
     downloaded_obj = requests.get(DBLP_ACM_url)
-    with open(os.path.join('data', 'datasets', 'DBLP-ACM.zip'), "wb") as file:
+    with open(os.path.join('web', 'data', 'datasets', 'DBLP-ACM.zip'), "wb") as file:
         file.write(downloaded_obj.content)
     extract_dataset('DBLP-ACM.zip')
     delete_dataset_zip('DBLP-ACM.zip')
@@ -527,7 +536,7 @@ def download_dataset():
     
     DBLP_GoogleScholar_url = 'http://pages.cs.wisc.edu/~anhai/data1/deepmatcher_data/Structured/DBLP-GoogleScholar/dblp_scholar_exp_data.zip'
     downloaded_obj = requests.get(DBLP_GoogleScholar_url)
-    with open(os.path.join('data', 'datasets', 'DBLP-GoogleScholar.zip'), "wb") as file:
+    with open(os.path.join('web', 'data', 'datasets', 'DBLP-GoogleScholar.zip'), "wb") as file:
         file.write(downloaded_obj.content)
     extract_dataset('DBLP-GoogleScholar.zip')
     delete_dataset_zip('DBLP-GoogleScholar.zip')
@@ -535,19 +544,43 @@ def download_dataset():
 
     Amazon_Google_url = 'http://pages.cs.wisc.edu/~anhai/data1/deepmatcher_data/Structured/Amazon-Google/amazon_google_exp_data.zip'
     downloaded_obj = requests.get(Amazon_Google_url)
-    with open(os.path.join('data', 'datasets', 'Amazon-Google.zip'), "wb") as file:
+    with open(os.path.join('web', 'data', 'datasets', 'Amazon-Google.zip'), "wb") as file:
         file.write(downloaded_obj.content)
     extract_dataset('Amazon-Google.zip')
     delete_dataset_zip('Amazon-Google.zip')
     
     Walmart_Amazon_url = 'http://pages.cs.wisc.edu/~anhai/data1/deepmatcher_data/Structured/Walmart-Amazon/walmart_amazon_exp_data.zip'
     downloaded_obj = requests.get(Walmart_Amazon_url)
-    with open(os.path.join('data', 'datasets', 'Walmart-Amazon.zip'), "wb") as file:
+    with open(os.path.join('web', 'data', 'datasets', 'Walmart-Amazon.zip'), "wb") as file:
         file.write(downloaded_obj.content)
     extract_dataset('Walmart-Amazon.zip')
     delete_dataset_zip('Walmart-Amazon.zip')
     export_exp_data('Walmart-Amazon')
 
+
+def download_kg_dataset():
+    """
+        Downloads and sets up all the DM datasets from https://github.com/anhaidgroup/deepmatcher/blob/master/Datasets.md
+    """
+
+    url = 'https://drive.google.com/uc?id=1XkOAa_vbf1gHuVTTXwebCQ7gV3yD2SnD&export=download'
+    outputfile = gdown.download(url, output=os.path.join('web', 'data', 'datasets', 'KG_Datasets.zip'))
+    extract_dataset('KG_Datasets.zip')
+
+    cur_dir = os.path.abspath(".")
+    folder_path = os.path.join(cur_dir, 'resources', 'Datasets', 'KG_Datasets')
+    shutil.rmtree(os.path.join(folder_path, "figures"))
+
+    parent_folder = os.path.dirname(folder_path)
+    
+    subdirectories = [subdir for subdir in os.listdir(folder_path) if os.path.isdir(os.path.join(folder_path, subdir))]
+    
+    for subdir in subdirectories:
+        subdir_path = os.path.join(folder_path, subdir)
+        # Move the subdirectory to the parent folder
+        shutil.move(subdir_path, parent_folder)
+        # Delete KG_Datasets folder
+    shutil.rmtree(folder_path)
 
     
 def read_dm_datasets():
@@ -561,6 +594,11 @@ def read_dm_datasets():
     read_datasets.run('Amazon-Google')
     read_datasets.run('Walmart-Amazon')
 
+def read_kg_datasets():
+    """
+        Reads all the DM datasets to produce the "joined_" files.
+    """
+    print("read")
 
 
 
@@ -574,8 +612,8 @@ def export_exp_data(dataset):
         Copies the files from "exp_data" to the dataset's directory.
     """
     cur_dir = os.path.abspath(".")
-    file_source = os.path.join(cur_dir, '..', 'resources', 'Datasets', dataset, 'exp_data')
-    file_destination = os.path.join(cur_dir, '..', 'resources', 'Datasets', dataset)
+    file_source = os.path.join(cur_dir, 'resources', 'Datasets', dataset, 'exp_data')
+    file_destination = os.path.join(cur_dir, 'resources', 'Datasets', dataset)
     
     shutil.copy(os.path.join(file_source,'tableA.csv'), file_destination)
     shutil.copy(os.path.join(file_source,'tableB.csv'), file_destination)
@@ -596,7 +634,7 @@ def img_to_base64(dataset, figure):
         Parameter figure: Which one of the figures ("Figure_1.png" or "Figure_2.png")
     """
     cur_dir = os.path.abspath(".")
-    path_to_figure = os.path.join(cur_dir, '..', 'resources', 'Datasets', dataset, 'figures', figure)
+    path_to_figure = os.path.join(cur_dir, 'resources', 'Datasets', dataset, 'figures', figure)
     with open(path_to_figure, "rb") as image_file:
         encoded_string = base64.b64encode(image_file.read())
 
@@ -611,7 +649,7 @@ def explanation_exists(dataset):
         Returns whether the explanation exists.
     """
     cur_dir = os.path.abspath(".")
-    path_to_figure = os.path.join(cur_dir, '..', 'resources', 'Datasets', dataset, 'figures', 'Figure_1.png')
+    path_to_figure = os.path.join(cur_dir, 'resources', 'Datasets', dataset, 'figures', 'Figure_1.png')
     exists = os.path.exists(path_to_figure)
     return exists
 
@@ -680,4 +718,7 @@ def delete_condition_from_file(dataset):
         pickle.dump(data, pkl_file, protocol=pickle.HIGHEST_PROTOCOL)
     with open(pickle_w_exp_path, 'wb') as pkl_file_w_exp:
         pickle.dump(data_w_exp, pkl_file_w_exp, protocol=pickle.HIGHEST_PROTOCOL)
-    
+
+
+def run_sampling(dataset, method, p, s, t):
+    start_sampling()
