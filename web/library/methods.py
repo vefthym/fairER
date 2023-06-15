@@ -16,6 +16,7 @@ from pathlib import Path
 sys.path.append(os.path.abspath('./'))
 from start_sampling import start_sampling
 import util, read_datasets, main_fairER, main_unfair, statistics
+import main_RREA_fairER
 sys.path.append(os.path.abspath('../'))
 
 def runFairER(dataset, explanation):
@@ -37,6 +38,13 @@ def runFairER(dataset, explanation):
         main_fairER.main(os.path.join(cur_dir, 'resources','Datasets',dataset), 'joined_train.csv', 'joined_valid.csv', 'joined_test.csv', explanation)
     else:
         main_fairER.main(os.path.join(cur_dir, 'resources','Datasets',dataset), 'merged_train.csv', 'merged_valid.csv', 'merged_test.csv', explanation)
+
+def runFairER_RREA(dataset, explanation):
+
+    cur_dir = os.path.abspath(".")
+    conf = "original"
+    which_entity = 0
+    main_RREA_fairER.main(20, dataset, conf, which_entity)
 
 
 def runUnfair(dataset):

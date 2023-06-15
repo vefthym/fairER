@@ -65,7 +65,7 @@ print(dataset)
 print(run_path)
 print(conf_id)
 print(sample)
-
+exit()
 if export_results == True:
     dest_path = "exp_results/" + measure + "/" + dataset + "/" + conf_id + "/"
     isExist = os.path.exists(dest_path)

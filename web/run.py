@@ -165,11 +165,18 @@ def getEvaluationResults():
 
     dataset = request.args.get('dataset')
     alg = request.args.get('alg')
+    method = request.args.get('method')
     explanation = request.args.get('explanation')
-    if alg == 'fairER':
-            methods.runFairER(dataset, explanation)
-    else:
-            methods.runUnfair(dataset)
+    if method == "Deepmatcher":
+        if alg == 'fairER':
+                methods.runFairER(dataset, explanation)
+        else:
+                methods.runUnfair(dataset)
+    elif method == "RREA":
+        if alg == 'fairER':
+                methods.runFairER(dataset, explanation)
+        else:
+                methods.runUnfair(dataset)
 
         # open the file that was created
     with open(os.path.join(os.getcwd(), 'web', 'data', 'json_data', 'evaluation_data.json')) as json_file:

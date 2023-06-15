@@ -225,9 +225,9 @@ class Utils:
                         fp2.write(ent + "\t" + line.split("\t")[1] + "\t" + line.split("\t")[2])
 
 
-    def generate_rels(conf_id, dataset):
+    def generate_rels(dataset):
 
-        RREA_process_RREA = "resources/Datasets/sampled/" + dataset + "_RREA/" + conf_id
+        RREA_process_RREA = "resources/Datasets/" + dataset + "_RREA/"
         RREA_process_RDGCN = "resources/Datasets/" + dataset + "/"
         
 

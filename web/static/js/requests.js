@@ -447,11 +447,17 @@ function run_sampling() {
 function run_exp(alg, container){
 
     sampling = $("#sampling-val").val()
+    method = $("#method-val").val()
+
     if (sampling == "SUSIE") {
         run_sampling();
+        // get_evaluation_sampl(alg, container);
+    }
+    else if (sampling == "No sampling") {
+        get_evaluation(alg, container, method);
     }
 
-    get_evaluation(alg, container)
+    
 }
 
 
@@ -513,7 +519,7 @@ function get_clusters(alg, container_id) {
 
 
 /* Prints the evaluation results in the 'container_id' html element */
-function get_evaluation(alg, container_id) {
+function get_evaluation(alg, container_id, method) {
     var explanation = 1;
     var dataset = $('#dataset-val').val()
     if (has_condition() == false)
@@ -533,7 +539,7 @@ function get_evaluation(alg, container_id) {
 
     $.ajax({
         type: "GET",
-        url: "/requests/getEvaluationResults?alg=" + alg + "&dataset=" + dataset + "&explanation=" + explanation,
+        url: "/requests/getEvaluationResults?alg=" + alg + "&dataset=" + dataset + "&method=" + method + "&explanation=" + explanation,
         contentType: "application/json",
         dataType: 'text',
         success: function (response) {

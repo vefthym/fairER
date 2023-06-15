@@ -16,18 +16,25 @@ import web.library.methods as methods
     Run fairER for RREA
 """
 
-def run(sample, conf_id):
+def run(conf, dest_path):
     """
     Purpose: Run RREA
     """
 
+    if conf == "original":
+        dataset_path = 
+    else:
+        dataset_path = 
+
     os.chdir("matching/RREA/")
-    os.system("python RREA.py " + sample + " " + conf_id + " -1")
+    os.system("python RREA.py " + dataset_path + " " + dest_path)
 
 
 
-def main(dataset, k_results, which_entity, conf_id, sample):
-    dest_path = "matching/RREA/exp_results/test_experiments/" + dataset + "/" + conf_id + "/" + dataset + "_sim_lists_NO_CSLS_sampled.pickle"
+def main(k_results, dataset, conf, which_entity):
+
+    dest_path = "resources/Datasets/exp_results/" + dataset + "_RREA/" + conf + "/" + dataset + "_sim_lists.pickle"
+    
     isExist = os.path.exists(dest_path)
     
     """
@@ -53,8 +60,8 @@ def main(dataset, k_results, which_entity, conf_id, sample):
         # Fair Unique Mapping Clustering
         #################################
 
-        kg1 = KnowledgeGraph("1", dataset, "", "multi_directed", "sampled", conf_id, "RREA")
-        kg2 = KnowledgeGraph("2", dataset, "", "multi_directed", "sampled", conf_id, "RREA")
+        kg1 = KnowledgeGraph("1", dataset, "multi_directed", "sampled", conf, "RREA")
+        kg2 = KnowledgeGraph("2", dataset, "multi_directed", "sampled", conf, "RREA")
 
         g = Grouping(kg1, kg2, dataset, "RREA")
         g.group_based_on_component(kg1, kg2)
@@ -80,15 +87,15 @@ def main(dataset, k_results, which_entity, conf_id, sample):
         print()
 
     elif not isExist:
-        run(sample, conf_id)
+        run(conf, dest_path)
 
     
 
-if __name__ == "__main__":
+# if __name__ == "__main__":
     
-    k_results = 20
-    dataset = "D_W_15K_V1"
-    which_entity = 0
-    conf_id = "conf_3_only_p"
-    sample = "sampled"
-    main(dataset, k_results, which_entity, conf_id, sample)
+#     k_results = 20
+#     dataset = "D_W_15K_V1"
+#     which_entity = 0
+#     conf_id = "conf_3_only_p"
+#     sample = "sampled"
+#     main(dataset, k_results, which_entity, conf_id, sample)

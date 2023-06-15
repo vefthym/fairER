@@ -32,5 +32,5 @@ def start_sampling(dataset, method, p, s, t):
     sampled_attr_df1.to_csv(dest_path + "/attr_triples_1", sep="\t", index=False, columns=["e1", "attr", "val"], header=False)  
     sampled_attr_df2.to_csv(dest_path + "/attr_triples_2", sep="\t", index=False, columns=["e1", "attr", "val"], header=False)
     Utils.generate_seeds_and_splittings(dataset, "", ents1, ents2, dest_path +  "/721_5fold/2/", method)
-    Utils.generate_rels(p + "_" + s + "_" + t, dataset)
+    Utils.generate_rels(dataset)
     Utils.convert_sampling(p + "_" + s + "_" + t, dataset)
