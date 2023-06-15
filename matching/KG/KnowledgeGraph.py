@@ -13,11 +13,11 @@ class KnowledgeGraph:
     attr_df = ""
     attr_dict = ""
 
-    def __init__(self, id, dataset, prefix, kg_type, sample, conf_id, method):
+    def __init__(self, id, dataset, kg_type, sample, conf_id, method):
 
       self.id = id
       self.dataset = dataset
-      self.prefix = prefix
+      self.prefix = ""
       self.sample = sample
       self.conf_id = conf_id
       self.attr_df = ""
@@ -34,9 +34,9 @@ class KnowledgeGraph:
         return KnowledgeGraph.get_seed_pairs_RDGCN(self, reverse = reverse)
 
       if self.sample == "original":
-        path = "matching/RREA/RREA_process_datasets/" + self.dataset + self.prefix + "_RREA/721_5fold/2/"
+        path = "resources/Datasets/" + self.dataset + self.prefix + "_RREA/721_5fold/2/"
       elif self.sample == "sampled":
-        path = "matching/RREA/sampled/" + self.dataset + "_sampled/" + self.conf_id + "/721_5fold/2/"
+        path = "resources/Datasets/sampled/" + self.dataset + "_" + self.method + "/" + self.conf_id + "/721_5fold/2/"
 
       if reverse == False:
         pairs = {}
@@ -76,9 +76,9 @@ class KnowledgeGraph:
 
     def get_seed_pairs_RDGCN(self, reverse=False):
       if self.sample == "original":
-        path = "matching/RREA/RREA_process_datasets/" + self.dataset + self.prefix + "/721_5fold/2/"
+        path = "resources/Datasets/" + self.dataset + self.prefix + "/721_5fold/2/"
       elif self.sample == "sampled":
-        path = "matching/RREA/sampled/" + self.dataset + "_sampled/" + self.conf_id + "/721_5fold/2/"
+        path = "resources/Datasets/sampled/" + self.dataset + "_" + self.method + "/" + self.conf_id + "/721_5fold/2/"
 
       if reverse == False:
         pairs = {}
@@ -120,11 +120,11 @@ class KnowledgeGraph:
 
       if self.sample == "original":
         if method == "RREA":
-          path =  "matching/RREA/RREA_process_datasets/" + self.dataset + self.prefix + "_RREA/rel_triples_" + self.id
+          path =  "resources/Datasets/" + self.dataset + self.prefix + "_RREA/rel_triples_" + self.id
         elif method == "RDGCN":
-          path =  "matching/RREA/RREA_process_datasets/" + self.dataset + self.prefix + "/rel_triples_" + self.id
+          path =  "resources/Datasets/" + self.dataset + self.prefix + "/rel_triples_" + self.id
       elif self.sample == "sampled":
-        path =  "matching/RREA/sampled/" + self.dataset + "_sampled/" + self.conf_id + "/rel_triples_" + self.id
+        path =  "resources/Datasets/sampled/" + self.dataset + "_" + method + "/" + self.conf_id + "/rel_triples_" + self.id
 
       kg = pd.read_csv(path,  sep='\t', names=["e1", "r", "e2"])
       self.df = kg
@@ -147,11 +147,11 @@ class KnowledgeGraph:
 
       if self.sample == "original":
         if method == "RREA":
-          path =  "matching/RREA/RREA_process_datasets/" + self.dataset + self.prefix + "_RREA/attr_triples_" + self.id
+          path =  "resources/Datasets/" + self.dataset + self.prefix + "_RREA/attr_triples_" + self.id
         elif method == "RDGCN":
-          path =  "matching/RREA/RREA_process_datasets/" + self.dataset + self.prefix + "/attr_triples_" + self.id
+          path =  "resources/Datasets/" + self.dataset + self.prefix + "/attr_triples_" + self.id
       elif self.sample == "sampled":
-        path =  "matching/RREA/sampled/" + self.dataset + "_sampled/" + self.conf_id + "/attr_triples_" + self.id
+        path =  "resources/Datasets/sampled/" + self.dataset + "_" + method + "/" + self.conf_id + "/attr_triples_" + self.id
 
       kg = pd.read_csv(path,  sep='\t', names=["e1", "attr", "val"], warn_bad_lines=True, error_bad_lines=False)
       self.attr_df = kg

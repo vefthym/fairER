@@ -10,10 +10,11 @@ import requests
 import shutil
 import base64
 import gdown
-from sampling.start_sampling import *
+
 
 from pathlib import Path
 sys.path.append(os.path.abspath('./'))
+from start_sampling import start_sampling
 import util, read_datasets, main_fairER, main_unfair, statistics
 sys.path.append(os.path.abspath('../'))
 
@@ -721,4 +722,17 @@ def delete_condition_from_file(dataset):
 
 
 def run_sampling(dataset, method, p, s, t):
-    start_sampling()
+    
+    # Sampling is done on RREA format based datasets and then auto converted for
+    # being compatble with the other methods
+    method = "RREA"
+    
+    dest_path = "resources/Datasets/sampled/" + dataset + "_" + method + "/" + p + "_" + s + "_" + t
+    isExist = os.path.exists(dest_path)
+
+    if not isExist:
+        start_sampling(dataset, method, p, s, t)
+        return "Sample is done"
+    else:
+        print("Already Sampled")
+        return "Already sampled"

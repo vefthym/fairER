@@ -11,17 +11,17 @@ class SUSIE:
         pass
 
     @staticmethod
-    def get_curr_node(comps_dict, disconnected):
+    def get_curr_node(comps_dict, disconnected, t):
         
         if len(disconnected) != 0:
             curr_node = np.random.choice(disconnected)
             disconnected.remove(curr_node)
         else:
             keys = list(comps_dict.keys())
-            # keys_above_t = []
-            # for key in keys:
-            #     if key >= 1:
-            #         keys_above_t.append(key)
+            keys_above_t = []
+            for key in keys:
+                if key >= 1:
+                    keys_above_t.append(key)
             curr_key = np.random.choice(keys)
             curr_node = np.random.choice(list(comps_dict[curr_key]))
 
@@ -46,7 +46,7 @@ class SUSIE:
         return comps_dict
 
     @staticmethod
-    def RJ_only_p(kg1_mdi, kg2_mdi, kg1_mun, kg2_mun, sampling_size, p):
+    def RJ_only_p(kg1_mdi, kg2_mdi, kg1_mun, kg2_mun, sampling_size, p, t):
 
         complete_graph1 = kg1_mun.graph
         complete_graph2 = kg2_mun.graph
@@ -73,7 +73,7 @@ class SUSIE:
         disconnected1 = []
         disconnected2 = []
         isKG1 = True
-        curr_node, disconnected1 = SUSIE.get_curr_node(comps_dict1, [])
+        curr_node, disconnected1 = SUSIE.get_curr_node(comps_dict1, [], t)
 
         iteration1 = 0
         iteration2 = 0
@@ -86,7 +86,10 @@ class SUSIE:
             curr_node_match = None
 
         while sampled_filtered_kg.number_of_nodes() < sampling_size and sampled_filtered_kg2.number_of_nodes() < sampling_size:
+
             print(sampled_filtered_kg.number_of_nodes())
+            print(sampled_filtered_kg2.number_of_nodes())
+
             if isKG1:
                 if curr_node in seed_pairs:
                     curr_node_match = seed_pairs[curr_node]
@@ -136,13 +139,11 @@ class SUSIE:
                 if iteration1 % 100 == 0:
                     if sampled_filtered_kg.number_of_nodes() - nodes_before1 < 2:
                         choice = 'jump'
-                        print('jump')
                     nodes_before1 = sampled_filtered_kg.number_of_nodes()
             else:
                 if iteration2 % 100 == 0:
                     if sampled_filtered_kg2.number_of_nodes() - nodes_before2 < 2:
                         choice = 'jump'
-                        print('jump2')
                     nodes_before2 = sampled_filtered_kg2.number_of_nodes()
 
             if choice == 'random_walk':
@@ -150,9 +151,9 @@ class SUSIE:
             elif choice == 'jump':
                 isKG1 = not isKG1
                 if isKG1:
-                    curr_node, disconnected1 = SUSIE.get_curr_node(comps_dict1, disconnected1)
+                    curr_node, disconnected1 = SUSIE.get_curr_node(comps_dict1, disconnected1, t)
                 else:
-                    curr_node, disconnected2 = SUSIE.get_curr_node(comps_dict2, disconnected2)
+                    curr_node, disconnected2 = SUSIE.get_curr_node(comps_dict2, disconnected2, t)
 
             # keeps parallel edges
             filtered_kg1 = kg1_mdi.df.loc[kg1_mdi.df['e1'].isin(sampled_graph.nodes()) & kg1_mdi.df['e2'].isin(sampled_graph.nodes())]
@@ -180,19 +181,19 @@ class SUSIE:
             ents2.add(n[0])
             ents2.add(n[1])
 
-        print(len(ents))
-        print(len(ents2))
+        # print(len(ents))
+        # print(len(ents2))
 
-        # if len(ents) < len(ents2):
-        #     print("den einai idio")
-        #     for e in ents2.copy():
-        #         if rev_seed_pairs[e] in disconnected1:
-        #             ents2.remove(e)
-        # elif len(ents) > len(ents2):
-        #     print("den einai idio2")
-        #     for e in ents.copy():
-        #         if seed_pairs[e] in disconnected2:
-        #             ents.remove(e)
+        if len(ents) < len(ents2):
+            print("not same")
+            for e in ents2.copy():
+                if rev_seed_pairs[e] in disconnected1:
+                    ents2.remove(e)
+        elif len(ents) > len(ents2):
+            print("not same2")
+            for e in ents.copy():
+                if seed_pairs[e] in disconnected2:
+                    ents.remove(e)
         
         filtered_kg1 = kg1_mdi.df.loc[kg1_mdi.df['e1'].isin(ents) & kg1_mdi.df['e2'].isin(ents)]
         filtered_kg2 = kg2_mdi.df.loc[kg2_mdi.df['e1'].isin(ents2) & kg2_mdi.df['e2'].isin(ents2)]
@@ -203,4 +204,3 @@ class SUSIE:
         filtered_attr_kg2 = kg2_mdi.attr_df.loc[kg2_mdi.attr_df['e1'].isin(ents2)]
 
         return node_pairs, node_pairs2, ents, ents2, sampled_filtered_kg, sampled_filtered_kg2, filtered_kg1, filtered_kg2, filtered_attr_kg1, filtered_attr_kg2
-        # return node_pairs, node_pairs2, ents, ents2, sampled_filtered_kg, sampled_filtered_kg2, filtered_kg1, filtered_kg2

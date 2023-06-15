@@ -890,15 +890,15 @@ def startSampling():
         ...
     """
     try:
-
+        
         dataset = request.args.get('dataset')
         method = request.args.get('method')
         p = request.args.get('p')
         s = request.args.get('s')
         t = request.args.get('t')
-        methods.run_sampling(dataset, method, p, s, t)
+        resp = methods.run_sampling(dataset, method, p, s, t)
         response = app.response_class(
-            response=json.dumps({'message': "done"}),
+            response=json.dumps({'message': resp}),
             mimetype='application/json'
         )
         return response

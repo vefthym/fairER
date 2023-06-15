@@ -419,9 +419,6 @@ function get_predictions(alg, container_id) {
 
 function run_sampling() {
 
-
-    // [TODO] check for cached sampled
-
     var dataset = $('#dataset-val').val()
     var method = $('#method-val').val()
     var p = $('#jump_prob').val()
@@ -430,13 +427,13 @@ function run_sampling() {
 
     $.ajax({
         type: "GET",
-        url: "/requests/runSampling?dataset=" + dataset + "?method=" + method + "?p=" + p + "?s=" + s + "?t=" + t,
+        url: "/requests/runSampling?dataset=" + dataset + "&method=" + method + "&p=" + p + "&s=" + s + "&t=" + t,
         dataType: 'text',
         success: function (response) {
             const obj = JSON.parse(response);
             //If there is no exception 
             if (obj.exception == undefined) {
-                alert("sampling done")
+                console.log(obj.message)
             }
             //If there is an exception, print details about it
             else print_exception(obj.exception_type, obj.exception, obj.filename, obj.func_name, obj.line_number)
@@ -689,7 +686,7 @@ function upload_dataset() {
                     datasets_names_list = response.datasets_list
                     non_cached_datasets = response.non_cached_datasets
                     datasets_without_condition = response.datasets_without_condition
-                    
+
                     // [TODO] Testing purpose. DELETE IT !
                     // datasets_names_list.length = 0
 
@@ -727,7 +724,7 @@ function upload_dataset() {
                                     kg_data.push({ id: item, text: item, type: type})
                                 }
                             }
-                            else if (!item.includes("mdb")) {
+                            else if (!item.includes("mdb") && !item.includes("sampled")) {
                                     type = "tab";
                                     tab_data.push({ id: item, text: item, type: type});
                             }
@@ -765,42 +762,41 @@ function upload_dataset() {
                         $("#dataset-val").select2({
                             data: [{
                                 id: '',
-                                text: 'Tabular',
-                                children: tab_data
-                            },{
-                                id: '',
                                 text: 'Knowledge Graph',
                                 children: kg_data
-                            }]
+                            }, {
+                            id: '',
+                            text: 'Tabular',
+                            children: tab_data
+                        }]
                         })
 
                         $('#method-val').select2({
                             data:  [{
                                 id: '',
-                                text: 'Tabular',
+                                text: 'Knowledge Graph',
                                 children: [
-                                    { id: 'deepmatcher', text: 'Deepmatcher' },
+                                    { id: 'RREA', text: 'RREA' },
+                                    { id: 'RDGCN', text: 'RDGCN' },
+                                    { id: 'MultiKE', text: 'MultiKE' },
+                                    { id: 'BERT_INT', text: 'BERT-INT' },
                                 ]
                             },{
                                 id: '',
-                                text: 'Knowledge Graph',
+                                text: 'Tabular',
                                 children: [
-                                    { id: 'rrea', text: 'RREA' },
-                                    { id: 'rdgcn', text: 'RDGCN' },
-                                    { id: 'multike', text: 'MultiKE' },
-                                    { id: 'bert_int', text: 'BERT-INT' },
+                                    { id: 'deepmatcher', text: 'Deepmatcher' },
                                 ]
                             }]
                         })
 
                         $("#sampling-val").select2({
                             data: [{
-                                id: 'no_sampling',
-                                text: 'No Sampling'
-                            },
-                            {
                                 id: 'SUSIE',
                                 text: 'SUSIE'
+                            }, {
+                                id: 'no_sampling',
+                                text: 'No Sampling'
                             }]
                         })
                         
