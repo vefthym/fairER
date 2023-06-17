@@ -167,6 +167,15 @@ def getEvaluationResults():
     alg = request.args.get('alg')
     method = request.args.get('method')
     explanation = request.args.get('explanation')
+    p = request.args.get('p')
+    s = request.args.get('s')
+    t = request.args.get('t')
+    print(request.args)
+    if p == None:
+        conf = "original"
+    else:
+        conf = p + "_" + s + "_" + t
+
     if method == "Deepmatcher":
         if alg == 'fairER':
                 methods.runFairER(dataset, explanation)
@@ -174,11 +183,11 @@ def getEvaluationResults():
                 methods.runUnfair(dataset)
     elif method == "RREA":
         if alg == 'fairER':
-                methods.runFairER(dataset, explanation)
+                methods.runFairER_RREA(dataset, explanation, conf)
         else:
-                methods.runUnfair(dataset)
+                methods.runUnfair_RREA(dataset)
 
-        # open the file that was created
+    # open the file that was created
     with open(os.path.join(os.getcwd(), 'web', 'data', 'json_data', 'evaluation_data.json')) as json_file:
             data = json.load(json_file)  # get the data from this file
 
@@ -925,4 +934,4 @@ def startSampling():
 
 
 if __name__ == "__main__":
-    app.run(debug=True, threaded=True)  
+    app.run(debug=True, threaded=True, port=5000)  

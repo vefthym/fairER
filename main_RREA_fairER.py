@@ -16,33 +16,33 @@ import web.library.methods as methods
     Run fairER for RREA
 """
 
-def run(conf, dest_path):
+def run(conf, dest_path, dataset, file_name):
     """
     Purpose: Run RREA
     """
 
     if conf == "original":
-        dataset_path = 
+        dataset_path = "resources/Datasets/" + dataset + "_RREA/"
     else:
-        dataset_path = 
-
-    os.chdir("matching/RREA/")
-    os.system("python RREA.py " + dataset_path + " " + dest_path)
+        dataset_path = "resources/Datasets/sampled/" + dataset + "_RREA/" + conf + "/"
+    # exit()
+    os.system("python matching/RREA/RREA.py " + dataset_path + " " + dest_path + " " + file_name)
 
 
 
 def main(k_results, dataset, conf, which_entity):
 
-    dest_path = "resources/Datasets/exp_results/" + dataset + "_RREA/" + conf + "/" + dataset + "_sim_lists.pickle"
+    dest_path = "resources/exp_results/" + dataset + "_RREA/" + conf + "/"
+    file_name =  dataset + "_sim_lists.pickle"
     
-    isExist = os.path.exists(dest_path)
+    isExist = os.path.exists(dest_path + file_name)
     
     """
         If file exists, load similarity lists and perform unique mapping clustering
         otherwise, run RREA to produce similarity lists and re-run for unique mapping clustering
     """
     if isExist:
-        with (open(dest_path, "rb")) as fp:
+        with (open(dest_path + file_name, "rb")) as fp:
             sim_lists_no_csls = pickle.load(fp)
         
         index_to_id = {}
@@ -85,9 +85,10 @@ def main(k_results, dataset, conf, which_entity):
         eod = f_eval.get_eod_KG(clusters, candidates, g, which_entity)
         print("EOD:", eod)
         print()
+        methods.eval_to_json(accuracy, spd, eod)
 
     elif not isExist:
-        run(conf, dest_path)
+        run(conf, dest_path, dataset, file_name)
 
     
 

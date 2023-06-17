@@ -417,13 +417,13 @@ function get_predictions(alg, container_id) {
     });
 }
 
-function run_sampling() {
+function run_sampling(p, s, t) {
 
     var dataset = $('#dataset-val').val()
     var method = $('#method-val').val()
-    var p = $('#jump_prob').val()
-    var s = $('#sampl_size').val()
-    var t = $('#min_comp').val()
+    // var p = $('#jump_prob').val()
+    // var s = $('#sampl_size').val()
+    // var t = $('#min_comp').val()
 
     $.ajax({
         type: "GET",
@@ -446,15 +446,43 @@ function run_sampling() {
 
 function run_exp(alg, container){
 
-    sampling = $("#sampling-val").val()
-    method = $("#method-val").val()
+    var sampling = $("#sampling-val").val()
+    var method = $("#method-val").val()
 
     if (sampling == "SUSIE") {
-        run_sampling();
-        // get_evaluation_sampl(alg, container);
+        var jump_prob = $("#jump_prob").val()
+        var sampl_size = $("#sampl_size").val()
+        var min_comp = $("#min_comp").val()
+        var samplingPromise = new Promise(function(resolve, reject) {
+            run_sampling(jump_prob, sampl_size, min_comp, function(result) {
+              resolve(result);
+            });
+          });
+
+          var evaluationPromise = new Promise(function(resolve, reject) {
+            conf = "&p=" + jump_prob + "&s=" + sampl_size + "&t=" + min_comp;
+            get_evaluation(alg, container, method, conf, function(result) {
+              resolve(result);
+            });
+          });
+          
+          Promise.all([samplingPromise, evaluationPromise])
+            .then(function(results) {
+            //   // Both AJAX requests have completed successfully
+              var samplingResult = results[0];
+              console.log(samplingResult)
+              var evaluationResult = results[1];
+              console.log(evaluationResult)
+              console.log("completed");
+              
+            })
+            .catch(function(error) {
+                console.log(error);
+            });
     }
-    else if (sampling == "No sampling") {
-        get_evaluation(alg, container, method);
+    else if (sampling == "no_sampling") {
+        conf = "original"
+        get_evaluation(alg, container, method, conf);
     }
 
     
@@ -519,12 +547,12 @@ function get_clusters(alg, container_id) {
 
 
 /* Prints the evaluation results in the 'container_id' html element */
-function get_evaluation(alg, container_id, method) {
+function get_evaluation(alg, container_id, method, conf) {
+    
     var explanation = 1;
     var dataset = $('#dataset-val').val()
     if (has_condition() == false)
         return;
-
 
     if (non_cached_datasets.includes(dataset)){
         if(document.querySelector('input[name="exp-form"]:checked') == null){
@@ -537,9 +565,16 @@ function get_evaluation(alg, container_id, method) {
 
     $('#' + container_id).html('<div class="loader"></div><p style="text-align:center; margin-top:1%">Please wait as this may take a few minutes...</p>')
 
+    if(conf == "original"){
+        url = "/requests/getEvaluationResults?alg=" + alg + "&dataset=" + dataset + "&method=" + method + "&explanation=" + explanation
+    }
+    else{
+        url = "/requests/getEvaluationResults?alg=" + alg + "&dataset=" + dataset + "&method=" + method + "&explanation=" + explanation + conf
+    }
+
     $.ajax({
         type: "GET",
-        url: "/requests/getEvaluationResults?alg=" + alg + "&dataset=" + dataset + "&method=" + method + "&explanation=" + explanation,
+        url: url,
         contentType: "application/json",
         dataType: 'text',
         success: function (response) {
@@ -691,6 +726,7 @@ function upload_dataset() {
                 if (response.exception == undefined) {
                     datasets_names_list = response.datasets_list
                     non_cached_datasets = response.non_cached_datasets
+
                     datasets_without_condition = response.datasets_without_condition
 
                     // [TODO] Testing purpose. DELETE IT !

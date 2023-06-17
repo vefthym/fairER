@@ -39,10 +39,9 @@ def runFairER(dataset, explanation):
     else:
         main_fairER.main(os.path.join(cur_dir, 'resources','Datasets',dataset), 'merged_train.csv', 'merged_valid.csv', 'merged_test.csv', explanation)
 
-def runFairER_RREA(dataset, explanation):
+def runFairER_RREA(dataset, explanation, conf):
 
     cur_dir = os.path.abspath(".")
-    conf = "original"
     which_entity = 0
     main_RREA_fairER.main(20, dataset, conf, which_entity)
 
@@ -61,7 +60,8 @@ def runUnfair(dataset):
     cur_dir = os.path.abspath(".")
     main_unfair.main(os.path.join(cur_dir, 'resources','Datasets',dataset), 'joined_train.csv', 'joined_valid.csv', 'joined_test.csv', 20) # k==20
 
-
+def runUnfair_RREA(dataset):
+    pass
 
 
 def runStatistics(dataset):
@@ -467,9 +467,10 @@ def datasets_without_condition():
     non_deepmatcher_datasets = []
     datasets_without_condition = []
     deepmatcher_datasets = ["DBLP-ACM", "Amazon-Google", "iTunes-Amazon", "Beer", "Fodors-Zagats", "Walmart-Amazon", "DBLP-GoogleScholar"]
+    KG_datasets = ["D_W_15K_V1", "D_W_15K_V2", "D_Y_15K_V1", "D_Y_15K_V2", "D_W_15K_V1_RREA", "D_W_15K_V2_RREA", "D_Y_15K_V1_RREA", "D_Y_15K_V2_RREA", "sampled"]
     datasets_list = datasets_names_to_json()
     for item in datasets_list:
-        if item not in deepmatcher_datasets:
+        if item not in deepmatcher_datasets and item not in KG_datasets:
             non_deepmatcher_datasets.append(item)
 
     
