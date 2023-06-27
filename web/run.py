@@ -162,7 +162,7 @@ def getEvaluationResults():
         Parameter alg: The algorithm to run.
         Precondition: alg is a String, with two possible values: "fairER", "unfair"
     """
-
+    
     dataset = request.args.get('dataset')
     alg = request.args.get('alg')
     method = request.args.get('method')
@@ -176,7 +176,7 @@ def getEvaluationResults():
     else:
         conf = p + "_" + s + "_" + t
 
-    if method == "Deepmatcher":
+    if method == "deepmatcher":
         if alg == 'fairER':
                 methods.runFairER(dataset, explanation)
         else:
@@ -185,7 +185,12 @@ def getEvaluationResults():
         if alg == 'fairER':
                 methods.runFairER_RREA(dataset, explanation, conf)
         else:
-                methods.runUnfair_RREA(dataset)
+                methods.runUnfair_RREA(dataset, explanation, conf)
+    elif method == "RDGCN" or method == "MultiKE":
+            if alg == 'fairER':
+                    methods.runFairER_OpenEA(dataset, explanation, conf, method)
+            else:
+                    methods.runUnfair_OpenEA(dataset, explanation, conf, method)
 
     # open the file that was created
     with open(os.path.join(os.getcwd(), 'web', 'data', 'json_data', 'evaluation_data.json')) as json_file:
@@ -223,11 +228,33 @@ def getPreds():
     try:
         dataset = request.args.get('dataset')
         alg = request.args.get('alg')
-        if alg == 'fairER':
-            explanation = request.args.get('explanation')
-            methods.runFairER(dataset, explanation)  
+        method = request.args.get('method')
+        explanation = request.args.get('explanation')
+        p = request.args.get('p')
+        s = request.args.get('s')
+        t = request.args.get('t')
+        print(request.args)
+        if p == None:
+            conf = "original"
         else:
-            methods.runUnfair(dataset) 
+            conf = p + "_" + s + "_" + t
+
+        if method == "deepmatcher":
+            if alg == 'fairER':
+                methods.runFairER(dataset, explanation)  
+            else:
+                methods.runUnfair(dataset) 
+        elif method == "RREA":
+            if alg == 'fairER':
+                    methods.runFairER_RREA(dataset, explanation, conf)
+            else:
+                    methods.runUnfair_RREA(dataset, explanation, conf)
+        elif method == "RDGCN" or method == "MultiKE":
+            if alg == 'fairER':
+                    methods.runFairER_OpenEA(dataset, explanation, conf, method)
+            else:
+                    methods.runUnfair_OpenEA(dataset, explanation, conf, method)
+
 
         # open the file that was created
         with open(os.path.join(os.getcwd() + '/web/' + 'data', 'json_data', 'preds_data.json')) as json_file:
@@ -267,12 +294,35 @@ def getClust():
         Precondition: alg is a String, with two possible values: "fairER", "unfair"
     """
     try:
-        alg = request.args.get('alg') 
+
         dataset = request.args.get('dataset')
-        if alg == 'fairER':
-            methods.runFairER(dataset, explanation=1)
+        alg = request.args.get('alg')
+        method = request.args.get('method')
+        explanation = request.args.get('explanation')
+        p = request.args.get('p')
+        s = request.args.get('s')
+        t = request.args.get('t')
+        print(request.args)
+        if p == None:
+            conf = "original"
         else:
-            methods.runUnfair(dataset)
+            conf = p + "_" + s + "_" + t
+
+        if method == "deepmatcher":
+            if alg == 'fairER':
+                methods.runFairER(dataset, explanation)  
+            else:
+                methods.runUnfair(dataset) 
+        elif method == "RREA":
+            if alg == 'fairER':
+                    methods.runFairER_RREA(dataset, explanation, conf)
+            else:
+                    methods.runUnfair_RREA(dataset, explanation, conf)
+        elif method == "RDGCN" or method == "MultiKE":
+            if alg == 'fairER':
+                    methods.runFairER_OpenEA(dataset, explanation, conf, method)
+            else:
+                    methods.runUnfair_OpenEA(dataset, explanation, conf, method)
 
         with open(os.path.join(os.getcwd() + '/web/' + 'data', 'json_data', 'clusters_data.json')) as json_file:
             data = json.load(json_file)
@@ -934,4 +984,4 @@ def startSampling():
 
 
 if __name__ == "__main__":
-    app.run(debug=True, threaded=True, port=5000)  
+    app.run(debug=True, threaded=True, port=5050)  

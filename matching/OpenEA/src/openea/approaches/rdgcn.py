@@ -12,6 +12,8 @@ from openea.approaches.gcn_align import ones, glorot, zeros
 from openea.models.basic_model import BasicModel
 from sklearn import preprocessing
 from openea.approaches.literal_encoder import LiteralEncoder
+import os
+import pickle
 
 def rfunc(triple_list, ent_num, rel_num):
     head = dict()
@@ -353,11 +355,22 @@ class RDGCN(BasicModel):
         self.local_name_vectors = None
         self.entity_local_name_dict = None
         self.entities = None
-        self.word_embed = 'wiki-news-300d-1M.vec'
+        self.word_embed = 'matching/OpenEA/run/wiki-news-300d-1M.vec'
 
     def init(self):
         self.entities = self.kgs.kg1.entities_set | self.kgs.kg2.entities_set
-        _, _, self.local_name_vectors = self._get_desc_input()
+
+        # _, _, self.local_name_vectors = self._get_desc_input()
+        # print(self.local_name_vectors.shape)
+
+        # print(self.local_name_vectors.shape)
+        # file_to_write = open("local_name_vectors_original", "wb")
+        # pickle.dump(self.local_name_vectors, file_to_write)
+
+
+        file_to_write = open("local_name_vectors", "rb")
+        self.local_name_vectors = pickle.load(file_to_write)
+
         self.gcn_model = Layer(self.args, self.kgs, self.local_name_vectors)
         self.output, self.loss = self.gcn_model.build()
         self.optimizer = tf.train.AdamOptimizer(self.args.learning_rate).minimize(self.loss)
@@ -427,6 +440,7 @@ class RDGCN(BasicModel):
         names = pd.DataFrame(name_triples)
         names.iloc[:, 2] = names.iloc[:, 2].str.replace(r'[{}]+'.format(string.punctuation), '').str.split(' ')
         # load word embedding
+
         with open(self.word_embed, 'r') as f:
 
             # comment 2 lines below, uncomment the 3rd line and dim = 300 for .json

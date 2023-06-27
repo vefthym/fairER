@@ -41,6 +41,11 @@ def main(k_results, dataset, conf, which_entity):
         If file exists, load similarity lists and perform unique mapping clustering
         otherwise, run RREA to produce similarity lists and re-run for unique mapping clustering
     """
+
+    if not isExist:
+        run(conf, dest_path, dataset, file_name)
+        isExist = True
+
     if isExist:
         with (open(dest_path + file_name, "rb")) as fp:
             sim_lists_no_csls = pickle.load(fp)
@@ -60,16 +65,24 @@ def main(k_results, dataset, conf, which_entity):
         # Fair Unique Mapping Clustering
         #################################
 
-        kg1 = KnowledgeGraph("1", dataset, "multi_directed", "sampled", conf, "RREA")
-        kg2 = KnowledgeGraph("2", dataset, "multi_directed", "sampled", conf, "RREA")
+        if conf == "original":
+            kg1 = KnowledgeGraph("1", dataset, "multi_directed", "original", "original", "RREA")
+            kg2 = KnowledgeGraph("2", dataset, "multi_directed", "original", "original", "RREA")
+        else:
+            kg1 = KnowledgeGraph("1", dataset, "multi_directed", "sampled", conf, "RREA")
+            kg2 = KnowledgeGraph("2", dataset, "multi_directed", "sampled", conf, "RREA")
 
         g = Grouping(kg1, kg2, dataset, "RREA")
         g.group_based_on_component(kg1, kg2)
 
+        preds = []
+        for pair in sim_lists_no_csls:
+            preds.append([pair[1], index_to_id[sim_lists_no_csls[pair][0][0]], abs(sim_lists_no_csls[pair][0][1]),
+                           g.pair_is_protected([pair[1], index_to_id[sim_lists_no_csls[pair][0][0]]], which_entity)])
 
         initial_pairs = [(int(cand[0]), int(cand[1]), int(cand[2]), g.pair_is_protected(cand[:2], which_entity))
                      for cand in candidates]
-        
+
         clusters = fumc.run(initial_pairs, k_results)
 
         #############################
@@ -85,10 +98,10 @@ def main(k_results, dataset, conf, which_entity):
         eod = f_eval.get_eod_KG(clusters, candidates, g, which_entity)
         print("EOD:", eod)
         print()
-        methods.eval_to_json(accuracy, spd, eod)
 
-    elif not isExist:
-        run(conf, dest_path, dataset, file_name)
+        methods.eval_to_json(accuracy, spd, eod)
+        methods.clusters_to_json(clusters)
+        methods.preds_to_json("", preds)
 
     
 

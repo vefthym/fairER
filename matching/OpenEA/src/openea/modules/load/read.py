@@ -313,11 +313,15 @@ def radio_2file(radio, folder):
 
 def save_results(dataset, conf_id, sampled, folder, rest_12, update_sim_lists, performance):
     # pair2file(folder + 'alignment_results_12', rest_12)
-    dataset = dataset.replace("_ready", "").replace("_sampled", "")
-    file_to_write = open(folder + "/" + dataset + "_sim_lists_NO_CSLS_"+ sampled + ".pickle", "wb")
+    # dataset = dataset.replace("_ready", "").replace("_sampled", "")
+    splitted_folder = folder.split("/")[:len(folder.split("/")) - 1]
+    dest = folder
+    file_name = dest.split("/")[-1]
+    dest = dest.replace(file_name, "")
+    file_to_write = open(dest + file_name, "wb")
     pickle.dump(update_sim_lists, file_to_write)
-    file_to_write3 = open(folder + "/" + dataset + "_acc_" + "NO_CSLS" + "_" + sampled + ".pickle", "wb")
-    pickle.dump(performance, file_to_write3)
+    # file_to_write3 = open(folder + "/" + dataset + "_acc_" + "NO_CSLS" + "_" + sampled + ".pickle", "wb")
+    # pickle.dump(performance, file_to_write3)
     print("Results saved!")
 
 

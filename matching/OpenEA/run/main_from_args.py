@@ -78,9 +78,9 @@ if __name__ == '__main__':
     t = time.time()
     args = load_args(sys.argv[1])
     if "conf_" in args.conf_id:
-        args.training_data = args.training_data + args.dataset + '/' + args.conf_id + '/'
+        args.training_data = args.training_data + '/' + args.conf_id + '/'
     else:
-        args.training_data = args.training_data + args.dataset + '/'
+        args.training_data = args.training_data + '/'
 
     # args.dataset_division = sys.argv[2]
     print(args.embedding_module)

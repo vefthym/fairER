@@ -194,7 +194,7 @@ class BasicModel:
         ent_embeds = self.ent_embeds.eval(session=self.session)
         rel_embeds = self.rel_embeds.eval(session=self.session)
         mapping_mat = self.mapping_mat.eval(session=self.session) if self.mapping_mat is not None else None
-        rd.save_embeddings(self.out_folder, self.kgs, ent_embeds, rel_embeds, None, mapping_mat=mapping_mat)
+        # rd.save_embeddings(self.out_folder, self.kgs, ent_embeds, rel_embeds, None, mapping_mat=mapping_mat)
 
     def eval_kg1_ent_embeddings(self):
         embeds = tf.nn.embedding_lookup(self.ent_embeds, self.kgs.kg1.entities_list)

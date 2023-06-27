@@ -358,9 +358,17 @@ function pair_is_protected() {
 }
 
 /* Prints the predictions in the 'container_id' html element */
-function get_predictions(alg, container_id) {
+function get_predictions(alg, container_id, method, conf) {
     var explanation = 1;
     var dataset = $('#dataset-val').val()
+
+    if (conf == "original"){
+        url = "/requests/getPreds?alg=" + alg + "&dataset=" + dataset + "&method=" + method + "&explanation=" + explanation;
+    }
+    else {
+        url = "/requests/getPreds?alg=" + alg + "&dataset=" + dataset + "&method=" + method + "&explanation=" + explanation + conf;
+    }
+
     if (has_condition() == false)
         return;
 
@@ -378,9 +386,10 @@ function get_predictions(alg, container_id) {
     
     $.ajax({
         type: "GET",
-        url: "/requests/getPreds?alg=" + alg + "&dataset=" + dataset + "&explanation=" + explanation,
+        url: url,
         contentType: "application/json",
         dataType: 'text',
+        async: false,
         success: function (response) {
             var obj = JSON.parse(response);
             //If there is no exception 
@@ -429,6 +438,7 @@ function run_sampling(p, s, t) {
         type: "GET",
         url: "/requests/runSampling?dataset=" + dataset + "&method=" + method + "&p=" + p + "&s=" + s + "&t=" + t,
         dataType: 'text',
+        async: false,
         success: function (response) {
             const obj = JSON.parse(response);
             //If there is no exception 
@@ -453,32 +463,14 @@ function run_exp(alg, container){
         var jump_prob = $("#jump_prob").val()
         var sampl_size = $("#sampl_size").val()
         var min_comp = $("#min_comp").val()
-        var samplingPromise = new Promise(function(resolve, reject) {
-            run_sampling(jump_prob, sampl_size, min_comp, function(result) {
-              resolve(result);
-            });
-          });
+        
+        conf = "&p=" + jump_prob + "&s=" + sampl_size + "&t=" + min_comp;
+        $.when(run_sampling(jump_prob, sampl_size, min_comp),
+                get_evaluation(alg, container, method, conf)
+        ).done(function(){
+            console.log("done!")
+        });
 
-          var evaluationPromise = new Promise(function(resolve, reject) {
-            conf = "&p=" + jump_prob + "&s=" + sampl_size + "&t=" + min_comp;
-            get_evaluation(alg, container, method, conf, function(result) {
-              resolve(result);
-            });
-          });
-          
-          Promise.all([samplingPromise, evaluationPromise])
-            .then(function(results) {
-            //   // Both AJAX requests have completed successfully
-              var samplingResult = results[0];
-              console.log(samplingResult)
-              var evaluationResult = results[1];
-              console.log(evaluationResult)
-              console.log("completed");
-              
-            })
-            .catch(function(error) {
-                console.log(error);
-            });
     }
     else if (sampling == "no_sampling") {
         conf = "original"
@@ -489,10 +481,73 @@ function run_exp(alg, container){
 }
 
 
+function run_clusters(alg, container){
+
+    var sampling = $("#sampling-val").val()
+    var method = $("#method-val").val()
+
+    if (sampling == "SUSIE") {
+        var jump_prob = $("#jump_prob").val()
+        var sampl_size = $("#sampl_size").val()
+        var min_comp = $("#min_comp").val()
+        
+        conf = "&p=" + jump_prob + "&s=" + sampl_size + "&t=" + min_comp;
+        $.when(run_sampling(jump_prob, sampl_size, min_comp),
+        get_clusters(alg, container, method, conf)
+        ).done(function(){
+            console.log("done!")
+        });
+
+    }
+    else if (sampling == "no_sampling") {
+        conf = "original"
+        get_clusters(alg, container, method, conf);
+    }
+
+    
+}
+
+function run_predictions(alg, container){
+
+    var sampling = $("#sampling-val").val()
+    var method = $("#method-val").val()
+
+    if (sampling == "SUSIE") {
+        var jump_prob = $("#jump_prob").val()
+        var sampl_size = $("#sampl_size").val()
+        var min_comp = $("#min_comp").val()
+        
+        conf = "&p=" + jump_prob + "&s=" + sampl_size + "&t=" + min_comp;
+        $.when(run_sampling(jump_prob, sampl_size, min_comp),
+        get_predictions(alg, container, method, conf)
+        ).done(function(){
+            console.log("done!")
+        });
+
+    }
+    else if (sampling == "no_sampling") {
+        conf = "original"
+        get_predictions(alg, container, method, conf);
+    }
+
+    
+}
+
 /* Prints the clusters in the 'container_id' html element */
-function get_clusters(alg, container_id) {
+function get_clusters(alg, container_id, method, conf) {
+
+
+    var method = $("#method-val").val()
     var explanation = 1;
     var dataset = $('#dataset-val').val()
+
+    if (conf == "original"){
+        url = "/requests/getClusters?alg=" + alg + "&dataset=" + dataset + "&method=" + method + "&explanation=" + explanation;
+    }
+    else {
+        url = "/requests/getClusters?alg=" + alg + "&dataset=" + dataset + "&method=" + method + "&explanation=" + explanation + conf;
+    }
+
     if (has_condition() == false)
         return;
 
@@ -510,7 +565,7 @@ function get_clusters(alg, container_id) {
 
     $.ajax({
         type: "GET",
-        url: "/requests/getClusters?alg=" + alg + "&dataset=" + dataset + "&explanation=" + explanation,
+        url: url,
         contentType: "application/json",
         dataType: 'text',
         success: function (response) {

@@ -21,6 +21,9 @@ from layer import NR_GraphAttention
 import time
 from datetime import datetime
 import sys
+import os 
+
+os.environ["KMP_WARNINGS"] = "FALSE"
 
 total_time = time.time()
 
@@ -38,46 +41,28 @@ sess = tf.Session(config=config)
 args = sys.argv[1:]
 
 export_results = True
-mycsls=int(args[2])
-sample = args[0]
-conf_id = args[1]
+mycsls = -1
+dataset_path = args[0]
+dest_path = args[1]
+file_name = args[2]
 
 if mycsls == -1:
     csls_mode = "NO_CSLS"
 elif mycsls > 0:
     csls_mode = "WITH_CSLS"
 
-measure = "OAEI"
-sample = sample
-dataset = "mem_exp_no_1to1_RREA"
-prefix = ""
-
-if sample == "sampled":
-    run_path = "sampled/" + dataset + "_sampled/" + conf_id + "/"
-elif sample == "original":
-    # run_path = "RREA_process_datasets/" + dataset + prefix + "_RREA/"
-    run_path = "RREA_process_datasets/" + dataset + "/"
-
 print(csls_mode)
-print(conf_id)
-print(measure)
-print(dataset)
-print(run_path)
-print(conf_id)
-print(sample)
-exit()
+print(dataset_path)
+print(dest_path)
+
 if export_results == True:
-    dest_path = "exp_results/" + measure + "/" + dataset + "/" + conf_id + "/"
     isExist = os.path.exists(dest_path)
-    if isExist:
-        if input("are you sure you want to override " + dest_path + " ? (y/n) ") != "y":
-            exit()
     if not isExist:
         os.makedirs(dest_path)
-    sys.stdout=open(dest_path + "log_" + csls_mode + "_" + str(datetime.now()),"w")
+    sys.stdout=open(dest_path + "log_" + str(datetime.now()),"w")
 
 # Specify dataset, training ratio and fold
-entity1, entity2, train_pair,dev_pair,valid_pair,adj_matrix,r_index,r_val,adj_features,rel_features = load_data(run_path,0.20,2)
+entity1, entity2, train_pair,dev_pair,valid_pair,adj_matrix,r_index,r_val,adj_features,rel_features = load_data(dataset_path,0.20,2)
 print(len(entity1))
 adj_matrix = np.stack(adj_matrix.nonzero(),axis = 1)
 rel_matrix,rel_val = np.stack(rel_features.nonzero(),axis = 1),rel_features.data
@@ -117,7 +102,7 @@ def check_early_stop(thread_number = 16, csls=10,accurate = True, iteration = 0)
     Rvec = np.array([vec[e2] for e1, e2 in valid_pair])
     Lvec = Lvec / np.linalg.norm(Lvec,axis=-1,keepdims=True)
     Rvec = Rvec / np.linalg.norm(Rvec,axis=-1,keepdims=True)
-    _, hits1, _, _ = eval_alignment_by_sim_mat(Lvec, Rvec, [1, 5, 10], thread_number, dataset, entity1, entity2, csls=csls, accurate=accurate, output=False, testing=False, iteration = iteration)
+    _, hits1, _, _ = eval_alignment_by_sim_mat(Lvec, Rvec, [1, 5, 10], thread_number, "", entity1, entity2, csls=csls, accurate=accurate, output=False, testing=False, iteration = iteration)
     return hits1
 
 def testing(thread_number = 16, csls=10,accurate = True, iteration = 0):
@@ -127,7 +112,7 @@ def testing(thread_number = 16, csls=10,accurate = True, iteration = 0):
     Lvec = Lvec / np.linalg.norm(Lvec,axis=-1,keepdims=True)
     Rvec = Rvec / np.linalg.norm(Rvec,axis=-1,keepdims=True)
     test_ent_list = [ent[0] for ent in dev_pair]
-    _, hits1, performance, neighbors_sim_dict = eval_alignment_by_sim_mat(Lvec, Rvec, [1, 5, 10], thread_number, dataset, entity1, entity2, csls=csls, accurate=accurate, testing=True, iteration = iteration, test_ent_list=test_ent_list)
+    _, hits1, performance, neighbors_sim_dict = eval_alignment_by_sim_mat(Lvec, Rvec, [1, 5, 10], thread_number, "", entity1, entity2, csls=csls, accurate=accurate, testing=True, iteration = iteration, test_ent_list=test_ent_list)
     return performance, neighbors_sim_dict
 
 
@@ -225,9 +210,10 @@ test_set_2 = [e2 for e1, e2 in dev_pair]
 np.random.shuffle(test_set_1)
 np.random.shuffle(test_set_2)
 
-epoch = 1200
+# epoch = 1200
+epoch = 40
 # replace 5 with 1 for RREA(basic)
-for turn in range(5):
+for turn in range(1):
     iter_time = time.time()
     print("iteration %d start."%turn)
     hits1_temp = []
@@ -261,7 +247,7 @@ for turn in range(5):
     # hits_pairs = measure_hits_k_bias_pairs(neighbors_sim_dict, dataset, entity1, entity2, [1, 5, 10], dev_pair)
     # hits_hubs_iso = measure_hubs_iso(neighbors_sim_dict, dataset, entity1, entity2, [1, 5, 10], dev_pair, measure, sample, conf_id)
     
-    if turn == 4:
+    if turn == 0:
     #     file_to_write = open("statistics/hits_sens_" + dataset + ".pickle", "wb")
     #     pickle.dump(hits_sens, file_to_write)
     #     file_to_write = open("statistics/hits_sc1_" + dataset + ".pickle", "wb")
@@ -271,31 +257,31 @@ for turn in range(5):
     #     file_to_write = open("statistics/hits_sc3_" + dataset + ".pickle", "wb")
     #     pickle.dump(hits_sc3, file_to_write)
         if export_results == True:
-            file_to_write = open("exp_results/" + measure + "/" + dataset + "/" + conf_id + "/" + dataset + "_sim_lists_" + csls_mode + "_" + sample + ".pickle", "wb")
+            file_to_write = open(dest_path + file_name, "wb")
             pickle.dump(neighbors_sim_dict, file_to_write)
 
             # file_to_write2 = open("exp_results/" + measure + "/" + dataset + "/" + conf_id + "/" + dataset + "_hits_hubs_iso_" + csls_mode + "_" + sample + ".pickle", "wb")
             # pickle.dump(hits_hubs_iso, file_to_write2)
 
-            file_to_write3 = open("exp_results/" + measure + "/" + dataset + "/" + conf_id + "/" + dataset + "_acc_" + csls_mode + "_" + sample + ".pickle", "wb")
-            pickle.dump(performance, file_to_write3)
+            # file_to_write3 = open("exp_results/" + measure + "/" + dataset + "/" + conf_id + "/" + dataset + "_acc_" + csls_mode + "_" + sample + ".pickle", "wb")
+            # pickle.dump(performance, file_to_write3)
 
-            with open(dest_path + "/configurations" + "_" + csls_mode + ".txt", "w") as fp:
-                fp.write("timestamp: " + str(datetime.now()))
-                fp.write("\n")
-                fp.write("conf_id: " + str(conf_id))
-                fp.write("\n")
-                fp.write("csls: " + str(csls_mode))
-                fp.write("\n")
-                fp.write("measure: " + str(measure))
-                fp.write("\n")
-                fp.write("dataset: " + str(dataset))
-                fp.write("\n")
-                fp.write("entities_size: " + str(len(entity1)) + "," + str(len(entity2)))
-                fp.write("\n")
-                fp.write("export_results: " + str(export_results))
-                fp.write("\n")
-                fp.write("mode: " + str(sample))
+            # with open(dest_path + "/configurations" + "_" + csls_mode + ".txt", "w") as fp:
+            #     fp.write("timestamp: " + str(datetime.now()))
+            #     fp.write("\n")
+            #     fp.write("conf_id: " + str(conf_id))
+            #     fp.write("\n")
+            #     fp.write("csls: " + str(csls_mode))
+            #     fp.write("\n")
+            #     fp.write("measure: " + str(measure))
+            #     fp.write("\n")
+            #     fp.write("dataset: " + str(dataset))
+            #     fp.write("\n")
+            #     fp.write("entities_size: " + str(len(entity1)) + "," + str(len(entity2)))
+            #     fp.write("\n")
+            #     fp.write("export_results: " + str(export_results))
+            #     fp.write("\n")
+            #     fp.write("mode: " + str(sample))
     
         # align_results = generate_alignment_results(neighbors_sim_dict)
         # if turn == 4:
@@ -327,8 +313,8 @@ for turn in range(5):
     Rvec = np.array([vec[e] for e in rest_set_2])
     Lvec = Lvec / np.linalg.norm(Lvec,axis=-1,keepdims=True)
     Rvec = Rvec / np.linalg.norm(Rvec,axis=-1,keepdims=True)
-    A,_,_,_ = eval_alignment_by_sim_mat(Lvec, Rvec, [1, 5, 10], 16, dataset, entity1, entity2, mycsls,True,False)
-    B,_,_,_ = eval_alignment_by_sim_mat(Rvec, Lvec,[1, 5, 10], 16, dataset, entity1, entity2, mycsls,True,False)
+    A,_,_,_ = eval_alignment_by_sim_mat(Lvec, Rvec, [1, 5, 10], 16, "", entity1, entity2, mycsls,True,False)
+    B,_,_,_ = eval_alignment_by_sim_mat(Rvec, Lvec,[1, 5, 10], 16, "", entity1, entity2, mycsls,True,False)
     A = sorted(list(A)); B = sorted(list(B))
     for a,b in A:
         if  B[b][1] == a:

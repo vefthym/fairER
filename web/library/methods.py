@@ -10,13 +10,18 @@ import requests
 import shutil
 import base64
 import gdown
+import json
 
 
 from pathlib import Path
 sys.path.append(os.path.abspath('./'))
-from start_sampling import start_sampling
+import start_sampling
 import util, read_datasets, main_fairER, main_unfair, statistics
 import main_RREA_fairER
+import main_RREA_unfair
+import main_OpenEA_fairER
+import main_OpenEA_unfair
+
 sys.path.append(os.path.abspath('../'))
 
 def runFairER(dataset, explanation):
@@ -45,6 +50,12 @@ def runFairER_RREA(dataset, explanation, conf):
     which_entity = 0
     main_RREA_fairER.main(20, dataset, conf, which_entity)
 
+def runFairER_OpenEA(dataset, explanation, conf, method):
+
+    cur_dir = os.path.abspath(".")
+    which_entity = 0
+    main_OpenEA_fairER.main(20, dataset, conf, which_entity, method)
+
 
 def runUnfair(dataset):
     """
@@ -60,8 +71,15 @@ def runUnfair(dataset):
     cur_dir = os.path.abspath(".")
     main_unfair.main(os.path.join(cur_dir, 'resources','Datasets',dataset), 'joined_train.csv', 'joined_valid.csv', 'joined_test.csv', 20) # k==20
 
-def runUnfair_RREA(dataset):
-    pass
+def runUnfair_RREA(dataset, explanation, conf):
+    cur_dir = os.path.abspath(".")
+    which_entity = 0
+    main_RREA_unfair.main(20, dataset, conf, which_entity)
+
+def runUnfair_OpenEA(dataset, explanation, conf, method):
+    cur_dir = os.path.abspath(".")
+    which_entity = 0
+    main_OpenEA_unfair.main(20, dataset, conf, which_entity, method)
 
 
 def runStatistics(dataset):
@@ -388,11 +406,24 @@ def clusters_to_json(clusters):
         outfile.write(json_string)
 
 
-def preds_to_json(data_path):
+def preds_to_json(data_path, preds=[]):
+
     """
         Writes the predictions to a json file.
     """
-    csv_to_json(data_path + '/dm_results.csv',
+    preds_json = []
+    if len(preds) > 0:
+        for p in preds:
+            preds_json.append({
+                "id": str(p[0]) + "_" + str(p[1]),
+                "match_score": str(p[2]),
+                "label": str(int(p[3])),
+            })
+        preds_json = json.dumps(preds_json)
+        with open(os.getcwd() + '/web/' + 'data/json_data/preds_data.json', 'w') as f:
+            json.dump(preds_json, f)
+    else:
+        csv_to_json(data_path + '/dm_results.csv',
                 os.getcwd() + '/web/' + 'data/json_data/preds_data.json') 
 
 
@@ -740,7 +771,7 @@ def run_sampling(dataset, method, p, s, t):
     isExist = os.path.exists(dest_path)
 
     if not isExist:
-        start_sampling(dataset, method, p, s, t)
+        start_sampling.start_sampling(dataset, method, p, s, t)
         return "Sample is done"
     else:
         print("Already Sampled")

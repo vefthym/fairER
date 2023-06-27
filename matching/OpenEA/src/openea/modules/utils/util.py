@@ -42,9 +42,11 @@ def generate_out_folder(args, out_folder, training_data_path, div_path, method_n
     # print(out_folder, training_data_path, params, div_path, method_name)
     # path = params[-1]
     dataset = args.dataset.replace("_ready", "").replace("_sampled", "")
-    dest = out_folder + method_name + "/" + dataset + "/" + args.conf_id + "/"
+    dest = out_folder
+    postfix = dest.split("/")[-1]
+    dest = dest.replace(postfix, "")
     if not os.path.exists(dest):
         os.makedirs(dest)
-    sys.stdout=open(dest + "log" + "_NO_CSLS_" + str(datetime.now()),"w")
+    sys.stdout=open(dest + "/log" + "_NO_CSLS_" + str(datetime.now()),"w")
     print("results output folder:", dest)
-    return dest
+    return out_folder

@@ -5,27 +5,62 @@ import evaluation.accuracy as eval
 import evaluation.fairness as f_eval
 from matching.KG.KnowledgeGraph import KnowledgeGraph
 from matching.Grouping import Grouping
+import web.library.methods as methods
+import json
 
+def run(conf, dest_path, dataset, file_name, method):
+    """
+    Purpose: Run OpenEA
+    """
+    if conf == "original":
+        with open("matching/OpenEA/run/args/original_" + method.lower() + "_args_15K.json") as fp:
+            j = json.load(fp)
+        dataset_path = "resources/Datasets/" + dataset + "/"
+        j["training_data"] = dataset_path
+        j["output"] = dest_path + file_name
+        j["dataset"] = dataset
+        with open("matching/OpenEA/run/args/original_" + method.lower() + "_args_15K.json", 'w') as outfile:
+            json.dump(j, outfile)
+        os.system("python matching/OpenEA/run/main_from_args.py matching/OpenEA/run/args/original_" + method.lower() + "_args_15K.json")
+    else:
+        with open("matching/OpenEA/run/args/sampled_" + method.lower() + "_args_15K.json") as fp:
+            j = json.load(fp)
+        dataset_path = "resources/Datasets/sampled/" + dataset + "_RDGCN/" + conf + "/"
+        j["training_data"] = dataset_path
+        j["output"] = dest_path + file_name
+        j["dataset"] = dataset
+        j["conf_id"] = conf
+        with open("matching/OpenEA/run/args/sampled_" + method.lower() + "_args_15K.json", 'w') as outfile:
+            json.dump(j, outfile)
+        os.system("python matching/OpenEA/run/main_from_args.py matching/OpenEA/run/args/sampled_" + method.lower() + "_args_15K.json")
+    
 """
         Run unfair method for OpenEA method (unique mapping clustering)
 """
 
-def main(dataset, k_results, which_entity, conf_id, sample, method_sim_list):
-    dest_path = "matching/RREA/exp_results/test_experiments/" + method_sim_list + "/" + dataset + "/" + conf_id + "/" + dataset + "_sim_lists_NO_CSLS_sampled.pickle"
-    isExist = os.path.exists(dest_path)
+def main(k_results, dataset, conf, which_entity, method_sim_list):
+    
+    dest_path = "resources/exp_results/" + dataset + "_" + method_sim_list + "/" + conf + "/"
+    file_name =  dataset + "_sim_lists.pickle"
+    
+    isExist = os.path.exists(dest_path + file_name)
 
     """
         If file exists, load similarity lists and perform unique mapping clustering
         otherwise, manually run OpenEA method to produce similarity lists and re-run for unique mapping clustering
     """
 
+    if not isExist:
+        run(conf, dest_path, dataset, file_name, method_sim_list)
+        isExist = True
+
     if isExist:
-        with (open(dest_path, "rb")) as fp:
+        with (open(dest_path + file_name, "rb")) as fp:
             sim_lists_no_csls = pickle.load(fp)
 
         # Corrects the wrong entity-metric pairs of similarity lists of RDGCN
         # This happens because of manhattan metric used for this method
-        if method_sim_list == "RDGCN":
+        if method_sim_list == "RDGCN" or method_sim_list == "MultiKE":
             for pair in sim_lists_no_csls:
                 temp_measures = list()
                 for p in range(len(sim_lists_no_csls[pair])):
@@ -49,11 +84,20 @@ def main(dataset, k_results, which_entity, conf_id, sample, method_sim_list):
         
         clusters = results
 
-        kg1 = KnowledgeGraph("1", dataset, "", "multi_directed", "sampled", conf_id ,"RDGCN")
-        kg2 = KnowledgeGraph("2", dataset, "", "multi_directed", "sampled", conf_id,"RDGCN")
+        if conf == "original":
+            kg1 = KnowledgeGraph("1", dataset, "multi_directed", "original", "original", "RDGCN")
+            kg2 = KnowledgeGraph("2", dataset, "multi_directed", "original", "original", "RDGCN")
+        else:
+            kg1 = KnowledgeGraph("1", dataset, "multi_directed", "sampled", conf, "RDGCN")
+            kg2 = KnowledgeGraph("2", dataset, "multi_directed", "sampled", conf, "RDGCN")
 
         g = Grouping(kg1, kg2, dataset, "RDGCN")
         g.group_based_on_component(kg1, kg2)
+
+        preds = []
+        for pair in sim_lists_no_csls:
+            preds.append([pair[1], index_to_id[sim_lists_no_csls[pair][0][0]], abs(sim_lists_no_csls[pair][0][1]),
+                           g.pair_is_protected([pair[1], index_to_id[sim_lists_no_csls[pair][0][0]]], which_entity)])
 
         #############################
         # Evaluation
@@ -81,6 +125,10 @@ def main(dataset, k_results, which_entity, conf_id, sample, method_sim_list):
             right.append(r[1])
         assert(len(left) == len(right))
 
+        methods.eval_to_json(accuracy, spd, eod)
+        methods.clusters_to_json(clusters)
+        methods.preds_to_json("", preds)
+
         # measure tp
         # tp = 0
         # for r in results:
@@ -90,13 +138,13 @@ def main(dataset, k_results, which_entity, conf_id, sample, method_sim_list):
         # print(tp/len(results) * 100)
         
 
-if __name__ == '__main__':
+# if __name__ == '__main__':
 
-    k_results = 20
-    dataset = "D_W_15K_V1"
-    which_entity = 0
-    conf_id = "conf_3_only_p_RDGCN"
-    sample = "sampled"
-    method_sim_list = "MultiKE"
+#     k_results = 20
+#     dataset = "D_W_15K_V1"
+#     which_entity = 0
+#     conf_id = "conf_3_only_p_RDGCN"
+#     sample = "sampled"
+#     method_sim_list = "MultiKE"
 
-    main(dataset, k_results, which_entity, conf_id, sample, method_sim_list)
+#     main(dataset, k_results, which_entity, conf_id, sample, method_sim_list)
