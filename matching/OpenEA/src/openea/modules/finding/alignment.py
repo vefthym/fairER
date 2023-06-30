@@ -188,7 +188,11 @@ def calculate_rank(kgs, test_ent_lists, mode, idx, sim_mat, top_k, accurate, tot
                 if len(test_ent_lists) > 0:
                     similarities_sorted = list(np.sort((-sim_mat[i, :])))
                     # 500 for smaller sim_lists file. Otherwise, len(rank)
-                    for r in range(len(rank)):
+                    if len(rank) > 100:
+                        limit = 100
+                    else:
+                        limit = len(rank)
+                    for r in range(limit):
                         rank_sim_list.append((temp_rank[r], similarities_sorted[r]))
                 sim_lists[(gold, ent_ids1_rev[test_ent_lists[gold]])] = rank_sim_list
 

@@ -26,7 +26,6 @@ def run(data, data_path, train_file, valid_file, test_file, explanation, k_resul
 
     # unnecessary read for the 1st time, but throws error otherwise
     preds = pd.read_csv(data_path + '/dm_results.csv')
-    # print(preds)
 
     # Ranking of matching results in desc. match score
     preds = preds.sort_values(by='match_score', ascending=False)
@@ -37,7 +36,8 @@ def run(data, data_path, train_file, valid_file, test_file, explanation, k_resul
     #################################
     initial_pairs = [(int(a.id.split('_')[0]), int(a.id.split('_')[1]), a.match_score, util.pair_is_protected(a, data, False, explanation))
                      for a in preds.itertuples(index=False)]
-
+    
+    k_results = 20
     clusters = fumc.run(initial_pairs, k_results)
     # print("\nclustering results:\n", clusters)
 
@@ -55,8 +55,8 @@ def run(data, data_path, train_file, valid_file, test_file, explanation, k_resul
 
 # This pipeline performs a Fair version of Unique Mapping Clustering (creates two PQs instead of one)
 # instead of running the fa*ir algorithm for re-ranking
-def main(data_path, train_file, valid_file, test_file, explanation):
-    k = 20
+def main(data_path, train_file, valid_file, test_file, explanation, k=20):
+    k_results = 20
     data = os.path.basename(data_path)
     
     print('\n', data, '\n')
@@ -65,7 +65,7 @@ def main(data_path, train_file, valid_file, test_file, explanation):
     for _ in range(10):
         start_time = time.time()
         clusters, preds = run(data, data_path, train_file,
-                              valid_file, test_file, int(explanation), k)
+                              valid_file, test_file, int(explanation), k_results)
         ex_time = time.time() - start_time
         av_time += ex_time
 
@@ -74,13 +74,13 @@ def main(data_path, train_file, valid_file, test_file, explanation):
     #############################
     print("--- %s seconds ---" % (av_time / 10.0))
 
-    accuracy = eval.get_accuracy(clusters, preds)
+    accuracy = eval.get_accuracy(clusters, preds, k)
     print("accuracy:", accuracy)
 
-    spd = f_eval.get_spd(clusters, preds, data)
+    spd = f_eval.get_spd(clusters, preds, data, k)
     print("SPD:", spd)
 
-    eod = f_eval.get_eod(clusters, preds, data)
+    eod = f_eval.get_eod(clusters, preds, data, k)
     print("EOD:", eod)
     print()
 

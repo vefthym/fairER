@@ -30,7 +30,7 @@ def run(conf, dest_path, dataset, file_name):
 
 
 
-def main(k_results, dataset, conf, which_entity):
+def main(dataset, conf, which_entity, k=20):
 
     dest_path = "resources/exp_results/" + dataset + "_RREA/" + conf + "/"
     file_name =  dataset + "_sim_lists.pickle"
@@ -60,7 +60,7 @@ def main(k_results, dataset, conf, which_entity):
             for sim_pairs in sim_lists_no_csls[pair]:
                 candidates.append([pair[1], index_to_id[sim_pairs[0]], abs(sim_pairs[1])])
         candidates.sort(key=lambda x: x[2], reverse=True)
-
+        
         #################################
         # Fair Unique Mapping Clustering
         #################################
@@ -80,27 +80,31 @@ def main(k_results, dataset, conf, which_entity):
             preds.append([pair[1], index_to_id[sim_lists_no_csls[pair][0][0]], abs(sim_lists_no_csls[pair][0][1]),
                            g.pair_is_protected([pair[1], index_to_id[sim_lists_no_csls[pair][0][0]]], which_entity)])
 
-        initial_pairs = [(int(cand[0]), int(cand[1]), int(cand[2]), g.pair_is_protected(cand[:2], which_entity))
+        initial_pairs = [(int(cand[0]), int(cand[1]), float(cand[2]), g.pair_is_protected(cand[:2], which_entity))
                      for cand in candidates]
-
+        
+        k_results = len(sim_lists_no_csls)
         clusters = fumc.run(initial_pairs, k_results)
-
+        
+        cluster_mapped = []
+        for cl in clusters:
+            cluster_mapped.append([cl[0], kg1.get_seed_pairs()[cl[1]], cl[2], cl[3]])
         #############################
         # Evaluation
         #############################
 
-        accuracy = eval.get_accuracy_KG(clusters, candidates)
+        accuracy = eval.get_accuracy_KG(clusters, candidates, k)
         print("accuracy:", accuracy)
 
-        spd = f_eval.get_spd_KG(clusters, candidates, g, which_entity)
+        spd = f_eval.get_spd_KG(clusters, candidates, g, which_entity, k)
         print("SPD:", spd)
 
-        eod = f_eval.get_eod_KG(clusters, candidates, g, which_entity)
+        eod = f_eval.get_eod_KG(clusters, candidates, g, which_entity, k)
         print("EOD:", eod)
         print()
 
         methods.eval_to_json(accuracy, spd, eod)
-        methods.clusters_to_json(clusters)
+        methods.clusters_to_json(cluster_mapped, ["KG 1", "KG 2"])
         methods.preds_to_json("", preds)
 
     

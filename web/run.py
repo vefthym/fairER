@@ -170,6 +170,8 @@ def getEvaluationResults():
     p = request.args.get('p')
     s = request.args.get('s')
     t = request.args.get('t')
+    k = request.args.get('k')
+    
     print(request.args)
     if p == None:
         conf = "original"
@@ -178,20 +180,20 @@ def getEvaluationResults():
 
     if method == "deepmatcher":
         if alg == 'fairER':
-                methods.runFairER(dataset, explanation)
+                methods.runFairER(dataset, explanation, k)
         else:
-                methods.runUnfair(dataset)
+                methods.runUnfair(dataset, k)
     elif method == "RREA":
         if alg == 'fairER':
-                methods.runFairER_RREA(dataset, explanation, conf)
+                methods.runFairER_RREA(dataset, explanation, conf, k)
         else:
-                methods.runUnfair_RREA(dataset, explanation, conf)
+                methods.runUnfair_RREA(dataset, explanation, conf, k)
     elif method == "RDGCN" or method == "MultiKE":
             if alg == 'fairER':
-                    methods.runFairER_OpenEA(dataset, explanation, conf, method)
+                    methods.runFairER_OpenEA(dataset, explanation, conf, method, k)
             else:
-                    methods.runUnfair_OpenEA(dataset, explanation, conf, method)
-
+                    methods.runUnfair_OpenEA(dataset, explanation, conf, method, k)
+    print(k)
     # open the file that was created
     with open(os.path.join(os.getcwd(), 'web', 'data', 'json_data', 'evaluation_data.json')) as json_file:
             data = json.load(json_file)  # get the data from this file
@@ -202,7 +204,7 @@ def getEvaluationResults():
 
     response = app.response_class(
             response=json.dumps({'Algorithm': alg, 'Dataset': dataset,
-                                'Accuracy': accuracy, 'SPD': spd, 'EOD': eod}, sort_keys=False),
+                                'Accuracy@' + k: accuracy, 'SPD@' + k: spd, 'EOD@' + k: eod}, sort_keys=False),
             mimetype='application/json'
         )
     return response
@@ -359,28 +361,53 @@ def getStats():
     """
     try:
         dataset = request.args.get('dataset')
+        dataset_type = request.args.get('type')
         explanation = request.args.get('explanation')
 
-        cur_dir = os.path.abspath(".")
-        dm_results = os.path.join(
-            cur_dir, '..', 'resources', 'Datasets', dataset, 'dm_results.csv')
+        if dataset_type == "tab":
 
-        if not os.path.isfile(dm_results):
-            methods.runFairER(dataset, explanation)
+            cur_dir = os.path.abspath(".")
 
-        methods.runStatistics(dataset)
-        with open(os.path.join('data', 'json_data', 'statistics_data.json')) as json_file:
-            data = json.load(json_file)
+            dm_results = os.path.join(
+                cur_dir, 'resources', 'Datasets', dataset, 'dm_results.csv')
 
-        response = app.response_class(
-            response=json.dumps({'Number of Protected Matches': data['num_protected_matches'],
-                                'Number of non-Protected Matches':  data['num_nonprotected_matches'],
-                                'Avg Score Protected': data['avg_score_protected'],
-                                'Agv Score non-Protected': data['avg_score_nonprotected'],
-                                'Avg Score Protected Matches': data['avg_score_protected_matches'],
-                                'Avg Score non-Protected Matches': data['avg_score_nonprotected_matches']}, sort_keys=False),
-            mimetype='application/json'
-        )
+            if not os.path.isfile(dm_results):
+                methods.runFairER(dataset, explanation)
+
+            methods.runStatistics(dataset, dataset_type)
+            with open(os.path.join('web', 'data', 'json_data', 'statistics_data.json')) as json_file:
+                data = json.load(json_file)
+
+            response = app.response_class(
+                response=json.dumps({'Number of Protected Matches': data['num_protected_matches'],
+                                    'Number of non-Protected Matches':  data['num_nonprotected_matches'],
+                                    'Avg Score Protected': data['avg_score_protected'],
+                                    'Avg Score non-Protected': data['avg_score_nonprotected'],
+                                    'Avg Score Protected Matches': data['avg_score_protected_matches'],
+                                    'Avg Score non-Protected Matches': data['avg_score_nonprotected_matches']}, sort_keys=False),
+                mimetype='application/json'
+            )
+
+        elif dataset_type == "kg":
+            methods.runStatistics(dataset, dataset_type)
+            with open(os.path.join('web', 'data', 'json_data', 'statistics_data.json')) as json_file:
+                data = json.load(json_file)
+
+            response = app.response_class(
+                response=json.dumps({'#Ents KG1': data['#Nodes KG1'],
+                                    '#Ents KG2': data['#Nodes KG2'],
+                                    '#Rels KG1':  data['#Relations KG1'],
+                                    '#Rels KG2':  data['#Relations KG2'],
+                                    '#Triples KG1':  data['#Triples KG1'],
+                                    '#Triples KG2':  data['#Triples KG2'],
+                                    'wccR KG1':  data['wccR KG1'],
+                                    'wccR KG2':  data['wccR KG2'],
+                                    'maxCS KG1':  data['maxCS KG1'],
+                                    'maxCS KG2':  data['maxCS KG2'],
+                                    'deg KG1':  data['deg KG1'],
+                                    'deg KG2':  data['deg KG2']}, sort_keys=False),
+                mimetype='application/json')
+            
         return response
         
     except Exception as e:
@@ -394,7 +421,7 @@ def getStats():
                                 'line_number': str(line_number)}),
             mimetype='application/json'
         )
-        return response
+    return response
 
 
 
@@ -984,4 +1011,4 @@ def startSampling():
 
 
 if __name__ == "__main__":
-    app.run(debug=True, threaded=True, port=5050)  
+    app.run(debug=True, threaded=True, port=5052)  

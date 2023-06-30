@@ -102,6 +102,52 @@ body {
     /* color: #444; */
 }
 
+#k-val-fairer-container {
+    display: inline-block;
+    min-width: 180px;
+}
+
+#k-val-unfair-container {
+    display: inline-block;
+    min-width: 180px;
+}
+
+.re-run{
+    height: 30px;
+    min-width: 40px !important;
+    padding: 0px 12px;
+    margin-top: 6px !important;
+    /* font-size: 14px; */
+}
+
+#fairer-container  .form-control {
+    width: 31% !important;
+    height: 30px;
+    margin-left: 0.2em;
+    margin-right: 0.2em;
+    margin-top: 13px !important;
+    margin-bottom: 15px !important;
+    /* color: #444; */
+}
+
+#unfair-container  .form-control {
+    width: 31% !important;
+    height: 30px;
+    margin-left: 0.2em;
+    margin-right: 0.2em;
+    margin-top: 15px !important;
+    margin-bottom: 15px !important;
+    /* color: #444; */
+}
+
+.true-row {
+    background-color: 	rgb(173,216,230) !important;
+}
+
+.false-row {
+    background-color: rgb(144, 238, 144) !important;
+}
+
 
 #datasets-container, #methods-container {
     min-width: 300px;
@@ -195,7 +241,21 @@ body {
 }
 
 .hidden {
-    display: none;
+    display: none !important;
+}
+
+.vis_hidden {
+    visibility: hidden !important;
+}
+
+.vis_not_hidden {
+    visibility: visible !important;
+}
+
+.disabled {
+    /* Define the styles for the disabled state */
+    pointer-events: none !important;/* Prevent interaction with the element */
+    opacity: 0.5 !important; /* Apply a visual cue to indicate the disabled state */
 }
 
 /* #group_labels {

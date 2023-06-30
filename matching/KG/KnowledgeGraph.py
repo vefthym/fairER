@@ -12,6 +12,7 @@ class KnowledgeGraph:
     conf_id = ""
     attr_df = ""
     attr_dict = ""
+    num_rel_type = 0
 
     def __init__(self, id, dataset, kg_type, sample, conf_id, method):
 
@@ -23,6 +24,7 @@ class KnowledgeGraph:
       self.attr_df = ""
       self.method = method
       self.attr_dict = ""
+      self.num_rel_type = 0
       
       KnowledgeGraph.load_rel_graph(self, kg_type, method)
       KnowledgeGraph.load_attr_graph(self, method)
@@ -128,6 +130,8 @@ class KnowledgeGraph:
 
       kg = pd.read_csv(path,  sep='\t', names=["e1", "r", "e2"])
       self.df = kg
+
+      self.num_rel_type = len(kg["r"].unique())
 
       # print("Loaded relation types:")
       # print("\t" + str(len(pd.unique(self.df["r"]))))

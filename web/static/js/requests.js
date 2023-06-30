@@ -458,6 +458,11 @@ function run_exp(alg, container){
 
     var sampling = $("#sampling-val").val()
     var method = $("#method-val").val()
+    var k = $("#k-val-" + container).val()
+
+    if (k == undefined){
+        k = 20;
+    }
 
     if (sampling == "SUSIE") {
         var jump_prob = $("#jump_prob").val()
@@ -466,15 +471,15 @@ function run_exp(alg, container){
         
         conf = "&p=" + jump_prob + "&s=" + sampl_size + "&t=" + min_comp;
         $.when(run_sampling(jump_prob, sampl_size, min_comp),
-                get_evaluation(alg, container, method, conf)
+                get_evaluation(alg, container, method, conf, k)
         ).done(function(){
             console.log("done!")
         });
 
     }
-    else if (sampling == "no_sampling") {
+    else if (sampling == "no_sampling" || sampling == "No Sampling") {
         conf = "original"
-        get_evaluation(alg, container, method, conf);
+        get_evaluation(alg, container, method, conf, k);
     }
 
     
@@ -499,7 +504,7 @@ function run_clusters(alg, container){
         });
 
     }
-    else if (sampling == "no_sampling") {
+    else if (sampling == "no_sampling" || sampling == "No Sampling") {
         conf = "original"
         get_clusters(alg, container, method, conf);
     }
@@ -525,7 +530,7 @@ function run_predictions(alg, container){
         });
 
     }
-    else if (sampling == "no_sampling") {
+    else if (sampling == "no_sampling" || sampling == "No Sampling") {
         conf = "original"
         get_predictions(alg, container, method, conf);
     }
@@ -570,13 +575,15 @@ function get_clusters(alg, container_id, method, conf) {
         dataType: 'text',
         success: function (response) {
             var obj = JSON.parse(response);
+
             //If there is no exception 
             if (obj.exception == undefined) {
                 var clusters_data = eval(obj.clusters);
+
                 if (alg == "unfair")
-                    $('#unfair-container').html('<label for="clusters-table" id="clusters-label">Clusters</label><div id="clusters-table-' + container_id + '"></div>');
+                    $('#unfair-container').html('<label for="clusters-table" id="clusters-label">Suggested Matches</label><div id="clusters-table-' + container_id + '"></div>');
                 else
-                    $('#fairer-container').html('<label for="clusters-table" id="clusters-label">Clusters</label><div id="clusters-table-' + container_id + '"></div>');
+                    $('#fairer-container').html('<label for="clusters-table" id="clusters-label">Suggested Matches</label><div id="clusters-table-' + container_id + '"></div>');
                 $('#clusters-table' + container_id).addClass("table-bordered responsive-table");
                 var table = new Tabulator("#clusters-table-" + container_id, {
                     data: clusters_data,           //load row data from array
@@ -586,6 +593,20 @@ function get_clusters(alg, container_id, method, conf) {
                     pagination: "local",       //paginate the data
                     paginationSize: 15,         //allow 15 rows per page of data
                     autoColumns: true,
+                    rowFormatter: function (row) {
+                        var data = row.getData();
+                        console.log(data.Prot)
+                        if (data.Prot === "True") {
+                            // Apply CSS class to row for true value
+                            console.log("edo1")
+                            row.getElement().classList.add("true-row");
+                        } 
+                        else if (data.Prot === "False") {
+                            // Apply CSS class to row for false value
+                            console.log("edo2")
+                            row.getElement().classList.add("false-row");
+                        }
+                    },
                 });
                 if(non_cached_datasets.includes(dataset))
                     remove_from_noncached_datasets(dataset);
@@ -602,12 +623,13 @@ function get_clusters(alg, container_id, method, conf) {
 
 
 /* Prints the evaluation results in the 'container_id' html element */
-function get_evaluation(alg, container_id, method, conf) {
-    
+function get_evaluation(alg, container_id, method, conf, k) {
     var explanation = 1;
     var dataset = $('#dataset-val').val()
     if (has_condition() == false)
         return;
+
+
 
     if (non_cached_datasets.includes(dataset)){
         if(document.querySelector('input[name="exp-form"]:checked') == null){
@@ -621,12 +643,12 @@ function get_evaluation(alg, container_id, method, conf) {
     $('#' + container_id).html('<div class="loader"></div><p style="text-align:center; margin-top:1%">Please wait as this may take a few minutes...</p>')
 
     if(conf == "original"){
-        url = "/requests/getEvaluationResults?alg=" + alg + "&dataset=" + dataset + "&method=" + method + "&explanation=" + explanation
+        url = "/requests/getEvaluationResults?alg=" + alg + "&dataset=" + dataset + "&method=" + method + "&explanation=" + explanation + "&k=" + k
     }
     else{
-        url = "/requests/getEvaluationResults?alg=" + alg + "&dataset=" + dataset + "&method=" + method + "&explanation=" + explanation + conf
+        url = "/requests/getEvaluationResults?alg=" + alg + "&dataset=" + dataset + "&method=" + method + "&explanation=" + explanation + conf + "&k=" + k
     }
-
+    
     $.ajax({
         type: "GET",
         url: url,
@@ -635,9 +657,18 @@ function get_evaluation(alg, container_id, method, conf) {
         success: function (response) {
             const obj = JSON.parse(response);
             //If there is exception 
-            if (obj.exception == undefined) {
-                $('#' + container_id).html('<label for="eval-table" id="eval-label">Evaluation Results</label><div id="eval-table-' + container_id + '"></div>');
+            if (obj.exception == undefined) {         
+                $('#' + container_id).html('<label for="eval-table" id="eval-label-' + container_id + '">Evaluation Results</label><div id="eval-table-' + container_id + '"></div>');
                 $('#eval-table-' + container_id).addClass("table-bordered responsive-table");
+
+                if(container_id.replace("-container", "") == "fairer"){
+                    temp = "fairER"
+                }
+                else{
+                    temp = container_id.replace("-container", "")
+                }
+
+                $('#eval-label-' + container_id).append('<br><label for="k-val-' + container_id + '""><b>Set k = </b></label> <input type="text" class="form-control" id="k-val-' + container_id + '" name="k-val-' + container_id + '" value=\"' + k + '\"> <button type="button" class="btn btn-secondary re-run" id="re-run' + container_id + '" onclick="run_exp(\'' + temp + '\', \'' + container_id + '\')">' + 'Run Again' + '</button>');
 
                 data = '[' + response + ']'
                 data = JSON.parse(JSON.parse(JSON.stringify(data)));
@@ -664,15 +695,17 @@ function get_evaluation(alg, container_id, method, conf) {
 
 /* Prints the statistics */
 function get_statistics() {
+    
     var explanation = 1
     
     if (has_condition() == false)
         return;
 
     $('#datasets-info-container').html('<div class="loader"></div><p style="text-align:center; margin-top:1%">Please wait as this may take a few minutes...</p>')
-    var dataset = $('#dataset-val').val()
+    var dataset = $('#dataset-val').val();
+    var dataset_type = $('#dataset-val').select2("data")[0].type
 
-    if (non_cached_datasets.includes(dataset)){
+    if (dataset_type == "tab" && non_cached_datasets.includes(dataset)){
         if(document.querySelector('input[name="exp-form"]:checked') == null){
             has_cached_data();
             return;
@@ -683,7 +716,7 @@ function get_statistics() {
 
     $.ajax({
         type: "GET",
-        url: "/requests/getStatistics?dataset=" + dataset + "&explanation=" + explanation,
+        url: "/requests/getStatistics?dataset=" + dataset + "&explanation=" + explanation + "&type=" + dataset_type,
         contentType: "application/json",
         dataType: 'text',
         success: function (response) {
@@ -696,7 +729,6 @@ function get_statistics() {
 
                 data = '[' + response + ']'
                 data = JSON.parse(JSON.parse(JSON.stringify(data)));
-                console.log(data)
                 var table = new Tabulator("#statistics-table", {
                     data: data,           //load row data from array
                     layout: "fitColumns",      //fit columns to width of table
@@ -1033,4 +1065,24 @@ function get_explanation() {
             console.log(error);
         }
     });
+}
+function control_sampling(){
+    
+    var sampling_val = $('#sampling-val').select2("data")[0]
+
+    if(sampling_val != undefined) {
+        // Disable sampling and KG methods
+        if(sampling_val.text == "No Sampling" || sampling_val == undefined) {
+            $('#jump_prob').removeClass("vis_not_hidden").addClass("vis_hidden");
+            $('#sampl_size').removeClass("vis_not_hidden").addClass("vis_hidden");
+            $('#min_comp').removeClass("vis_not_hidden").addClass("vis_hidden");
+            $('#group_labels').removeClass("vis_not_hidden").addClass("vis_hidden");
+        }
+        else if(sampling_val == "SUSIE") {
+            $('#jump_prob').removeClass("vis_hidden").addClass("vis_not_hidden");
+            $('#sampl_size').removeClass("vis_hidden").addClass("vis_not_hidden");
+            $('#min_comp').removeClass("vis_hidden").addClass("vis_not_hidden");
+            $('#group_labels').removeClass("vis_hidden").addClass("vis_not_hidden");
+        }
+    }
 }

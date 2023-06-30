@@ -2,18 +2,23 @@ import util
 
 
 # returns the statistical parity difference (ideal: 0, worst: 1)
-def get_spd(clusters, preds, data):
+def get_spd(clusters, preds, data, k):
+
     num_protected = 0
-    num_results = len(clusters) * 1.0
+    # num_results = len(clusters) * 1.0
+    num_results = int(k) * 1.0
+    i = 0
 
     for cluster in clusters:
-        left_id = cluster[0]
-        right_id = cluster[1]
-        #label = preds['label'][preds['id'] == str(left_id)+'_'+str(right_id)]
-        is_protected = util.pair_is_protected(preds[preds['id'] == str(left_id)+'_'+str(right_id)].iloc[0], data)
-        #print(left_id, right_id, label.all())
-        if is_protected:
-            num_protected += 1
+        if i < int(k):
+            left_id = cluster[0]
+            right_id = cluster[1]
+            #label = preds['label'][preds['id'] == str(left_id)+'_'+str(right_id)]
+            is_protected = util.pair_is_protected(preds[preds['id'] == str(left_id)+'_'+str(right_id)].iloc[0], data)
+            #print(left_id, right_id, label.all())
+            if is_protected:
+                num_protected += 1
+        i += 1
     predict_protected_prob = num_protected / num_results
     predict_nonprotected_prob = 1 - predict_protected_prob
 
@@ -28,17 +33,21 @@ def get_spd(clusters, preds, data):
     Version for KGs
 """
 # returns the statistical parity difference (ideal: 0, worst: 1)
-def get_spd_KG(clusters, preds, g, which_entity):
+def get_spd_KG(clusters, preds, g, which_entity, k):
+
     num_protected = 0
-    num_results = len(clusters) * 1.0
-
+    # num_results = len(clusters) * 1.0
+    num_results = int(k) * 1.0
+    i = 0
     for cluster in clusters:
-        left_id = cluster[0]
-        right_id = cluster[1]
+        if i < int(k):
+            left_id = cluster[0]
+            right_id = cluster[1]
 
-        is_protected = g.pair_is_protected(cluster, which_entity)
-        if is_protected:
-            num_protected += 1
+            is_protected = g.pair_is_protected(cluster, which_entity)
+            if is_protected:
+                num_protected += 1
+        i += 1
             
     predict_protected_prob = num_protected / num_results
     predict_nonprotected_prob = 1 - predict_protected_prob
@@ -52,19 +61,22 @@ def get_spd_KG(clusters, preds, g, which_entity):
 
 
 # returns the equality of opportunity difference (ideal: 0, worst: 1)
-def get_eod(clusters, preds, data):
+def get_eod(clusters, preds, data, k):
     num_protected_matches_correct = 0
     correct_results = 0
 
+    i = 0
     for cluster in clusters:
-        left_id = cluster[0]
-        right_id = cluster[1]
-        label = preds['label'][preds['id'] == str(left_id)+'_'+str(right_id)]
-        is_protected = util.pair_is_protected(preds[preds['id'] == str(left_id)+'_'+str(right_id)].iloc[0], data)
-        if label.all() == 1:
-            correct_results += 1
-            if is_protected:
-                num_protected_matches_correct += 1
+        if i < int(k):
+            left_id = cluster[0]
+            right_id = cluster[1]
+            label = preds['label'][preds['id'] == str(left_id)+'_'+str(right_id)]
+            is_protected = util.pair_is_protected(preds[preds['id'] == str(left_id)+'_'+str(right_id)].iloc[0], data)
+            if label.all() == 1:
+                correct_results += 1
+                if is_protected:
+                    num_protected_matches_correct += 1
+        i += 1
 
     if correct_results == 0:
         return None
@@ -83,20 +95,22 @@ def get_eod(clusters, preds, data):
     Version of KGs
 """    
 # returns the equality of opportunity difference (ideal: 0, worst: 1)
-def get_eod_KG(clusters, preds, g, which_entity):
+def get_eod_KG(clusters, preds, g, which_entity, k):
     num_protected_matches_correct = 0
     correct_results = 0
-
+    i = 0
     for cluster in clusters:
-        left_id = cluster[0]
-        right_id = cluster[1]
+        if i < int(k):
+            left_id = cluster[0]
+            right_id = cluster[1]
 
-        is_protected = g.pair_is_protected(cluster, which_entity)
-        
-        if left_id == right_id:
-            correct_results += 1
-            if is_protected:
-                num_protected_matches_correct += 1
+            is_protected = g.pair_is_protected(cluster, which_entity)
+            
+            if left_id == right_id:
+                correct_results += 1
+                if is_protected:
+                    num_protected_matches_correct += 1
+        i += 1
 
     if correct_results == 0:
         return None

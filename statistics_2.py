@@ -14,7 +14,7 @@ def main(dataset):
     valid_file = 'joined_valid.csv'
     test_file = 'joined_test.csv'
     cur_dir = os.path.abspath(".")
-    data_path = os.path.join(cur_dir, '..', 'resources', 'Datasets', dataset)
+    data_path = os.path.join(cur_dir, 'resources', 'Datasets', dataset)
     # comment out after the first run (it writes output to file, which does not need to be re-written in every run)
     dm_results = data_path+'/dm_results.csv'
     if not os.path.exists(dm_results):
@@ -89,13 +89,13 @@ def main(dataset):
                 'avg_score_protected': str(avg_score_protected), 'avg_score_nonprotected': str(avg_score_nonprotected),
                 'avg_score_protected_matches': str(avg_score_protected_matches), 'avg_score_nonprotected_matches': str(avg_score_nonprotected_matches)}
         json_string = json.dumps(data)
-        with open('data/json_data/statistics_data.json', 'w+') as outfile:
+        with open('web/data/json_data/statistics_data.json', 'w+') as outfile:
             outfile.write(json_string)
 
 
 
 
 
-if __name__ == '__main__':
-    dataset = sys.argv[1]
-    main(dataset)
+# if __name__ == '__main__':
+#     dataset = sys.argv[1]
+#     main(dataset)

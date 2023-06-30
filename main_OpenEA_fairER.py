@@ -42,7 +42,7 @@ def run(conf, dest_path, dataset, file_name, method):
         Run fairER method for OpenEA method (unique mapping clustering)
 """
 
-def main(k_results, dataset, conf, which_entity, method_sim_list):
+def main(dataset, conf, which_entity, method_sim_list, k=20):
     
     dest_path = "resources/exp_results/" + dataset + "_" + method_sim_list + "/" + conf + "/"
     file_name =  dataset + "_sim_lists.pickle"
@@ -116,24 +116,29 @@ def main(k_results, dataset, conf, which_entity, method_sim_list):
         initial_pairs = [(cand[0], cand[1], int(cand[2]), g.pair_is_protected(cand[:2], which_entity))
                      for cand in candidates]
         
+        k_results = len(sim_lists_no_csls)
         clusters = fumc.run(initial_pairs, k_results)
+
+        cluster_mapped = []
+        for cl in clusters:
+            cluster_mapped.append([cl[0], kg1.get_seed_pairs()[cl[1]], cl[2], cl[3]])
 
         #############################
         # Evaluation
         #############################
 
-        accuracy = eval.get_accuracy_KG(clusters, candidates)
+        accuracy = eval.get_accuracy_KG(clusters, candidates, k)
         print("accuracy:", accuracy)
 
-        spd = f_eval.get_spd_KG(clusters, candidates, g, which_entity)
+        spd = f_eval.get_spd_KG(clusters, candidates, g, which_entity, k)
         print("SPD:", spd)
 
-        eod = f_eval.get_eod_KG(clusters, candidates, g, which_entity)
+        eod = f_eval.get_eod_KG(clusters, candidates, g, which_entity, k)
         print("EOD:", eod)
         print()
 
         methods.eval_to_json(accuracy, spd, eod)
-        methods.clusters_to_json(clusters)
+        methods.clusters_to_json(cluster_mapped, ["KG 1", "KG 2"])
         methods.preds_to_json("", preds)
 
 # if __name__ == "__main__":

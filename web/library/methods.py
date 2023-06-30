@@ -16,7 +16,7 @@ import json
 from pathlib import Path
 sys.path.append(os.path.abspath('./'))
 import start_sampling
-import util, read_datasets, main_fairER, main_unfair, statistics
+import util, read_datasets, main_fairER, main_unfair, statistics_2, statistics_1
 import main_RREA_fairER
 import main_RREA_unfair
 import main_OpenEA_fairER
@@ -24,7 +24,7 @@ import main_OpenEA_unfair
 
 sys.path.append(os.path.abspath('../'))
 
-def runFairER(dataset, explanation):
+def runFairER(dataset, explanation, k=20):
     """
         Runs main_fairER.py pipeline and produces the evaluation results, predictions and clusters 
 
@@ -40,24 +40,24 @@ def runFairER(dataset, explanation):
     """
     cur_dir = os.path.abspath(".")
     if int(explanation) == 0:
-        main_fairER.main(os.path.join(cur_dir, 'resources','Datasets',dataset), 'joined_train.csv', 'joined_valid.csv', 'joined_test.csv', explanation)
+        main_fairER.main(os.path.join(cur_dir, 'resources','Datasets',dataset), 'joined_train.csv', 'joined_valid.csv', 'joined_test.csv', explanation, k)
     else:
-        main_fairER.main(os.path.join(cur_dir, 'resources','Datasets',dataset), 'merged_train.csv', 'merged_valid.csv', 'merged_test.csv', explanation)
+        main_fairER.main(os.path.join(cur_dir, 'resources','Datasets',dataset), 'merged_train.csv', 'merged_valid.csv', 'merged_test.csv', explanation, k)
 
-def runFairER_RREA(dataset, explanation, conf):
-
-    cur_dir = os.path.abspath(".")
-    which_entity = 0
-    main_RREA_fairER.main(20, dataset, conf, which_entity)
-
-def runFairER_OpenEA(dataset, explanation, conf, method):
+def runFairER_RREA(dataset, explanation, conf, k=20):
 
     cur_dir = os.path.abspath(".")
     which_entity = 0
-    main_OpenEA_fairER.main(20, dataset, conf, which_entity, method)
+    main_RREA_fairER.main(dataset, conf, which_entity, k)
+
+def runFairER_OpenEA(dataset, explanation, conf, method, k=20):
+
+    cur_dir = os.path.abspath(".")
+    which_entity = 0
+    main_OpenEA_fairER.main(dataset, conf, which_entity, method, k)
 
 
-def runUnfair(dataset):
+def runUnfair(dataset, k=20):
     """
         Runs main_unfair.py pipeline and produces the evaluation results, predictions and clusters 
 
@@ -69,20 +69,20 @@ def runUnfair(dataset):
         Precondition: dataset is String.
     """
     cur_dir = os.path.abspath(".")
-    main_unfair.main(os.path.join(cur_dir, 'resources','Datasets',dataset), 'joined_train.csv', 'joined_valid.csv', 'joined_test.csv', 20) # k==20
+    main_unfair.main(os.path.join(cur_dir, 'resources','Datasets',dataset), 'joined_train.csv', 'joined_valid.csv', 'joined_test.csv', k) # k==20
 
-def runUnfair_RREA(dataset, explanation, conf):
+def runUnfair_RREA(dataset, explanation, conf, k=20):
     cur_dir = os.path.abspath(".")
     which_entity = 0
-    main_RREA_unfair.main(20, dataset, conf, which_entity)
+    main_RREA_unfair.main(dataset, conf, which_entity, k)
 
-def runUnfair_OpenEA(dataset, explanation, conf, method):
+def runUnfair_OpenEA(dataset, explanation, conf, method, k=20):
     cur_dir = os.path.abspath(".")
     which_entity = 0
-    main_OpenEA_unfair.main(20, dataset, conf, which_entity, method)
+    main_OpenEA_unfair.main(dataset, conf, which_entity, method, k)
 
 
-def runStatistics(dataset):
+def runStatistics(dataset, dataset_type):
     """
         Produces the statistics for a specific dataset 
         
@@ -91,7 +91,11 @@ def runStatistics(dataset):
         Parameter dataset: the dataset.
         Precondition: dataset is String.
     """
-    statistics.main(dataset)
+    
+    if dataset_type == "tab":
+        statistics_2.main(dataset)
+    elif dataset_type == "kg":
+        statistics_1.main(dataset)
 
 
 
@@ -389,14 +393,15 @@ def eval_to_json(accuracy, spd, eod):
 
 
 
-def clusters_to_json(clusters):
+def clusters_to_json(clusters, col_name=["Table A", "Table B"]):
     """
         Writes the clusters to a json file.
     """
+    counter = 0
     json_string = '['
     for i in clusters:
-        json_string = json_string + '{"Table A":"'+str(i[0])+'" , "Table B":"'+str(i[1])+'"},'
-    
+        json_string = json_string + '{"Rank":"' + "#" + str(counter) + '" , \'' + col_name[0] + '\':"'+str(i[0])+'" , \'' + col_name[1] + '\':"'+str(i[1])+'",' + '"Matching Score":"' + str(i[2]) + '",' + '"Prot":"' + str(i[3]) + '" }, '
+        counter += 1
     json_string = json_string + ']'
 
     data = {"clusters": json_string}
@@ -723,20 +728,20 @@ def construct_cond(left_attribute, left_func, left_value, logical_op, right_attr
 
 def delete_dataset(dataset):
     cur_dir = os.path.abspath(".")
-    parent_dir = Path(os.getcwd()).parent.absolute()
-    os.chdir(parent_dir)
-    
-
-
+    # print(cur_dir)
+    # parent_dir = Path(os.getcwd()).parent.absolute()
+    # os.chdir(parent_dir)
     path = os.path.join('resources', 'Datasets', dataset)
     if os.path.isdir(path):
         shutil.rmtree(path)
-        os.chdir(cur_dir) 
+        if os.path.isdir(path + "_RREA"):
+            shutil.rmtree(path + "_RREA")
+        # os.chdir(cur_dir) 
         delete_condition_from_file(dataset)
         return True
-    else:
-        os.chdir(cur_dir) 
-        return False
+    # else:
+    #     os.chdir(cur_dir) 
+    #     return False
     
 def delete_condition_from_file(dataset):
     data = {}

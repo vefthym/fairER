@@ -4,98 +4,69 @@ import os
 import util
 import json
 import pandas as pd
+from matching.KG.KnowledgeGraph import KnowledgeGraph
+import networkx as nx
+import pandas as pd
 
+
+def basic_statistics(kg):
+    nodes = kg.graph.number_of_nodes()
+    triples = kg.graph.number_of_edges()
+    return nodes, triples
+
+def weakly_conn_comps(kg_mdi):
+    return nx.number_weakly_connected_components(kg_mdi.graph)/kg_mdi.graph.number_of_nodes()
+
+
+def avg_rels_per_entity(kg_mdi):
+
+    nodes_deg = kg_mdi.graph.degree()
+
+    counter = 0
+    for pair in nodes_deg:
+        counter += pair[1]
+    avg_node_deg = counter / kg_mdi.graph.number_of_nodes()
+
+    return avg_node_deg
+
+def max_comp(kg_mdi):
+    comps = sorted(nx.weakly_connected_components(kg_mdi.graph), key=len)
+    max_len = len(comps[-1])/kg_mdi.graph.number_of_nodes()
+    return max_len
 
 def main(dataset):
-    ###########
-    # Matching
-    ###########
-    train_file = 'joined_train.csv'
-    valid_file = 'joined_valid.csv'
-    test_file = 'joined_test.csv'
-    cur_dir = os.path.abspath(".")
-    data_path = os.path.join(cur_dir, '..', 'resources', 'Datasets', dataset)
-    # comment out after the first run (it writes output to file, which does not need to be re-written in every run)
-    dm_results = data_path+'/dm_results.csv'
-    if not os.path.exists(dm_results):
-        preds = dm.run(data_path, train_file, valid_file,
-                       test_file, epochs=10)  # , unlabeled_file)
-        preds.to_csv(dm_results)
-    # otherwise throws error: Pandas has no attribute 'id'
-    preds = pd.read_csv(dm_results)
+        
+        
+    kg1_mdi = KnowledgeGraph("1", dataset, "multi_directed", "original", "original", "RDGCN")
+    kg2_mdi = KnowledgeGraph("2", dataset, "multi_directed", "original", "original", "RDGCN")
 
-    # Ranking of matching results in desc. match score
-    preds = preds.sort_values(by='match_score', ascending=False)
-    #print("Initial Ranking:\n", preds[:20].to_string(index=False))
+    kg1_mun = KnowledgeGraph("1", dataset, "multi_undirected", "original", "original", "RDGCN")
+    kg2_mun = KnowledgeGraph("2", dataset, "multi_undirected", "original", "original", "RDGCN")
 
-    initial_pairs = []
-    avg_score_protected = 0
-    avg_score_nonprotected = 0
-    num_protected = 0
+    nodes1, triples1 = basic_statistics(kg1_mun)
+    nodes2, triples2 = basic_statistics(kg2_mun)
 
-    avg_score_protected_matches = 0
-    avg_score_nonprotected_matches = 0
-    num_protected_matches = 0
-    num_nonprotected_matches = 0
+    rels1 = kg1_mdi.num_rel_type
+    rels2 = kg2_mdi.num_rel_type
 
-    for i in preds.itertuples():
-        is_protected = util.pair_is_protected(i, dataset)
-        # print(i.id, i.match_score, 'Protected' if is_protected else 'Nonprotected')
-        candidate = preds[preds['id'] == i.id][['id', 'match_score']] \
-            .to_string(header=None, index=False).split()
-        candidate = [int(candidate[0].split('_')[0]), int(
-            candidate[0].split('_')[1]), float(candidate[1]), is_protected]
-        initial_pairs.append(candidate)
-        is_a_match = i.label == 1
-        if is_protected:
-            avg_score_protected += i.match_score
-            num_protected += 1
-            if is_a_match:
-                avg_score_protected_matches += i.match_score
-                num_protected_matches += 1
-        else:
-            avg_score_nonprotected += i.match_score
-            if is_a_match:
-                avg_score_nonprotected_matches += i.match_score
-                num_nonprotected_matches += 1
+    wccR1 = weakly_conn_comps(kg1_mdi)
+    wccR2 = weakly_conn_comps(kg2_mdi)
 
+    deg1 = avg_rels_per_entity(kg1_mdi)
+    deg2 = avg_rels_per_entity(kg2_mdi)
 
-    if num_protected != 0:
-        avg_score_protected /= num_protected
-    if (len(preds)-num_protected) != 0:
-        avg_score_nonprotected /= (len(preds)-num_protected)
+    maxcs1 = max_comp(kg1_mdi)
+    maxcs2 = max_comp(kg2_mdi)   
 
-    ####################
-    # PRINT STATISTICS #
-    ####################
-
-    #print('\nnum protected matches', num_protected_matches)
-    #print('num nonprotected matches', num_nonprotected_matches)
-
-    #print('\naverage match score of protected: ', avg_score_protected)
-    #print('average match score of nonprotected: ', avg_score_nonprotected)
-
-    if num_protected_matches > 0:
-        avg_score_protected_matches = avg_score_protected_matches / num_protected_matches
-        #print('\naverage match score of protected matches: ', avg_score_protected_matches)
-    if num_nonprotected_matches > 0:
-        avg_score_nonprotected_matches /= num_nonprotected_matches
-        #print('average match score of nonprotected matches: ', avg_score_nonprotected_matches)
-
-        #################################
-        # Write statistics to json file
-        #################################
-        data = {'num_protected_matches': str(num_protected_matches), 'num_nonprotected_matches': str(num_nonprotected_matches),
-                'avg_score_protected': str(avg_score_protected), 'avg_score_nonprotected': str(avg_score_nonprotected),
-                'avg_score_protected_matches': str(avg_score_protected_matches), 'avg_score_nonprotected_matches': str(avg_score_nonprotected_matches)}
-        json_string = json.dumps(data)
-        with open('data/json_data/statistics_data.json', 'w+') as outfile:
-            outfile.write(json_string)
-
-
-
-
-
-if __name__ == '__main__':
-    dataset = sys.argv[1]
-    main(dataset)
+    #################################
+    # Write statistics to json file
+    #################################
+    data = {'#Nodes KG1': str(nodes1), '#Nodes KG2': str(nodes2),
+            '#Relations KG1': str(rels1), '#Relations KG2': str(rels2),
+            '#Triples KG1': str(triples1), '#Triples KG2': str(triples2),
+            'wccR KG1': str(wccR1), 'wccR KG2': str(wccR2),
+            'maxCS KG1': str(maxcs1), 'maxCS KG2': str(maxcs2),
+            'deg KG1': str(deg1), 'deg KG2': str(deg2)}
+    json_string = json.dumps(data)
+    with open('web/data/json_data/statistics_data.json', 'w+') as outfile:
+        outfile.write(json_string)

@@ -69,7 +69,7 @@
         <label for="method-val" id="select-method-label"><b>Select a Method:</b></label>
         <div class="container-fluid" id="methods-container">
 
-            <select class="form-select" id="method-val">
+            <select class="form-select" id="method-val" onchange="clear_all_containers(); expl_pop();">
 
             </select>
             
@@ -84,12 +84,12 @@
 
         <div class="container-fluid" id="sampling-container">
 
-            <select class="form-select" id="sampling-val">
+            <select class="form-select" id="sampling-val" onchange="control_sampling()">
           
             </select>
 
             <input type="text" class="form-control hypers" id="jump_prob" name="jump_prob" value="0.15">
-            <input type="text" class="form-control hypers" id="sampl_size" name="sampl_size" value="1000">
+            <input type="text" class="form-control hypers" id="sampl_size" name="sampl_size" value="100">
             <input type="text" class="form-control hypers" id="min_comp" name="min_comp" value="1">
 
             <!-- <button type="button" class="btn btn-secondary" id="start_sampling">Start Sampling</button> -->
@@ -120,14 +120,14 @@
                     <div class="btn-group container" role="group">
                         <button type="button" class="btn btn-secondary"
                             onclick="run_exp('fairER', 'fairer-container')">
-                            Evaluation Results
+                            Evaluation Scores
                         </button>
                         <button type="button" class="btn btn-secondary"
                             onclick="run_clusters('fairER', 'fairer-container')">Get
-                            Clusters</button>
+                            Suggested Matches</button>
                         <button type="button" class="btn btn-secondary"
                             onclick="run_predictions('fairER', 'fairer-container')">Get
-                            Predictions</button>
+                            Test Set Similarities</button>
                         <button type="button" class="btn btn-secondary" onclick="get_explanation()">Get
                             Explanation</button>
                     </div>
@@ -144,10 +144,10 @@
                         </button>
                     <button type="button" class="btn btn-secondary"
                         onclick="run_clusters('unfair', 'unfair-container')">Get
-                        Clusters</button>
+                        Suggested Matches</button>
                     <button type="button" class="btn btn-secondary"
                         onclick="run_predictions('unfair', 'unfair-container')">Get
-                        Predictions</button>
+                        Test Set Similarities</button>
                 </div>
                 <div id="unfair-container">
 

@@ -20,7 +20,6 @@ def run(candidates, results_limit):
     # exit()
 
     nextProtected = True
-    
     while (protected_candidates or nonprotected_candidates) and (len(matches) < results_limit):
         cand = protected_candidates.pop(0) if nextProtected else nonprotected_candidates.pop(0)
         #print(cand)
@@ -35,7 +34,7 @@ def run(candidates, results_limit):
             continue
 
         # add pair to matches
-        matches.append([cand[0],cand[1]])
+        matches.append([cand[0],cand[1],cand[2],cand[3]])
         matched_ids_left.add(cand[0])
         matched_ids_right.add(cand[1])
 
@@ -46,7 +45,7 @@ def run(candidates, results_limit):
     return matches
 
 
-if __name__ == '__main__':
-    cand_list = [[-1,1,0.5,False],[-1,3,0.3,False],[-2,3,0.2,True],[-3,3,0.1,False],[-4,4,0.0,True]]
-    clusters = run(cand_list)
-    #print(clusters)
+# if __name__ == '__main__':
+#     cand_list = [[-1,1,0.5,False],[-1,3,0.3,False],[-2,3,0.2,True],[-3,3,0.1,False],[-4,4,0.0,True]]
+#     clusters = run(cand_list)
+#     #print(clusters)

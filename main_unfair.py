@@ -42,15 +42,15 @@ def run(data, data_path, train, valid, test, k_results):
     return original_clusters, preds
 
 
-def main(data_path, train_file, valid_file, test_file, k):
-
+def main(data_path, train_file, valid_file, test_file, k=20):
+    k_results = 20
     data = os.path.basename(data_path)
     print('\n', data, '\n')
 
     av_time = 0
     for _ in range(10):
         start_time = time.time()
-        clusters, preds = run(data, data_path, train_file, valid_file, test_file, k)
+        clusters, preds = run(data, data_path, train_file, valid_file, test_file, k_results)
         ex_time = time.time() - start_time
         av_time += ex_time
 
@@ -59,13 +59,13 @@ def main(data_path, train_file, valid_file, test_file, k):
     ############################
     #print("--- %s seconds ---" % (av_time / 10.0))
 
-    accuracy = eval.get_accuracy(clusters, preds)
+    accuracy = eval.get_accuracy(clusters, preds, k)
     #print("accuracy:", accuracy)
 
-    spd = f_eval.get_spd(clusters, preds, data)
+    spd = f_eval.get_spd(clusters, preds, data, k)
     #print("SPD:", spd)
 
-    eod = f_eval.get_eod(clusters, preds, data)
+    eod = f_eval.get_eod(clusters, preds, data, k)
     #print("EOD:", eod)
     #print()
 

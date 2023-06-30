@@ -45,7 +45,11 @@ def cal_rank_by_sim_mat(task, sim, top_k, accurate, test_ent_list):
             if len(test_ent_list) > 0:
                 similarities_sorted = list(np.sort((-sim[i, :])))
                 # 500 for smaller sim_lists file. Otherwise, len(rank)
-                for r in range(5):
+                if len(rank) > 100:
+                    limit = 100
+                else:
+                    limit = len(rank)
+                for r in range(limit):
                     rank_sim_list.append((rank[r], similarities_sorted[r]))
                 neighbors[(ref,test_ent_list[ref])] = rank_sim_list
         else:

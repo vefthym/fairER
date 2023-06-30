@@ -13,18 +13,8 @@ function has_condition() {
         return true
 }
 
-function has_cached_data() {
-
+function expl_pop(){
     var dataset = $('#dataset-val').val();
-    var dataset_type = $('#dataset-val').select2("data")[0].type
-
-    // Disable sampling and KG methods
-    // if(dataset_type == "tab") {
-
-    // }
-    
-    clear_all_containers();
-
     if (non_cached_datasets.includes(dataset)){
 
         let exp_container = document.createElement('div');
@@ -89,7 +79,42 @@ function has_cached_data() {
         exp_container.appendChild(inner_container);
 
         document.getElementById('datasets-info-container').append(exp_container);
-    }   
+    }
+}
+
+function has_cached_data() {
+
+    
+    var dataset_type = $('#dataset-val').select2("data")[0].type
+
+    // Disable sampling and KG methods
+    if(dataset_type == "tab") {
+        $('#group_labels').removeClass("vis_not_hidden").addClass("vis_hidden");
+        $('#jump_prob').removeClass("vis_not_hidden").addClass("vis_hidden");
+        $('#sampl_size').removeClass("vis_not_hidden").addClass("vis_hidden");
+        $('#min_comp').removeClass("vis_not_hidden").addClass("vis_hidden");
+        $('#sampling-container').removeClass("vis_not_hidden").addClass("vis_hidden");
+        $('#method-val').find("optgroup[label='Knowledge Graph']").prop('disabled', true);
+        $('#method-val').find("optgroup[label='Tabular']").prop('disabled', false);
+        $('#method-val').val('deepmatcher').trigger('change');
+        $('#sampling-val').val('no_sampling').trigger('change');
+    }
+
+    if(dataset_type == "kg") {
+        $('#group_labels').removeClass("vis_hidden").addClass("vis_not_hidden");
+        $('#jump_prob').removeClass("vis_hidden").addClass("vis_not_hidden");
+        $('#sampl_size').removeClass("vis_hidden").addClass("vis_not_hidden");
+        $('#min_comp').removeClass("vis_hidden").addClass("vis_not_hidden");
+        $('#sampling-container').removeClass("vis_hidden").addClass("vis_not_hidden");
+        $('#method-val').find("optgroup[label='Tabular']").prop('disabled', true);
+        $('#method-val').find("optgroup[label='Knowledge Graph']").prop('disabled', false);
+        $('#method-val').val('RREA').trigger('change');
+        $('#sampling-val').val('SUSIE').trigger('change');
+    }
+    
+    clear_all_containers();
+    expl_pop();
+       
 }
 
 
@@ -114,7 +139,7 @@ function delete_dataset_message() {
 function upload_dataset_info() {
     var htmlRes = '<div id="upload-dataset">'
         + '<div id="upload-instructions">'
-        + '<p><b>Instructions to upload your dataset</b></p>'
+        + '<p><b>Instructions to upload your tabular dataset</b></p>'
         + '<ol>'
         + '<li>The dataset should be a zip file.</li>'
         + '<li>The zip file name will be the name of the dataset.</li>'

@@ -26,7 +26,7 @@ def run(conf, dest_path, dataset, file_name):
 
 
 
-def main(k_results, dataset, conf, which_entity):
+def main(dataset, conf, which_entity, k=20):
 
     dest_path = "resources/exp_results/" + dataset + "_RREA/" + conf + "/"
     file_name =  dataset + "_sim_lists.pickle"
@@ -57,10 +57,6 @@ def main(k_results, dataset, conf, which_entity):
                 candidates.append([pair[1], index_to_id[sim_pairs[0]], abs(sim_pairs[1])])
         candidates.sort(key=lambda x: x[2], reverse=True)
 
-        results = umc.run(candidates, k_results)
-        
-        clusters = results
-
         if conf == "original":
             kg1 = KnowledgeGraph("1", dataset, "multi_directed", "original", "original", "RREA")
             kg2 = KnowledgeGraph("2", dataset, "multi_directed", "original", "original", "RREA")
@@ -71,6 +67,14 @@ def main(k_results, dataset, conf, which_entity):
         g = Grouping(kg1, kg2, dataset, "RREA")
         g.group_based_on_component(kg1, kg2)
 
+        initial_pairs = [(int(cand[0]), int(cand[1]), float(cand[2]), g.pair_is_protected(cand[:2], which_entity))
+                     for cand in candidates]
+
+        k_results = len(sim_lists_no_csls)
+        results = umc.run(initial_pairs, k_results)
+        
+        clusters = results
+
         preds = []
         for pair in sim_lists_no_csls:
             preds.append([pair[1], index_to_id[sim_lists_no_csls[pair][0][0]], abs(sim_lists_no_csls[pair][0][1]),
@@ -80,13 +84,17 @@ def main(k_results, dataset, conf, which_entity):
         # Evaluation
         #############################
 
-        accuracy = eval.get_accuracy_KG(clusters, candidates)
+        cluster_mapped = []
+        for cl in clusters:
+            cluster_mapped.append([cl[0], kg1.get_seed_pairs()[cl[1]], cl[2], cl[3]])
+
+        accuracy = eval.get_accuracy_KG(clusters, candidates, k)
         print("accuracy:", accuracy)
 
-        spd = f_eval.get_spd_KG(clusters, candidates, g, which_entity)
+        spd = f_eval.get_spd_KG(clusters, candidates, g, which_entity, k)
         print("SPD:", spd)
 
-        eod = f_eval.get_eod_KG(clusters, candidates, g, which_entity)
+        eod = f_eval.get_eod_KG(clusters, candidates, g, which_entity, k)
         print("EOD:", eod)
 
          #############################
@@ -102,7 +110,7 @@ def main(k_results, dataset, conf, which_entity):
         assert(len(left) == len(right))
 
         methods.eval_to_json(accuracy, spd, eod)
-        methods.clusters_to_json(clusters)
+        methods.clusters_to_json(cluster_mapped, ["KG 1", "KG 2"])
         methods.preds_to_json("", preds)
 
         # measure tp
