@@ -393,18 +393,41 @@ def eval_to_json(accuracy, spd, eod):
 
 
 
-def clusters_to_json(clusters, col_name=["Table A", "Table B"]):
+def clusters_to_json(clusters, col_name=["Table A", "Table B"], candidates=[]):
     """
         Writes the clusters to a json file.
     """
     counter = 0
-    json_string = '['
+    clusters_list = []
     for i in clusters:
-        json_string = json_string + '{"Rank":"' + "#" + str(counter) + '" , \'' + col_name[0] + '\':"'+str(i[0])+'" , \'' + col_name[1] + '\':"'+str(i[1])+'",' + '"Matching Score":"' + str(i[2]) + '",' + '"Prot":"' + str(i[3]) + '" }, '
+        cluster_dict = {
+            "Rank": "#" + str(counter),
+            col_name[0]: str(i[0]),
+            col_name[1]: str(i[1]),
+            "Matching Score": str(i[2]),
+            "Prot": str(i[3])
+        }
+        clusters_list.append(cluster_dict)
         counter += 1
-    json_string = json_string + ']'
 
-    data = {"clusters": json_string}
+    counter = 0
+    candidates_list = []
+    for i in candidates:
+        candidate_dict = {
+            "Rank": "#" + str(counter),
+            col_name[0]: str(i[0]),
+            col_name[1]: str(i[1]),
+            "Matching Score": str(i[2]),
+            "Prot": str(i[3]),
+            "ExistInClust": str(i[4])
+        }
+        candidates_list.append(candidate_dict)
+        counter += 1
+    
+    data = {
+        "clusters": clusters_list,
+        "candidates": candidates_list
+    }
 
     json_string = json.dumps(data)
     with open(os.getcwd() + '/web/' + 'data/json_data/clusters_data.json', 'w+') as outfile:

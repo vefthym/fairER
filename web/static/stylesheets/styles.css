@@ -141,12 +141,38 @@ body {
 }
 
 .true-row {
-    background-color: 	rgb(173,216,230) !important;
+    background-color: 	#eaebf5 !important;
 }
 
 .false-row {
-    background-color: rgb(144, 238, 144) !important;
+    background-color: #fdece8 !important;
 }
+
+#true-rectangle {
+    width: 40px; /* Define the width of the rectangle */
+    height: 25px; /* Define the height of the rectangle */
+    background-color: #eaebf5; /* Set the background color of the rectangle */
+    margin: 5px;
+    margin-right: 13px;
+}
+
+#false-rectangle {
+    width: 40px; /* Define the width of the rectangle */
+    height: 25px; /* Define the height of the rectangle */
+    background-color: #fdece8; /* Set the background color of the rectangle */
+    margin: 5px;
+}
+
+#legend-cont{
+    display: flex;
+    justify-content: flex-end;
+}
+
+#legend{
+    display: flex;
+    align-items: center;
+}
+
 
 
 #datasets-container, #methods-container {
@@ -244,6 +270,10 @@ body {
     display: none !important;
 }
 
+.visible {
+    display: block !important;
+}
+
 .vis_hidden {
     visibility: hidden !important;
 }
@@ -336,13 +366,26 @@ body {
     font-size: large;
 }
 
+.table-container {
+    display: inline-block;
+    width: 50%;
+}
 
+#explanations-table-fairer-container-1,  #explanations-table-fairer-container-2{
+    display: inline-block;
+    /* max-height: 200px; */
+    max-width: 300px;
+}
 
 /* || Protected Container*/
 #protected-tuples {
     margin-top: 3%;
     text-align: center;
     margin-bottom: 120px;
+}
+
+.strikethrough {
+    text-decoration: line-through;
 }
 
 

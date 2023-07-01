@@ -362,12 +362,14 @@ function get_predictions(alg, container_id, method, conf) {
     var explanation = 1;
     var dataset = $('#dataset-val').val()
 
-    if (conf == "original"){
-        url = "/requests/getPreds?alg=" + alg + "&dataset=" + dataset + "&method=" + method + "&explanation=" + explanation;
-    }
-    else {
-        url = "/requests/getPreds?alg=" + alg + "&dataset=" + dataset + "&method=" + method + "&explanation=" + explanation + conf;
-    }
+    // if (conf == "original"){
+    //     url = "/requests/getPreds?alg=" + alg + "&dataset=" + dataset + "&method=" + method + "&explanation=" + explanation;
+    // }
+    // else {
+    //     url = "/requests/getPreds?alg=" + alg + "&dataset=" + dataset + "&method=" + method + "&explanation=" + explanation + conf;
+    // }
+
+    url = "/requests/getPreds?alg=" + alg + "&dataset=" + dataset + "&method=" + method + "&explanation=" + explanation;
 
     if (has_condition() == false)
         return;
@@ -507,9 +509,31 @@ function run_clusters(alg, container){
     else if (sampling == "no_sampling" || sampling == "No Sampling") {
         conf = "original"
         get_clusters(alg, container, method, conf);
-    }
+    }   
+}
 
-    
+function run_expl(alg, container){
+
+    var sampling = $("#sampling-val").val()
+    var method = $("#method-val").val()
+
+    if (sampling == "SUSIE") {
+        var jump_prob = $("#jump_prob").val()
+        var sampl_size = $("#sampl_size").val()
+        var min_comp = $("#min_comp").val()
+        
+        conf = "&p=" + jump_prob + "&s=" + sampl_size + "&t=" + min_comp;
+        $.when(run_sampling(jump_prob, sampl_size, min_comp),
+        get_explanation(alg, container, method, conf)
+        ).done(function(){
+            console.log("done!")
+        });
+
+    }
+    else if (sampling == "no_sampling" || sampling == "No Sampling") {
+        conf = "original"
+        get_explanation(alg, container, method, conf);
+    }   
 }
 
 function run_predictions(alg, container){
@@ -584,6 +608,21 @@ function get_clusters(alg, container_id, method, conf) {
                     $('#unfair-container').html('<label for="clusters-table" id="clusters-label">Suggested Matches</label><div id="clusters-table-' + container_id + '"></div>');
                 else
                     $('#fairer-container').html('<label for="clusters-table" id="clusters-label">Suggested Matches</label><div id="clusters-table-' + container_id + '"></div>');
+                
+                // Create the legend element
+                var legend_cont = document.createElement("div");
+                legend_cont.id = "legend-cont"
+                legend_cont.innerHTML = `<div id="legend">
+                <span style="text-color: #eaebf5 !important;">Protected</span>
+                <div id="true-rectangle"></div>
+                <span style="text-color: #fdece8 !important;">Non protected</span>
+                <div id="false-rectangle"></div>
+                </div>`
+
+                // Append the legend element to the table container
+                var tableContainer = document.querySelector("#clusters-table-" + container_id);
+                tableContainer.parentNode.insertBefore(legend_cont, tableContainer);
+                
                 $('#clusters-table' + container_id).addClass("table-bordered responsive-table");
                 var table = new Tabulator("#clusters-table-" + container_id, {
                     data: clusters_data,           //load row data from array
@@ -595,19 +634,21 @@ function get_clusters(alg, container_id, method, conf) {
                     autoColumns: true,
                     rowFormatter: function (row) {
                         var data = row.getData();
-                        console.log(data.Prot)
                         if (data.Prot === "True") {
                             // Apply CSS class to row for true value
-                            console.log("edo1")
                             row.getElement().classList.add("true-row");
                         } 
                         else if (data.Prot === "False") {
                             // Apply CSS class to row for false value
-                            console.log("edo2")
                             row.getElement().classList.add("false-row");
                         }
                     },
                 });
+
+                table.on("tableBuilt", function() {
+                    table.hideColumn("Prot");
+                })
+                
                 if(non_cached_datasets.includes(dataset))
                     remove_from_noncached_datasets(dataset);
             }
@@ -619,6 +660,7 @@ function get_clusters(alg, container_id, method, conf) {
             console.log(error);
         }
     });
+    
 }
 
 
@@ -1014,23 +1056,33 @@ function download_datasets() {
 
 
 /* Prints explanations */
-function get_explanation() {
+function get_explanation(alg, container_id, method, conf) {
     $('#fairer-container').html('<div class="loader"></div><p style="text-align:center; margin-top:1%">Please wait as this may take a few minutes...</p>')
+    
     var dataset = $('#dataset-val').val()
+    var method = $("#method-val").val()
+    var explanation = 1;
 
     if (non_cached_datasets.includes(dataset))
         document.getElementById('datasets-info-container').innerHTML = "";
 
+    if (conf == "original"){
+        url = "/requests/getExplanation?alg=" + alg + "&dataset=" + dataset + "&method=" + method + "&explanation=" + explanation;
+    }
+    else {
+        url = "/requests/getExplanation?alg=" + alg + "&dataset=" + dataset + "&method=" + method + "&explanation=" + explanation + conf;
+    }
+
     $.ajax({
         type: "GET",
-        url: "/requests/getExplanation?dataset=" + dataset,
+        url: url,
         dataType: 'text',
         success: function (response) {
             const obj = JSON.parse(response);
             //If there is no exception 
             if (obj.exception == undefined) {
-
-                let galery_html = '<div>'
+                if(method == "deepmatcher"){
+                    let galery_html = '<div>'
                     + '<ul id="images">'
                     + '<li id="first-expl-img"></li>'
                     + '<li id="second-expl-img"></li>'
@@ -1038,25 +1090,219 @@ function get_explanation() {
                     + '</div>'
 
 
-                let image1 = new Image();
-                image1.src = 'data:image/png;base64,' + obj.base64_1;
-                image1.alt = 'Figure 1'
-                image1.id = 'img1'
+                    let image1 = new Image();
+                    image1.src = 'data:image/png;base64,' + obj.base64_1;
+                    image1.alt = 'Figure 1'
+                    image1.id = 'img1'
 
-                let image2 = new Image();
-                image2.src = 'data:image/png;base64,' + obj.base64_2;
-                image2.alt = 'Figure 2'
-                image2.id = 'img2'
+                    let image2 = new Image();
+                    image2.src = 'data:image/png;base64,' + obj.base64_2;
+                    image2.alt = 'Figure 2'
+                    image2.id = 'img2'
 
 
-                $('#fairer-container').html(galery_html);
-                $('#first-expl-img').html(image1);
-                $('#second-expl-img').html(image2);
-                $('#images').hide();
-                let gallery = new Viewer(document.getElementById('images'));
-                gallery.show();
-                if(non_cached_datasets.includes(dataset))
-                    remove_from_noncached_datasets(dataset);
+                    $('#fairer-container').html(galery_html);
+                    $('#first-expl-img').html(image1);
+                    $('#second-expl-img').html(image2);
+                    $('#images').hide();
+                    let gallery = new Viewer(document.getElementById('images'));
+                    gallery.show();
+                    
+                    }else{
+
+                        var clusters_data1 = eval(obj.candidates);
+                        var clusters_data2 = eval(obj.candidates);
+                        var clusters_data3 = eval(obj.clusters);
+
+                        // Create a container div to hold both tables
+                        var container = document.createElement("div");
+                        container.id = "tables-container";
+                        $('#fairer-container').html(container);
+
+                        // Create the first table and append it to the container
+                        var tableContainer1 = document.createElement("div");
+                        tableContainer1.id = "explanations-table-" + container_id + "-1";
+                        tableContainer1.classList.add("table-container");
+                        container.appendChild(tableContainer1);
+
+                        // Create the second table and append it to the container
+                        var tableContainer2 = document.createElement("div");
+                        tableContainer2.id = "explanations-table-" + container_id + "-2";
+                        tableContainer2.classList.add("table-container");
+                        container.appendChild(tableContainer2);
+
+                        // Create the second table and append it to the container
+                        var tableContainer3 = document.createElement("div");
+                        tableContainer3.id = "explanations-table-" + container_id + "-3";
+                        tableContainer3.classList.add("table-container");
+                        container.appendChild(tableContainer3);
+
+                        // Create the legend element for the first table
+                        // var legend_cont1 = document.createElement("div");
+                        // legend_cont1.id = "legend-cont1"
+                        // legend_cont1.innerHTML = `<div id="legend1">
+                        //     <span style="text-color: #eaebf5 !important;">Protected</span>
+                        //     <div id="true-rectangle1"></div>
+                        //     <span style="text-color: #fdece8 !important;">Non protected</span>
+                        //     <div id="false-rectangle1"></div>
+                        // </div>`
+
+                        // // Append the legend element to the first table container
+                        // tableContainer1.parentNode.insertBefore(legend_cont1, tableContainer1);
+
+                        // Create the legend element for the second table
+                        // var legend_cont2 = document.createElement("div");
+                        // legend_cont2.id = "legend-cont2"
+                        // legend_cont2.innerHTML = `<div id="legend2">
+                        //     <span style="text-color: #eaebf5 !important;">Protected</span>
+                        //     <div id="true-rectangle2"></div>
+                        //     <span style="text-color: #fdece8 !important;">Non protected</span>
+                        //     <div id="false-rectangle2"></div>
+                        // </div>`
+
+                        // // Append the legend element to the second table container
+                        // tableContainer2.parentNode.insertBefore(legend_cont2, tableContainer2);
+
+                        // Add CSS classes to the table containers for styling
+                        tableContainer1.classList.add("table-bordered", "responsive-table");
+                        tableContainer2.classList.add("table-bordered", "responsive-table");
+                        tableContainer3.classList.add("table-bordered", "responsive-table");
+                        tableContainer1.style.marginRight = "10px";
+                        tableContainer2.style.marginRight = "10px";
+
+                        // Initialize the third table
+                        // table3_pairs = {}
+                        // clusters_data3.map(function(cl){
+                        //     table3_pairs[cl["KG 1"]] = cl["KG 2"]
+                        // });
+
+                        var table3 = new Tabulator("#explanations-table-" + container_id + "-3", {
+                            data: clusters_data3,
+                            layout: "fitColumns",
+                            responsiveLayout: "hide",
+                            addRowPos: "top",
+                            pagination: "local",
+                            paginationSize: 10,
+                            autoColumns: true,
+                            rowFormatter: function (row) {
+                                var data = row.getData();
+                                if (data.Prot === "True") {
+                                    row.getElement().classList.add("true-row");
+                                } else if (data.Prot === "False") {
+                                    row.getElement().classList.add("false-row");
+                                }
+                            },
+                        });
+                        
+                        // Initialize the first table
+                        var table1 = new Tabulator("#explanations-table-" + container_id + "-1", {
+                            data: clusters_data1,
+                            layout: "fitColumns",
+                            responsiveLayout: "hide",
+                            addRowPos: "top",
+                            pagination: "local",
+                            paginationSize: 10,
+                            autoColumns: true,
+                            rowFormatter: function (row) {
+                                var data = row.getData();
+                                if (data.Prot === "True") {
+                                    row.getElement().classList.add("true-row");
+                                } else if (data.Prot === "False") {
+                                    row.getElement().classList.add("false-row");
+                                }
+                            },
+                        });
+
+                        // var table2 = new Tabulator("#explanations-table-" + container_id + "-2", {
+                        //     data: clusters_data2,
+                        //     layout: "fitColumns",
+                        //     responsiveLayout: "hide",
+                        //     addRowPos: "top",
+                        //     pagination: "local",
+                        //     paginationSize: 10,
+                        //     autoColumns: true,
+                        //     rowFormatter: function (row) {
+                        //         var data = row.getData();
+                        //         if (data.Prot === "True") {
+                        //             row.getElement().classList.add("true-row");
+                        //         } else if (data.Prot === "False") {
+                        //             row.getElement().classList.add("false-row");
+                        //         }
+                        //     },
+                        // });
+                        
+                        table3.on("tableBuilt", function() {
+                            table3.hideColumn("Prot");
+                        })
+                        
+                        table1.on("tableBuilt", function() {
+                            table1.hideColumn("Prot");
+                            table1.hideColumn("Rank");
+                            table1.hideColumn("Matching Score");
+                            table1.setFilter("Prot", "=", "True");
+                            var rows = table1.getRows();
+                            for (let index = 0;index < 10;index++) {
+                                var isExist = rows[index].getCell("ExistInClust").getValue()
+                                console.log(table1.getRow(index))
+                                if(isExist == "False"){
+                                    var cell1 = rows[index].getCell("KG 1");
+                                    var cell2 = rows[index].getCell("KG 2");
+                                    cell1.getElement().classList.add("strikethrough");
+                                    cell2.getElement().classList.add("strikethrough");
+                                }
+                              }
+                        })
+
+                        table1.on("pageLoaded", function(pageno){
+                            var rows = table1.getRows(true);
+                            rows.forEach(function (row) {
+                                
+                                var isExist = row.getCell("ExistInClust").getValue()
+                                if(isExist){
+                                    var cell1 = row.getCell("KG 1");
+                                    var cell2 = row.getCell("KG 2");
+                                    cell1.getElement().classList.add("strikethrough");
+                                    cell2.getElement().classList.add("strikethrough");
+                                }
+                              });
+                        });
+
+                        // table2.on("tableBuilt", function() {
+                        //     table2.hideColumn("Prot");
+                        //     table2.hideColumn("Rank");
+                        //     table2.hideColumn("Matching Score");
+                        //     table2.setFilter("Prot", "=", "False");
+                        //     var rows = table1.getRows(true);
+                        //     for (let index = start_num_1;index < end_num_1;index++) {
+                        //         var isExist = rows[index].getCell("ExistInClust").getValue()
+                        //         console.log(rows[index].getCell("KG 1").getValue())
+                        //         if(isExist == "False"){
+                        //             var cell1 = rows[index].getCell("KG 1");
+                        //             var cell2 = rows[index].getCell("KG 2");
+                        //             cell1.getElement().classList.add("strikethrough");
+                        //             cell2.getElement().classList.add("strikethrough");
+                        //         }
+                        //       }
+                        // })
+
+                        // table2.on("pageLoaded", function(pageno){
+                        //     var rows = table2.getRows(true);
+                        //     rows.forEach(function (row) {
+                        //         var cell1 = row.getCell("KG 1");
+                        //         var cell2 = row.getCell("KG 2");
+                                
+                        //         if(table3_pairs[cell1.getValue()] != cell2.getValue()){
+                        //             cell1.getElement().classList.add("strikethrough");
+                        //             cell2.getElement().classList.add("strikethrough");
+                        //         }
+                        //       });
+                        // });
+     
+                    }
+
+                    
+                    if(non_cached_datasets.includes(dataset))
+                        remove_from_noncached_datasets(dataset);
             }
             //If there is an exception, print details about it
             else print_exception(obj.exception_type, obj.exception, obj.filename, obj.func_name, obj.line_number)

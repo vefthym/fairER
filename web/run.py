@@ -232,30 +232,30 @@ def getPreds():
         alg = request.args.get('alg')
         method = request.args.get('method')
         explanation = request.args.get('explanation')
-        p = request.args.get('p')
-        s = request.args.get('s')
-        t = request.args.get('t')
-        print(request.args)
-        if p == None:
-            conf = "original"
-        else:
-            conf = p + "_" + s + "_" + t
-
+        # p = request.args.get('p')
+        # s = request.args.get('s')
+        # t = request.args.get('t')
+        # print(request.args)
+        # if p == None:
+        #     conf = "original"
+        # else:
+        #     conf = p + "_" + s + "_" + t
+        conf = "original"
         if method == "deepmatcher":
             if alg == 'fairER':
                 methods.runFairER(dataset, explanation)  
             else:
                 methods.runUnfair(dataset) 
-        elif method == "RREA":
-            if alg == 'fairER':
-                    methods.runFairER_RREA(dataset, explanation, conf)
-            else:
-                    methods.runUnfair_RREA(dataset, explanation, conf)
-        elif method == "RDGCN" or method == "MultiKE":
-            if alg == 'fairER':
-                    methods.runFairER_OpenEA(dataset, explanation, conf, method)
-            else:
-                    methods.runUnfair_OpenEA(dataset, explanation, conf, method)
+        # elif method == "RREA":
+        #     if alg == 'fairER':
+        #             methods.runFairER_RREA(dataset, explanation, conf)
+        #     else:
+        #             methods.runUnfair_RREA(dataset, explanation, conf)
+        # elif method == "RDGCN" or method == "MultiKE":
+        #     if alg == 'fairER':
+        #             methods.runFairER_OpenEA(dataset, explanation, conf, method)
+        #     else:
+        #             methods.runUnfair_OpenEA(dataset, explanation, conf, method)
 
 
         # open the file that was created
@@ -927,19 +927,62 @@ def getExplanation():
         Parameter dataset: the dataset.
         Precondition: dataset is String.
     """
+
     try:
-        dataset = request.args.get('dataset')   
-        if methods.explanation_exists(dataset) == False:
-            methods.deleteCachedData(dataset)
-            methods.runFairER(dataset, 1)
-        base64_1 = methods.img_to_base64(dataset, 'Figure_1.png')
-        base64_2 = methods.img_to_base64(dataset, 'Figure_2.png')
-        response = app.response_class(
-                response = json.dumps({'base64_1': base64_1, 'base64_2': base64_2}),
-                mimetype = 'application/json'
+        dataset = request.args.get('dataset')
+        method = request.args.get('method')
+
+        if method == "deepmatcher":
+            if methods.explanation_exists(dataset) == False:
+                methods.deleteCachedData(dataset)
+                methods.runFairER(dataset, 1)
+                base64_1 = methods.img_to_base64(dataset, 'Figure_1.png')
+                base64_2 = methods.img_to_base64(dataset, 'Figure_2.png')
+                response = app.response_class(
+                        response = json.dumps({'base64_1': base64_1, 'base64_2': base64_2}),
+                        mimetype = 'application/json'
+                    )
+                
+                return response
+        else:
+            # dataset = request.args.get('dataset')
+            alg = request.args.get('alg')
+            explanation = request.args.get('explanation')
+            p = request.args.get('p')
+            s = request.args.get('s')
+            t = request.args.get('t')
+            print(request.args)
+            if p == None:
+                conf = "original"
+            else:
+                conf = p + "_" + s + "_" + t
+            
+            if method == "deepmatcher":
+                if alg == 'fairER':
+                    methods.runFairER(dataset, explanation)  
+                else:
+                    methods.runUnfair(dataset) 
+            elif method == "RREA":
+                if alg == 'fairER':
+                        methods.runFairER_RREA(dataset, explanation, conf)
+                else:
+                        methods.runUnfair_RREA(dataset, explanation, conf)
+            elif method == "RDGCN" or method == "MultiKE":
+                if alg == 'fairER':
+                        methods.runFairER_OpenEA(dataset, explanation, conf, method)
+                else:
+                        methods.runUnfair_OpenEA(dataset, explanation, conf, method)
+
+            with open(os.path.join(os.getcwd() + '/web/' + 'data', 'json_data', 'clusters_data.json')) as json_file:
+                data = json.load(json_file)
+
+            response = app.response_class(
+                response=json.dumps({'clusters': str(data["clusters"]), 'candidates': str(data["candidates"])}),
+                mimetype='application/json'
             )
+                
+            return response
         
-        return response
     except Exception as e:
         exception_type, exception_object, exception_traceback = sys.exc_info()
         filename = exception_traceback.tb_frame.f_code.co_filename

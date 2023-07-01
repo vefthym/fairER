@@ -125,10 +125,10 @@
                         <button type="button" class="btn btn-secondary"
                             onclick="run_clusters('fairER', 'fairer-container')">Get
                             Suggested Matches</button>
-                        <button type="button" class="btn btn-secondary"
+                        <button id="pred-fairer" type="button" class="btn btn-secondary"
                             onclick="run_predictions('fairER', 'fairer-container')">Get
                             Test Set Similarities</button>
-                        <button type="button" class="btn btn-secondary" onclick="get_explanation()">Get
+                        <button type="button" class="btn btn-secondary" onclick="run_expl('fairER', 'fairer-container')">Get
                             Explanation</button>
                     </div>
                     <div id="fairer-container">
@@ -145,7 +145,7 @@
                     <button type="button" class="btn btn-secondary"
                         onclick="run_clusters('unfair', 'unfair-container')">Get
                         Suggested Matches</button>
-                    <button type="button" class="btn btn-secondary"
+                    <button id="pred-unfair" type="button" class="btn btn-secondary"
                         onclick="run_predictions('unfair', 'unfair-container')">Get
                         Test Set Similarities</button>
                 </div>
@@ -158,9 +158,9 @@
                     <button type="button" class="btn btn-secondary" onclick="get_condition('protected-container')">Get
                         Condition</button>
                     <button type="button" class="btn btn-secondary" onclick="edit_condition()">Edit Condition</button>
-                    <button type="button" class="btn btn-secondary" onclick="get_table_options()">Tuple is
+                    <button id="is-prot" type="button" class="btn btn-secondary" onclick="get_table_options()">Tuple is
                         Protected</button>
-                    <button type="button" class="btn btn-secondary" onclick="get_pair_fields()">Pair is Protected</button>
+                    <button id="pair-is-prot" type="button" class="btn btn-secondary" onclick="get_pair_fields()">Pair is Protected</button>
                 </div>
                 <div id="protected-container">
 

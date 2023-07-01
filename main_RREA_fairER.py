@@ -87,8 +87,20 @@ def main(dataset, conf, which_entity, k=20):
         clusters = fumc.run(initial_pairs, k_results)
         
         cluster_mapped = []
+        i=0
         for cl in clusters:
+            if i == 0:
+                print(cl)
             cluster_mapped.append([cl[0], kg1.get_seed_pairs()[cl[1]], cl[2], cl[3]])
+            i+=1
+
+        initial_pairs_mapped = []
+        for pair in initial_pairs:
+            pair = [*pair,]
+            if pair in clusters:
+                initial_pairs_mapped.append([pair[0], kg1.get_seed_pairs()[pair[1]], pair[2], pair[3], True])
+            else:
+                initial_pairs_mapped.append([pair[0], kg1.get_seed_pairs()[pair[1]], pair[2], pair[3], False])
         #############################
         # Evaluation
         #############################
@@ -104,7 +116,7 @@ def main(dataset, conf, which_entity, k=20):
         print()
 
         methods.eval_to_json(accuracy, spd, eod)
-        methods.clusters_to_json(cluster_mapped, ["KG 1", "KG 2"])
+        methods.clusters_to_json(cluster_mapped, ["KG 1", "KG 2"], initial_pairs_mapped)
         methods.preds_to_json("", preds)
 
     

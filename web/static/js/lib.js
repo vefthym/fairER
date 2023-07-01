@@ -98,6 +98,12 @@ function has_cached_data() {
         $('#method-val').find("optgroup[label='Tabular']").prop('disabled', false);
         $('#method-val').val('deepmatcher').trigger('change');
         $('#sampling-val').val('no_sampling').trigger('change');
+        $('#pred-fairer').addClass("visible")
+        $('#pred-unfair').addClass("visible")
+        $('#is-prot').addClass("visible")
+        $('#is-prot').addClass("visible")
+        $('#pair-is-prot').addClass("visible")
+        $('#pair-is-prot').addClass("visible")
     }
 
     if(dataset_type == "kg") {
@@ -110,6 +116,18 @@ function has_cached_data() {
         $('#method-val').find("optgroup[label='Knowledge Graph']").prop('disabled', false);
         $('#method-val').val('RREA').trigger('change');
         $('#sampling-val').val('SUSIE').trigger('change');
+        $('#pred-fairer').removeClass("visible")
+        $('#pred-unfair').removeClass("visible")
+        $('#pred-fairer').addClass("hidden")
+        $('#pred-unfair').addClass("hidden")
+        $('#is-prot').removeClass("visible")
+        $('#is-prot').removeClass("visible")
+        $('#is-prot').addClass("hidden")
+        $('#is-prot').addClass("hidden")
+        $('#pair-is-prot').removeClass("visible")
+        $('#pair-is-prot').removeClass("visible")
+        $('#pair-is-prot').addClass("hidden")
+        $('#pair-is-prot').addClass("hidden")
     }
     
     clear_all_containers();
