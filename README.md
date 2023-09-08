@@ -1,4 +1,4 @@
-# Fairness-Aware and Explainable Entity Resolution
+# FairER demo: Fairness-Aware and Explainable Entity Resolution
 
 *A video presentation of our system was submitted as supplementary material. It is also located in "demo_video/new_demo_video.mkv" of this repository*
 
