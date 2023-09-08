@@ -1,34 +1,26 @@
-The source code for the paper:
+# Fairness-Aware and Explainable Entity Resolution
 
+*A video presentation of our system was submitted as supplementary material. It is also located in "demo_video/new_demo_video.mkv" of this repository*
 
-Vasilis Efthymiou, Kostas Stefanidis, Evaggelia Pitoura, Vassilis Christophides. FairER: Entity Resolution with Fairness Constraints. CIKM 2021 (short) [[pdf]](https://github.com/vefthym/fairER/blob/main/CIKM2021short_fairER_CR.pdf) [[slides]](https://github.com/vefthym/fairER/blob/main/FairER-slides.pdf) [[poster]](https://github.com/vefthym/fairER/blob/main/FairER_poster.pdf)
+## Installation
+```bash
+cd fairER/installation
+conda env create --file demo.yml
+conda env create --file demo_bert_int.yml
+pip install torch==1.11.0+cu113 torchvision==0.12.0+cu113 torchaudio==0.11.0 --extra-index-url https://download.pytorch.org/whl/cu113
+conda activate demo
+cd ../matching/OpenEA
+pip install -e .
+```
 
-which is part of the project <a href="https://isl.ics.forth.gr/ResponsibleER/">ResponsibleER: Responsible by Design Entity Resolution</a>, 
-funded by the <a href="https://www.elidek.gr/en/homepage/">Hellenic Foundation for Research and Innovation</a>.
+## Run
+```bash
+conda activate demo
+export PYTHONPATH=$PYTHONPATH:/home/<username>/fairER/
+python web/run.py
+```
 
-
-**Public API and UI (demo with restricted functionality)**:<br/>
-Before installing and running the code locally, with its full functionality, you may be interested in checking the public version with limited functionality, hosted at <a href="https://isl.ics.forth.gr/fairER/">https://isl.ics.forth.gr/fairER/</a>. There, you can also find the <a href="https://isl.ics.forth.gr/fairER/services-manual">API ("Services Manual")</a>, along with executable examples. 
-
-
-**Instructions for running the code locally**:<br/>
-First, make sure that you have installed on your computer:<br/>
--Python (3.9 – recommended)<br/>
--Microsoft Visual C++ (for Windows OS only)
-
-Then, you have to install all the required packages, using the command:<br/>
-`pip install -r requirements.txt`
-
-This allows a user to avoid the hassle of individually installing each required library, as well as resolving potential compatibility issues (since the library versions in the requirements file have been tested and found to be fully functional). 
-
-Now you can run the local version using the command:<br/>
-`python web/run.py`
-
-To open the app on your default browser, open the URL <a href="http://127.0.0.1:5000">http://127.0.0.1:5000</a> (you can use Ctrl+Click to open it from the terminal).
-
-During the first run, the datasets are not present in the system, so you have to click the "Download" button from the Web UI,  in order to download the datasets from DeepMatcher. This is a more convenient way than the alternative option of downloading each dataset individually, which is still applicable (if disk space is an issue). 
-
-Finally, it is also recommended to use a system with more than 12GB of RAM, otherwise the system may be unstable.
-
-
-In case of problems or questions, please report an issue, or contact Vasilis Efthymiou (vefthym AT ics DOT forth DOT gr).
+## Datasets
+1. Please click the "Download Datasets" button after the successfull running of the app.
+2. Download "2016-10-des_dict" from https://github.com/kosugi11037/bert-int and place it to resources/Datasets
+3. Download "wiki-news-300d-1M.vec" from https://fasttext.cc/docs/en/english-vectors.html and place it to matching/OpenEA/run
