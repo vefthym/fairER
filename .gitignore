@@ -1,8 +1,0 @@
-/venv/*
-*.pth
-/.idea/
-*.csv
-*.png
-*.json
-*.pkl
-__pycache__/
