@@ -1,10 +1,12 @@
 # FairER demo: Fairness-Aware and Explainable Entity Resolution
 
-*A video presentation of our system was submitted as supplementary material. It is also located in "demo_video/new_demo_video.mkv" of this repository*
+*A video presentation of FairER demo is located in "demo_video/new_demo_video.mkv" of this repository*
 
-The source code for the paper:
+The source code for the papers:
 
 Vasilis Efthymiou, Kostas Stefanidis, Evaggelia Pitoura, Vassilis Christophides. FairER: Entity Resolution with Fairness Constraints. CIKM 2021 (short) [[pdf]](https://github.com/vefthym/fairER/blob/main/CIKM2021short_fairER_CR.pdf) [[slides]](https://github.com/vefthym/fairER/blob/main/FairER-slides.pdf) [[poster]](https://github.com/vefthym/fairER/blob/main/FairER_poster.pdf)
+
+Nikolaos Fanourakis, Christos Kontousias, Vasilis Efthymiou, Vassilis Christophides and Dimitris Plexousakis. FairER demo: Fairness-Aware and Explainable Entity Resolution. ISWC 2023 [[pdf]](https://github.com/vefthym/fairER/blob/main/ISWC2023_fairer_demo.pdf) [[slides]]() [[poster]]()
 
 which is part of the project <a href="https://isl.ics.forth.gr/ResponsibleER/">ResponsibleER: Responsible by Design Entity Resolution</a>, 
 funded by the <a href="https://www.elidek.gr/en/homepage/">Hellenic Foundation for Research and Innovation</a>.
