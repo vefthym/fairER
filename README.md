@@ -8,7 +8,7 @@ Vasilis Efthymiou, Kostas Stefanidis, Evaggelia Pitoura, Vassilis Christophides.
 
 Nikolaos Fanourakis, Christos Kontousias, Vasilis Efthymiou, Vassilis Christophides and Dimitris Plexousakis. FairER demo: Fairness-Aware and Explainable Entity Resolution. ISWC 2023 [[pdf]](https://github.com/vefthym/fairER/blob/main/ISWC2023_fairer_demo.pdf) [[slides]]() [[poster]]()
 
-which is part of the project <a href="https://isl.ics.forth.gr/ResponsibleER/">ResponsibleER: Responsible by Design Entity Resolution</a>, 
+which are parts of the project <a href="https://isl.ics.forth.gr/ResponsibleER/">ResponsibleER: Responsible by Design Entity Resolution</a>, 
 funded by the <a href="https://www.elidek.gr/en/homepage/">Hellenic Foundation for Research and Innovation</a>.
 
 **Public API and UI (demo with restricted functionality)**:<br/>
